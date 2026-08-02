@@ -19,9 +19,12 @@ export function Footer() {
           Ready to wear something<br />
           <span className="italic">truly yours</span>?
         </h2>
-        <button className="mt-5 w-full rounded-full bg-white py-3.5 text-sm font-bold text-primary shadow-glow active:scale-[0.98] md:mt-0 md:w-auto md:px-10 md:py-4 md:text-base">
+        <Link
+          href="/book"
+          className="mt-5 flex w-full items-center justify-center rounded-full bg-white py-3.5 text-sm font-bold text-primary shadow-glow active:scale-[0.98] md:mt-0 md:w-auto md:px-10 md:py-4 md:text-base"
+        >
           Start designing — it&apos;s free
-        </button>
+        </Link>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
