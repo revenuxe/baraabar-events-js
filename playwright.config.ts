@@ -12,6 +12,11 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${LEGACY_AP
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // Every spec here targets a single shared dev-server instance of the
+  // legacy app (not per-test isolated backends), so too much parallelism
+  // causes resource-contention flakiness rather than real failures —
+  // capped rather than left at Playwright's CPU-count default.
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "html",

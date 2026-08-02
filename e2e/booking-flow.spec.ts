@@ -1,18 +1,26 @@
 import { test, expect, type Page } from "@playwright/test";
 
 // Baseline for the most critical, most recently-changed part of the app —
-// see docs/nextjs-migration-plan.md §4/§6. Two things this guards against
+// see docs/nextjs-migration-plan.md §4/§6. Things this guards against
 // regressing during the port:
-//   1. The full unauthenticated booking wizard still reaches submission
-//      and correctly bounces to /auth (submitBooking requires a session).
+//   1. Outfit through Measure (steps 1-5) work fully signed out; landing on
+//      Pickup (step 6) without a session shows a static "sign in to
+//      continue" gate with an explicit button — not an auto-redirect (that
+//      caused a redirect ping-pong on back navigation, see git history)
+//      and not at the very start or only at final submission.
 //   2. Back/swipe navigation steps back one screen at a time instead of
 //      exiting the wizard — this was a real bug fixed shortly before this
 //      migration started (see git history on booking-store.ts).
+//   3. A stale `step` left in localStorage from an earlier, abandoned
+//      session (e.g. "Start Designing" on the homepage links to plain
+//      /book, no ?category=) clamps back to what the persisted draft data
+//      actually supports, rather than resuming mid-air on a step with no
+//      category/garments chosen, or straight on the Pickup gate.
 //
 // Deliberately avoids requiring a seeded Supabase test account: it only
 // exercises the parts of the flow reachable while signed out. Once a test
-// account exists, extend this with the authenticated path (actual
-// submission, order confirmation).
+// account exists, extend this with the authenticated path (Pickup, Review,
+// actual submission, order confirmation).
 
 async function selectFirstCategory(page: Page) {
   await expect(page.getByText("Who are we stitching for?")).toBeVisible();
@@ -28,18 +36,7 @@ async function selectFirstGarment(page: Page) {
   await page.locator("main").locator("button:has(img)").first().click();
 }
 
-async function fillPickupStep(page: Page) {
-  await expect(page.getByText("When can we come by?")).toBeVisible();
-  await page.getByPlaceholder("House / flat number, street").fill("221B Baker Street");
-  await page.getByPlaceholder("City").fill("Mumbai");
-  await page.getByPlaceholder("Pincode").fill("400001");
-  await page.getByPlaceholder("Contact number").fill("9876543210");
-  // First selectable pickup day and time window.
-  await page.getByText("Pickup date").locator("..").getByRole("button").first().click();
-  await page.getByText("Time window").locator("..").getByRole("button").first().click();
-}
-
-test("full unauthenticated booking wizard reaches submission and bounces to /auth", async ({
+test("unauthenticated booking wizard works through Measure, then shows a sign-in gate before Pickup", async ({
   page,
 }) => {
   await page.goto("/book");
@@ -59,12 +56,13 @@ test("full unauthenticated booking wizard reaches submission and bounces to /aut
   // picking anything — this is intentional product behavior, not a gap.
   await page.getByRole("button", { name: "Continue" }).click();
 
-  await fillPickupStep(page);
-  await page.getByRole("button", { name: "Continue" }).click(); // -> Review
+  // Pickup requires an account — signed out, this shows a static gate
+  // (not an auto-redirect, see module comment above) with its own
+  // explicit "Sign in" button.
+  await expect(page.getByText("Sign in to continue")).toBeVisible();
+  await expect(page).toHaveURL(/\/book/);
 
-  await expect(page.getByText("Review your booking")).toBeVisible();
-  await page.getByRole("button", { name: "Confirm Pickup" }).click();
-
+  await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/auth/);
 });
 
@@ -110,7 +108,8 @@ test("clicking the in-app Back button repeatedly walks back through every step",
   // footer "Back" button element (onClick={back} -> window.history.back())
   // rather than driving browser-back directly, and walks several steps
   // deep first — the scenario a user reported still skipping straight to
-  // home from a few steps in.
+  // home from a few steps in. Stops at step 4 (Measure), not step 5
+  // (Pickup), since Pickup now requires signing in first.
   await page.goto("/");
   await page.getByRole("link", { name: "Book pickup" }).click();
   await expect(page.getByText(/Step 1 of \d+/)).toBeVisible();
@@ -125,15 +124,43 @@ test("clicking the in-app Back button repeatedly walks back through every step",
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByText(/Step 4 of \d+/)).toBeVisible();
 
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText(/Step 5 of \d+/)).toBeVisible();
-
   const backButton = page.getByRole("button", { name: "Back", exact: true }).last();
-  for (const expectedStep of [4, 3, 2, 1]) {
+  for (const expectedStep of [3, 2, 1]) {
     await backButton.click();
     await expect(page.getByText(new RegExp(`Step ${expectedStep} of \\d+`))).toBeVisible();
     await expect(page).toHaveURL(/\/book/);
   }
   await backButton.click();
   await expect(page).not.toHaveURL(/\/book/);
+});
+
+test("a restored handoff landing on Pickup while still signed out clamps back to Measure", async ({
+  page,
+}) => {
+  // Defensive path: not just the Continue-click transition, but the
+  // resume-on-mount guard. Simulates coming back from a genuine handoff
+  // (e.g. clicked "Sign in" on the Pickup gate, then closed that tab
+  // without actually signing in) — draft + step 5 both present, matching
+  // what persistDraftForHandoff actually writes, but still no session.
+  await page.goto("/book");
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "baraabar_booking_draft_v2",
+      JSON.stringify({
+        category: "women",
+        items: [{ garment: "Shirt", quantity: 1, references: [] }],
+        fabrics: [],
+        notes: "",
+        wantsStylistCall: false,
+        measurementMode: "sample",
+        address: { line1: "", line2: "", city: "", pincode: "", phone: "" },
+        deliverySame: true,
+      }),
+    );
+    localStorage.setItem("baraabar_booking_step_v1", "5");
+  });
+  await page.reload();
+  await expect(page).not.toHaveURL(/\/auth/);
+  await expect(page.getByText(/Step 5 of \d+/)).toBeVisible();
+  await expect(page.getByText("How should we measure")).toBeVisible();
 });
