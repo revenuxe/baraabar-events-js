@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { getCatalog } from "./_lib/catalog";
 import { BookWizard } from "./book-wizard";
 
 export const metadata: Metadata = {
@@ -11,6 +11,12 @@ export const metadata: Metadata = {
     description: "Free doorstep pickup and measurement. Stitched by master tailors.",
   },
 };
+
+// Reading `searchParams` below still opts this route into dynamic
+// rendering per-request, but the catalog fetch itself (see _lib/catalog.ts)
+// is wrapped in unstable_cache with a 300s TTL, so it no longer costs a
+// live Supabase round-trip on every request the way a plain SSR fetch would.
+export const revalidate = 300;
 
 export default async function BookPage({
   searchParams,
@@ -24,18 +30,13 @@ export default async function BookPage({
   // types, fabric types) arrives with the initial HTML instead of being
   // fetched client-side after mount — no more blank grid -> pop-in flash
   // on the Outfit step.
-  const supabase = await createClient();
-  const [{ data: categories }, { data: garmentTypes }, { data: fabricTypes }] = await Promise.all([
-    supabase.from("categories").select("*").order("sort_order"),
-    supabase.from("garment_types").select("*").order("sort_order"),
-    supabase.from("fabric_types").select("*").order("sort_order"),
-  ]);
+  const { categories, garmentTypes, fabricTypes } = await getCatalog();
 
   return (
     <BookWizard
-      categories={categories ?? []}
-      garmentTypes={garmentTypes ?? []}
-      fabricTypes={fabricTypes ?? []}
+      categories={categories}
+      garmentTypes={garmentTypes}
+      fabricTypes={fabricTypes}
       initialCategorySlug={initialCategorySlug}
     />
   );

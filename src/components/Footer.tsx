@@ -1,4 +1,5 @@
 import logo from "@/assets/baraabar tailor logo-webpg.webp";
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon } from "@/components/SocialIcons";
@@ -24,11 +25,9 @@ export function Footer() {
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <img
-          src={logo.src}
+        <Image
+          src={logo}
           alt="Baraabar — Custom Clothing. Your Style. Your Fit."
-          width={200}
-          height={56}
           className="h-8 w-auto object-contain"
         />
         <div className="flex gap-2">

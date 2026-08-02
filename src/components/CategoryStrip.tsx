@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import women from "@/assets/cat-women.jpg";
@@ -84,13 +85,13 @@ export function CategoryStrip() {
             href={`/book?category=${c.label.toLowerCase()}`}
             className="group relative block aspect-[3/4] overflow-hidden rounded-3xl shadow-card transition-all active:scale-[0.98] md:aspect-[4/5] md:hover:-translate-y-1 md:hover:shadow-elevated"
           >
-            <img
-              src={c.img.src}
+            <Image
+              src={c.img}
               alt={`${c.label} — ${c.tagline}`}
               loading="lazy"
-              width={900}
-              height={1100}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(min-width: 768px) 33vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div
               aria-hidden
