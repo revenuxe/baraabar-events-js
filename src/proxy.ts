@@ -6,7 +6,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 // (see docs/nextjs-migration-plan.md §7), so the admin bundle briefly
 // shipped to anyone. Here, no session or no admin role means a redirect
 // before any admin HTML/JS is ever sent.
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, supabase, user } = await updateSession(request);
 
   const { pathname } = request.nextUrl;
