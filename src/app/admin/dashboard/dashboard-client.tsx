@@ -112,10 +112,19 @@ export function AdminDashboard({ email }: { email: string }) {
     if (typeof window === "undefined") return "bookings";
     return (sessionStorage.getItem("admin_tab") as TabKey) || "bookings";
   });
+  // Panels only mount the first time their tab is visited — otherwise all
+  // 6 tabs' Supabase queries fire and their full row lists render the
+  // moment the dashboard opens, before the admin has looked at 5 of them,
+  // which is what made the whole page feel stuck right after load. Once
+  // visited, a panel stays mounted (hidden via CSS below) so switching
+  // back doesn't lose scroll position or an in-progress edit.
+  const [visitedTabs, setVisitedTabs] = useState<Set<TabKey>>(() => new Set([tab]));
 
-  useEffect(() => {
-    sessionStorage.setItem("admin_tab", tab);
-  }, [tab]);
+  function selectTab(key: TabKey) {
+    setTab(key);
+    sessionStorage.setItem("admin_tab", key);
+    setVisitedTabs((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  }
 
   async function signOut() {
     const supabase = createClient();
@@ -158,7 +167,7 @@ export function AdminDashboard({ email }: { email: string }) {
             return (
               <button
                 key={t.key}
-                onClick={() => setTab(t.key)}
+                onClick={() => selectTab(t.key)}
                 className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   active
                     ? "bg-gradient-brand text-primary-foreground shadow-glow"
@@ -174,38 +183,51 @@ export function AdminDashboard({ email }: { email: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        {/* Every tab stays mounted (hidden via CSS instead of conditional
-            rendering) so switching tabs never resets scroll position, the
-            in-progress "New" form, or the category pill filter, and never
-            re-fetches data that's already loaded. */}
-        <div className={tab === "bookings" ? "" : "hidden"}>
-          <BookingsPanel />
-        </div>
-        <div className={tab === "categories" ? "" : "hidden"}>
-          <CatalogPanel title="Categories" table="categories" columns={CATEGORY_COLUMNS} />
-        </div>
-        <div className={tab === "garment_types" ? "" : "hidden"}>
-          <CatalogPanel
-            title="Garment types"
-            table="garment_types"
-            groupBy="category_id"
-            columns={GARMENT_TYPE_COLUMNS}
-          />
-        </div>
-        <div className={tab === "fabric_types" ? "" : "hidden"}>
-          <CatalogPanel title="Fabrics" table="fabric_types" columns={FABRIC_TYPE_COLUMNS} />
-        </div>
-        <div className={tab === "style_presets" ? "" : "hidden"}>
-          <CatalogPanel
-            title="Style presets"
-            table="style_presets"
-            groupBy="garment_type_id"
-            columns={STYLE_PRESET_COLUMNS}
-          />
-        </div>
-        <div className={tab === "users" ? "" : "hidden"}>
-          <UsersPanel />
-        </div>
+        {/* Once a tab has been visited its panel stays mounted (hidden via
+            CSS instead of unmounting) so switching back never resets
+            scroll position, the in-progress "New" form, or the category
+            pill filter, and never re-fetches data that's already loaded.
+            Tabs not yet visited aren't rendered at all — see visitedTabs. */}
+        {visitedTabs.has("bookings") && (
+          <div className={tab === "bookings" ? "" : "hidden"}>
+            <BookingsPanel />
+          </div>
+        )}
+        {visitedTabs.has("categories") && (
+          <div className={tab === "categories" ? "" : "hidden"}>
+            <CatalogPanel title="Categories" table="categories" columns={CATEGORY_COLUMNS} />
+          </div>
+        )}
+        {visitedTabs.has("garment_types") && (
+          <div className={tab === "garment_types" ? "" : "hidden"}>
+            <CatalogPanel
+              title="Garment types"
+              table="garment_types"
+              groupBy="category_id"
+              columns={GARMENT_TYPE_COLUMNS}
+            />
+          </div>
+        )}
+        {visitedTabs.has("fabric_types") && (
+          <div className={tab === "fabric_types" ? "" : "hidden"}>
+            <CatalogPanel title="Fabrics" table="fabric_types" columns={FABRIC_TYPE_COLUMNS} />
+          </div>
+        )}
+        {visitedTabs.has("style_presets") && (
+          <div className={tab === "style_presets" ? "" : "hidden"}>
+            <CatalogPanel
+              title="Style presets"
+              table="style_presets"
+              groupBy="garment_type_id"
+              columns={STYLE_PRESET_COLUMNS}
+            />
+          </div>
+        )}
+        {visitedTabs.has("users") && (
+          <div className={tab === "users" ? "" : "hidden"}>
+            <UsersPanel />
+          </div>
+        )}
       </main>
     </div>
   );
@@ -920,7 +942,13 @@ const CatalogPanel = memo(function CatalogPanel({
       setCreating(false);
       setDraft({});
     }
-    load();
+    // Awaited: EditableRow closes edit mode as soon as this resolves and
+    // switches to a view that reads straight off the `row` prop (fresh
+    // data from this reload), not the form's local `value` state. Firing
+    // load() without waiting closed edit mode immediately, showing the
+    // pre-save row — including its old image — until the reload happened
+    // to land moments later.
+    await load();
     return null;
   }
 
