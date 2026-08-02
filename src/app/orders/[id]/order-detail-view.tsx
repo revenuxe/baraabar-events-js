@@ -153,23 +153,40 @@ export function OrderDetailView({
           {items.length > 0 && (
             <div className="mt-4 space-y-2 border-t border-border pt-4">
               {items.map((it) => (
-                <div key={it.id} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold">
-                    {it.garment_label}
-                    {it.style_label && (
-                      <span className="ml-1.5 font-normal text-muted-foreground">
-                        · {it.style_label}
-                      </span>
-                    )}
-                  </span>
-                  <span className="flex items-center gap-3">
-                    {(it.estimated_price_min || it.estimated_price_max) && (
-                      <span className="text-xs text-muted-foreground">
-                        ₹{it.estimated_price_min ?? "—"}–₹{it.estimated_price_max ?? "—"}
-                      </span>
-                    )}
-                    <span className="font-semibold">× {it.quantity}</span>
-                  </span>
+                <div key={it.id}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-semibold">
+                      {it.garment_label}
+                      {it.style_label && (
+                        <span className="ml-1.5 font-normal text-muted-foreground">
+                          · {it.style_label}
+                        </span>
+                      )}
+                    </span>
+                    <span className="flex items-center gap-3">
+                      {(it.estimated_price_min || it.estimated_price_max) && (
+                        <span className="text-xs text-muted-foreground">
+                          ₹{it.estimated_price_min ?? "—"}–₹{it.estimated_price_max ?? "—"}
+                        </span>
+                      )}
+                      <span className="font-semibold">× {it.quantity}</span>
+                    </span>
+                  </div>
+                  {Array.isArray(it.reference_images) && it.reference_images.length > 0 && (
+                    <div className="mt-1.5 flex gap-2 overflow-x-auto">
+                      {it.reference_images.map((src, i) => (
+                        <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+                          <Image
+                            src={src}
+                            alt={`${it.garment_label} reference ${i + 1}`}
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -198,7 +215,7 @@ export function OrderDetailView({
             </div>
           )}
 
-          {Array.isArray(order.reference_images) && order.reference_images.length > 0 && (
+          {items.length === 0 && Array.isArray(order.reference_images) && order.reference_images.length > 0 && (
             <div className="mt-4 border-t border-border pt-4">
               <div className="mb-2 flex items-center gap-2 text-xs font-semibold">
                 <ImageIcon className="h-4 w-4 text-muted-foreground" />
