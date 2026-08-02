@@ -334,12 +334,7 @@ export function BookWizard({
       await syncProfileContact(userId, draft.address.phone);
 
       const allReferenceUrls = draft.items.flatMap((it) => it.references);
-      const referenceUrlMap = await uploadReferenceImages(
-        supabase,
-        userId,
-        allReferenceUrls,
-        pendingFilesRef.current,
-      );
+      const referenceUrlMap = await uploadReferenceImages(allReferenceUrls, pendingFilesRef.current);
       const referenceImages = Array.from(referenceUrlMap.values());
 
       const { itemPricing, orderPriceMin, orderPriceMax } = estimatePrice(

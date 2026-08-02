@@ -1,5 +1,8 @@
+"use client";
+
 import type { Database } from "@/lib/supabase/types";
 import type { BookingDraft, BookingItem, MeasurementMode } from "@/lib/booking-store";
+import { uploadFileToS3 } from "@/lib/s3-upload-client";
 import women from "@/assets/cat-women.jpg";
 import men from "@/assets/cat-men.jpg";
 import kids from "@/assets/cat-kids.jpg";
@@ -78,10 +81,6 @@ STYLE_MAP.Kurti = STYLE_MAP.Kurta;
 STYLE_MAP["Bridal Lehenga"] = STYLE_MAP.Lehenga;
 STYLE_MAP["Formal Shirt"] = STYLE_MAP.Shirt;
 
-export function sanitizeFileName(name: string) {
-  return name.replace(/[^a-zA-Z0-9.-]/g, "-");
-}
-
 export function estimatePrice(items: BookingDraft["items"], garmentTypes: GarmentTypeRow[]) {
   const priceByName = new Map(garmentTypes.map((g) => [g.name.toLowerCase(), g]));
   const itemPricing = items.map((it) => {
@@ -141,8 +140,6 @@ export function orderMeasurementSnapshot(draft: BookingDraft): unknown {
 }
 
 export async function uploadReferenceImages(
-  supabase: import("@supabase/supabase-js").SupabaseClient,
-  userId: string,
   references: string[],
   pendingFiles: Map<string, File>,
 ): Promise<Map<string, string>> {
@@ -150,11 +147,12 @@ export async function uploadReferenceImages(
     references.map(async (ref) => {
       const file = pendingFiles.get(ref);
       if (!file) return null;
-      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${sanitizeFileName(file.name)}`;
-      const { error } = await supabase.storage.from("reference-images").upload(path, file);
-      if (error) return null;
-      const { data } = supabase.storage.from("reference-images").getPublicUrl(path);
-      return [ref, data.publicUrl] as const;
+      try {
+        const publicUrl = await uploadFileToS3(file, "reference");
+        return [ref, publicUrl] as const;
+      } catch {
+        return null;
+      }
     }),
   );
   return new Map(entries.filter((e): e is [string, string] => e !== null));

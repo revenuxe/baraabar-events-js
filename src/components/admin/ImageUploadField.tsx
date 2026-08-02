@@ -2,11 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-
-function sanitizeFileName(name: string) {
-  return name.replace(/[^a-zA-Z0-9.-]/g, "-");
-}
+import { deleteS3Upload, uploadFileToS3 } from "@/lib/s3-upload-client";
 
 export function ImageUploadField({
   value,
@@ -24,17 +20,23 @@ export function ImageUploadField({
   async function handleFile(file: File) {
     setUploading(true);
     setError(null);
-    const supabase = createClient();
-    const path = `${pathPrefix}/${Date.now()}-${sanitizeFileName(file.name)}`;
-    const { error: uploadError } = await supabase.storage.from("catalog-images").upload(path, file);
-    if (uploadError) {
-      setError(uploadError.message);
+    try {
+      const publicUrl = await uploadFileToS3(file, "catalog", pathPrefix);
+      const previous = value;
+      onChange(publicUrl);
+      // Replacing an existing image — clean up the old S3 object now that
+      // the new one is live. Best-effort; never blocks the UI.
+      if (previous) void deleteS3Upload(previous);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
       setUploading(false);
-      return;
     }
-    const { data } = supabase.storage.from("catalog-images").getPublicUrl(path);
-    onChange(data.publicUrl);
-    setUploading(false);
+  }
+
+  function handleRemove() {
+    if (value) void deleteS3Upload(value);
+    onChange(null);
   }
 
   return (
@@ -72,7 +74,7 @@ export function ImageUploadField({
             {value && (
               <button
                 type="button"
-                onClick={() => onChange(null)}
+                onClick={handleRemove}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive"
               >
                 <X className="h-3.5 w-3.5" /> Remove
