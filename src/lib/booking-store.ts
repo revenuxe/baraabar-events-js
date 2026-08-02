@@ -139,12 +139,18 @@ export function useBookingDraft() {
       setStepState(initialStep);
       if (raw && rawStep) setResumedFromHandoff(true);
       // Anchor the current history entry (the one created when the user
-      // navigated to /book) to this step, without adding a new entry.
+      // navigated to /book) at step 0, then — when resuming mid-flow after
+      // a handoff (e.g. the Google/email sign-in round trip) — synthesize
+      // one pushed entry per step up to initialStep. Without this, only
+      // the resumed step itself is anchored in this fresh page load, so
+      // pressing back doesn't step down through 4, 3, 2, 1 — it pops
+      // straight out of the wizard into the auth redirect chain and out
+      // to whatever preceded it (typically the homepage).
       if (typeof window !== "undefined") {
-        window.history.replaceState(
-          { ...(window.history.state ?? {}), bookingStep: initialStep },
-          "",
-        );
+        window.history.replaceState({ ...(window.history.state ?? {}), bookingStep: 0 }, "");
+        for (let s = 1; s <= initialStep; s++) {
+          window.history.pushState({ bookingStep: s }, "");
+        }
       }
     } catch {}
     setReady(true);
@@ -194,7 +200,32 @@ export function useBookingDraft() {
     setStepState(0);
   };
 
-  return { draft, update, reset, ready, step, setStep: setStepState, resumedFromHandoff };
+  // Same synthetic-chain fix as the handoff resume above, for the other
+  // place that can land on a step > 0 with no in-session history to back
+  // through: resuming a draft saved to the account (see book-wizard.tsx).
+  // Suppresses the normal single-entry push effect (fromPopRef) since the
+  // history is built manually here instead.
+  const jumpToStep = (n: number) => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState({ ...(window.history.state ?? {}), bookingStep: 0 }, "");
+      for (let s = 1; s <= n; s++) {
+        window.history.pushState({ bookingStep: s }, "");
+      }
+    }
+    fromPopRef.current = true;
+    setStepState(n);
+  };
+
+  return {
+    draft,
+    update,
+    reset,
+    ready,
+    step,
+    setStep: setStepState,
+    jumpToStep,
+    resumedFromHandoff,
+  };
 }
 
 /** One-shot handoff: writes the current draft+step to localStorage right

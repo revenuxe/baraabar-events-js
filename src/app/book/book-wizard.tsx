@@ -58,7 +58,8 @@ export function BookWizard({
   fabricTypes: FabricTypeRow[];
   initialCategorySlug?: string;
 }) {
-  const { draft, update, reset, ready, step, setStep, resumedFromHandoff } = useBookingDraft();
+  const { draft, update, reset, ready, step, setStep, jumpToStep, resumedFromHandoff } =
+    useBookingDraft();
   const [supabase] = useState<SupabaseClient>(() => createClient());
   const [done, setDone] = useState(false);
   const orderId = useMemo(() => "BR" + Math.random().toString(36).slice(2, 7).toUpperCase(), []);
@@ -108,7 +109,7 @@ export function BookWizard({
         const latest = drafts[0];
         if (!latest) return;
         update(normalizeDraft(latest.data));
-        setStep(latest.step ?? 0);
+        jumpToStep(latest.step ?? 0);
         draftIdRef.current = latest.id;
         setActiveDraftId(latest.id);
       } catch {}
