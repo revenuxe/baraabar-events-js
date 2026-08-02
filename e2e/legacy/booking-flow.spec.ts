@@ -12,9 +12,9 @@ import { test, expect, type Page } from "@playwright/test";
 //      exiting the wizard — this was a real bug fixed shortly before this
 //      migration started (see git history on booking-store.ts).
 //   3. A stale `step` left in localStorage from an earlier, abandoned
-//      session (e.g. "Start Designing" on the homepage links to plain
-//      /book, no ?category=) clamps back to what the persisted draft data
-//      actually supports, rather than resuming mid-air on a step with no
+//      session (e.g. Hero's "Book Now" CTA links to plain /book, no
+//      ?category=) clamps back to what the persisted draft data actually
+//      supports, rather than resuming mid-air on a step with no
 //      category/garments chosen, or straight on the Pickup gate.
 //
 // Deliberately avoids requiring a seeded Supabase test account: it only

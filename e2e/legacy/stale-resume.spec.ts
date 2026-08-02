@@ -8,11 +8,13 @@ import { test, expect } from "@playwright/test";
 // next /book mount. A lone leftover step key with no matching draft can no
 // longer happen through normal use, and even if it somehow did, the mount
 // effect only restores when BOTH keys are present together.
-test("'Start Designing' with no prior handoff always starts fresh at Outfit", async ({
-  page,
-}) => {
+test("'Book Now' with no prior handoff always starts fresh at Outfit", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Start Designing" }).click();
+  // Hero's "Book Now" CTA (below the hero image) — same plain /book link
+  // (no ?category=) as the header's "Book pickup", so it's an equally
+  // valid case for this. The old "Start Designing" button it used to be
+  // was replaced by the pincode-availability check card.
+  await page.getByRole("link", { name: "Book Now" }).click();
 
   await expect(page.getByText(/Step 1 of \d+/)).toBeVisible();
   await expect(page.getByText("Who are we stitching for?")).toBeVisible();
