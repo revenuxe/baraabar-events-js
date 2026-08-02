@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { jsPDF } from "jspdf";
 import { createClient } from "@/lib/supabase/client";
 import {
   ShieldCheck,
@@ -27,8 +28,10 @@ import {
   Ruler,
   Image as ImageIcon,
   User,
+  Download,
 } from "lucide-react";
 import { STATUS_LABEL, CATEGORY_LABELS, MEASUREMENT_MODE_LABEL } from "@/lib/orders";
+import { M_META, type MField } from "@/lib/measurements";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { GarmentPicker } from "@/components/admin/GarmentPicker";
@@ -334,6 +337,216 @@ function BookingsPanel() {
   );
 }
 
+function MeasurementSnapshotView({ snapshot }: { snapshot: any }) {
+  if (!snapshot) {
+    return <p className="text-xs text-muted-foreground">No measurements provided yet</p>;
+  }
+  if (snapshot.mode === "sample") {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Fit sample garment provided{snapshot.sampleNote ? ` — "${snapshot.sampleNote}"` : ""}
+      </p>
+    );
+  }
+  if (snapshot.mode === "doorstep") {
+    return (
+      <p className="text-xs text-muted-foreground">To be measured during the home pickup visit</p>
+    );
+  }
+  if (snapshot.values && typeof snapshot.values === "object") {
+    const entries = Object.entries(snapshot.values as Record<string, number>);
+    if (entries.length === 0) {
+      return <p className="text-xs text-muted-foreground">No values recorded</p>;
+    }
+    const unit = snapshot.unit ?? "cm";
+    return (
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3">
+        {entries.map(([field, value]) => (
+          <li key={field} className="flex items-baseline justify-between gap-2 text-xs">
+            <span className="text-muted-foreground">{M_META[field as MField]?.label ?? field}</span>
+            <span className="font-semibold">
+              {String(value)} {unit}
+            </span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return <p className="text-xs text-muted-foreground">—</p>;
+}
+
+/** Builds a tailor-facing spec sheet: order + garment requirements and
+ * measurements. Deliberately omits contact_phone and pickup/delivery
+ * addresses — this sheet is meant to be handed to production, not to
+ * carry customer contact details. */
+function buildMeasurementsPdf(booking: any, items: any[], profile: any) {
+  const doc = new jsPDF();
+  const marginX = 14;
+  const rightEdge = 196;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let y = 20;
+
+  const ensureSpace = (needed: number) => {
+    if (y + needed > pageHeight - 15) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(20);
+  doc.text("Baraabar — Order & Measurement Sheet", marginX, y);
+  y += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(
+    `Order #${booking.order_number}  ·  Placed ${new Date(booking.created_at).toLocaleDateString()}  ·  ${STATUS_LABEL[booking.status] ?? booking.status}`,
+    marginX,
+    y,
+  );
+  y += 6;
+  doc.setDrawColor(220);
+  doc.line(marginX, y, rightEdge, y);
+  y += 8;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(20);
+  doc.text("Customer", marginX, y);
+  y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(profile?.full_name ?? "Unnamed", marginX, y);
+  y += 10;
+
+  const sources =
+    items.length > 0
+      ? items.map((it) => ({
+          garment: it.garment_label,
+          style: it.style_label,
+          quantity: it.quantity,
+          priceMin: it.estimated_price_min,
+          priceMax: it.estimated_price_max,
+          snapshot: it.measurement_snapshot as any,
+        }))
+      : [
+          {
+            garment: booking.garment_label,
+            style: booking.style_label,
+            quantity: booking.quantity,
+            priceMin: booking.estimated_price_min,
+            priceMax: booking.estimated_price_max,
+            snapshot: booking.measurement_snapshot as any,
+          },
+        ];
+
+  for (const src of sources) {
+    ensureSpace(20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(20);
+    doc.text(`${src.garment ?? "Garment"}${src.style ? ` · ${src.style}` : ""}`, marginX, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    const priceLine = [
+      `Qty: ${src.quantity ?? 1}`,
+      src.priceMin || src.priceMax ? `Est. Rs ${src.priceMin ?? "—"}–${src.priceMax ?? "—"}` : null,
+    ]
+      .filter(Boolean)
+      .join("   ");
+    doc.text(priceLine, marginX, y);
+    y += 6;
+
+    const snap = src.snapshot;
+    doc.setTextColor(20);
+    doc.setFontSize(9);
+    if (!snap) {
+      doc.text("Measurements: not provided yet", marginX, y);
+      y += 6;
+    } else if (snap.mode === "sample") {
+      doc.text(
+        `Measurements: fit sample garment provided${snap.sampleNote ? ` — "${snap.sampleNote}"` : ""}`,
+        marginX,
+        y,
+      );
+      y += 6;
+    } else if (snap.mode === "doorstep") {
+      doc.text("Measurements: to be taken during the home pickup visit", marginX, y);
+      y += 6;
+    } else if (snap.values && typeof snap.values === "object") {
+      const unit = snap.unit ?? "cm";
+      const entries = Object.entries(snap.values as Record<string, number>);
+      if (entries.length === 0) {
+        doc.text("Measurements: no values recorded", marginX, y);
+        y += 6;
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.text("Measurements", marginX, y);
+        y += 5.5;
+        doc.setFont("helvetica", "normal");
+        const perRow = 3;
+        for (let i = 0; i < entries.length; i += perRow) {
+          ensureSpace(6);
+          const line = entries
+            .slice(i, i + perRow)
+            .map(([field, value]) => `${M_META[field as MField]?.label ?? field}: ${value} ${unit}`)
+            .join("     ");
+          doc.text(line, marginX, y);
+          y += 5.5;
+        }
+      }
+    }
+    y += 5;
+  }
+
+  if (booking.fabric_label) {
+    ensureSpace(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(20);
+    doc.text("Fabric", marginX, y);
+    y += 5.5;
+    doc.setFont("helvetica", "normal");
+    doc.text(String(booking.fabric_label), marginX, y);
+    y += 8;
+  }
+
+  if (booking.notes) {
+    const wrapped = doc.splitTextToSize(String(booking.notes), rightEdge - marginX);
+    ensureSpace(6 + wrapped.length * 5.5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(20);
+    doc.text("Notes", marginX, y);
+    y += 5.5;
+    doc.setFont("helvetica", "normal");
+    doc.text(wrapped, marginX, y);
+    y += wrapped.length * 5.5 + 4;
+  }
+
+  ensureSpace(10);
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text(
+    `Generated ${new Date().toLocaleString()} · Customer contact number and address omitted for production handoff.`,
+    marginX,
+    pageHeight - 10,
+  );
+
+  return doc;
+}
+
+function downloadMeasurementsPdf(booking: any, items: any[], profile: any) {
+  const doc = buildMeasurementsPdf(booking, items, profile);
+  doc.save(`measurements-${booking.order_number}.pdf`);
+}
+
 function BookingDetailDialog({
   booking,
   onClose,
@@ -420,8 +633,18 @@ function BookingDetailDialog({
           </div>
 
           <div className="rounded-2xl border border-border p-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              <Package className="h-3.5 w-3.5" /> Garment
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                <Package className="h-3.5 w-3.5" /> Garment
+              </div>
+              {!loadingExtras && (
+                <button
+                  onClick={() => downloadMeasurementsPdf(booking, items, profile)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-foreground hover:bg-muted"
+                >
+                  <Download className="h-3 w-3" /> Download PDF
+                </button>
+              )}
             </div>
             <p className="mt-1.5 font-semibold">
               {booking.quantity} garment{booking.quantity > 1 ? "s" : ""}
@@ -465,8 +688,18 @@ function BookingDetailDialog({
                         ))}
                       </div>
                     )}
+                    <div className="mt-1.5 flex items-start gap-1.5">
+                      <Ruler className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                      <MeasurementSnapshotView snapshot={it.measurement_snapshot} />
+                    </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {items.length === 0 && (
+              <div className="mt-2.5 flex items-start gap-1.5 border-t border-border pt-2.5">
+                <Ruler className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                <MeasurementSnapshotView snapshot={booking.measurement_snapshot} />
               </div>
             )}
             {booking.measurement_mode && (

@@ -40,6 +40,7 @@ export const MEASUREMENT_MODE_LABEL: Record<string, string> = {
   doorstep: "Doorstep measurement",
   self: "Self measurement",
   saved: "Saved profile",
+  sample: "Fit sample garment",
 };
 
 const NON_CANCELLABLE = new Set(["out_for_delivery", "delivered", "cancelled"]);
