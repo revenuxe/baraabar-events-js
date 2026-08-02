@@ -8,7 +8,7 @@ test("home page renders header, hero, categories, and footer", async ({ page }) 
   await expect(page.getByRole("heading", { name: /designed by you/i })).toBeVisible();
 
   // Category strip — links to /book with the right query param.
-  const womenCard = page.getByRole("link", { name: /Women.*Dresses, blouses, kurtis/s });
+  const womenCard = page.getByRole("link", { name: /Women[\s\S]*Dresses, blouses, kurtis/ });
   await expect(womenCard).toBeVisible();
   await expect(womenCard).toHaveAttribute("href", "/book?category=women");
 

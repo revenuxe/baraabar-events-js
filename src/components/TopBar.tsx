@@ -24,7 +24,7 @@ export function TopBar() {
             alt="Baraabar"
             width={160}
             height={48}
-            className="h-9 w-auto object-contain md:h-10"
+            className="h-11 w-auto object-contain md:h-12"
           />
         </Link>
 
