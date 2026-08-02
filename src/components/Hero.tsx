@@ -21,7 +21,7 @@ export function Hero() {
               style={{ animationDelay: "0.1s" }}
             >
               Bring your own fabric. We pick it up, measure you at home, and stitch it
-              to a fit you'll never want to take off.
+              to a fit you&apos;ll never want to take off.
             </p>
 
             {/* Service-availability check, in place of the old "Start
@@ -36,7 +36,10 @@ export function Hero() {
                 aria-hidden
                 className="absolute -inset-4 rounded-[3rem] bg-gradient-brand opacity-25 blur-3xl"
               />
-              <div className="relative animate-float-slow overflow-hidden rounded-[2rem] shadow-elevated">
+              <Link
+                href="/book?category=women"
+                className="relative block animate-float-slow overflow-hidden rounded-[2rem] shadow-elevated transition-transform active:scale-[0.98]"
+              >
                 <img
                   src={heroImg.src}
                   alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
@@ -47,14 +50,14 @@ export function Hero() {
                 <div className="glass-dark absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                   <div>
                     <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
-                    <p className="font-semibold">Ladies Suit</p>
+                    <p className="font-semibold">Salwar Kameez</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
                     <p className="font-semibold">₹699</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
 
             {/* Secondary CTA */}
@@ -88,7 +91,10 @@ export function Hero() {
               aria-hidden
               className="absolute -inset-6 rounded-[3rem] bg-gradient-brand opacity-30 blur-3xl"
             />
-            <div className="relative animate-float-slow overflow-hidden rounded-[3rem] shadow-elevated">
+            <Link
+              href="/book?category=women"
+              className="relative block animate-float-slow overflow-hidden rounded-[3rem] shadow-elevated transition-transform hover:-translate-y-1 hover:shadow-elevated"
+            >
               <img
                 src={heroImg.src}
                 alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
@@ -99,7 +105,7 @@ export function Hero() {
               <div className="glass-dark absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                 <div>
                   <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
-                  <p className="font-semibold">Ladies Suit</p>
+                  <p className="font-semibold">Salwar Kameez</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
@@ -110,7 +116,7 @@ export function Hero() {
                 <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-accent" />
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
               </span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
