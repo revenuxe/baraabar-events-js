@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
@@ -336,6 +337,12 @@ export function BookWizard({
       const allReferenceUrls = draft.items.flatMap((it) => it.references);
       const referenceUrlMap = await uploadReferenceImages(allReferenceUrls, pendingFilesRef.current);
       const referenceImages = Array.from(referenceUrlMap.values());
+      if (allReferenceUrls.length > 0 && referenceUrlMap.size < allReferenceUrls.length) {
+        const failed = allReferenceUrls.length - referenceUrlMap.size;
+        toast.warning(
+          `${failed} reference image${failed > 1 ? "s" : ""} couldn't be uploaded — placing your order without ${failed > 1 ? "them" : "it"}.`,
+        );
+      }
 
       const { itemPricing, orderPriceMin, orderPriceMax } = estimatePrice(
         draft.items,

@@ -78,8 +78,19 @@ export async function DELETE(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
-  const key = typeof body?.key === "string" ? body.key : (s3KeyFromUrl(body?.url ?? "") ?? undefined);
-  if (!key) return NextResponse.json({ error: "Missing key or url" }, { status: 400 });
+  const url = typeof body?.url === "string" ? body.url : undefined;
+  const key = typeof body?.key === "string" ? body.key : (url ? s3KeyFromUrl(url) : null);
+
+  if (!key && !url) {
+    return NextResponse.json({ error: "Missing key or url" }, { status: 400 });
+  }
+  if (!key) {
+    // `url` was given but doesn't belong to our bucket — e.g. a legacy
+    // Supabase Storage URL from before this migration, or a manually
+    // pasted external URL (see ImageUploadField). Nothing for us to
+    // delete; that's not the caller's fault.
+    return NextResponse.json({ ok: true, skipped: true });
+  }
 
   const admin = await isAdmin(supabase, user.id);
   const ownsReference = key.startsWith(`reference/${user.id}/`);

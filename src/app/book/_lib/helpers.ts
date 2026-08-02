@@ -150,7 +150,12 @@ export async function uploadReferenceImages(
       try {
         const publicUrl = await uploadFileToS3(file, "reference");
         return [ref, publicUrl] as const;
-      } catch {
+      } catch (err) {
+        // Swallowed further up so one bad photo doesn't block the whole
+        // booking — but silent failure here is exactly what makes upload
+        // issues (misconfigured S3 CORS/env vars, etc.) invisible, so at
+        // least get it into the console/monitoring.
+        console.error(`Reference image upload failed for "${file.name}":`, err);
         return null;
       }
     }),
