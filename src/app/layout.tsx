@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { CONTACT, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
@@ -18,7 +19,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const SITE_TITLE = "Baraabar — Custom tailoring, reimagined";
+const SITE_TITLE = "Online Tailor | Tailored Suits | Baraabar";
 const SITE_DESCRIPTION =
   "Bring your own fabric. Free doorstep pickup and home measurement. Master-tailored delivery in 10–14 days — booked in 3 minutes.";
 // TODO(migration): this og:image still points at the Lovable-hosted preview
@@ -28,14 +29,27 @@ const OG_IMAGE =
   "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2fc3eab6-c27f-4cec-82f1-f5fef3729da6/id-preview-f00fef45--6508bba4-1382-469c-a8c4-f6b832c7c367.lovable.app-1784038901448.png";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  authors: [{ name: "Baraabar" }],
-  icons: { icon: "/favicon.ico" },
+  keywords: [
+    "online tailor",
+    "tailored suits",
+    "custom tailoring",
+    "made to measure",
+    "bespoke tailoring India",
+    "Bengaluru tailor",
+  ],
+  authors: [{ name: SITE_NAME }],
+  icons: { icon: "/favicon-48x48.png" },
+  alternates: { canonical: "/" },
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "en_IN",
     images: [OG_IMAGE],
   },
   twitter: {
@@ -44,6 +58,25 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE],
   },
+};
+
+const localBusinessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ClothingStore",
+  name: SITE_NAME,
+  url: SITE_URL,
+  telephone: CONTACT.phone,
+  email: CONTACT.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: `${CONTACT.address.line1}, ${CONTACT.address.line2}`,
+    addressLocality: CONTACT.address.city,
+    addressRegion: CONTACT.address.state,
+    postalCode: CONTACT.address.postalCode,
+    addressCountry: CONTACT.address.country,
+  },
+  description: SITE_DESCRIPTION,
+  areaServed: "Bengaluru",
 };
 
 export const viewport: Viewport = {
@@ -60,6 +93,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${instrumentSerif.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
