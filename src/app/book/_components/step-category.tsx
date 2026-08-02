@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { categoryImg, FALLBACK_ACCENT, type CategoryRow } from "../_lib/helpers";
 
 export function StepCategory({
@@ -26,13 +25,14 @@ export function StepCategory({
             onClick={() => onSelect(c.slug)}
             className="group relative block aspect-[3/4] overflow-hidden rounded-3xl text-left shadow-card transition-all active:scale-[0.98]"
           >
-            <Image
+            {/* Admins can paste any external image URL for a category (see
+                ImageUploadField), so next/image's remotePatterns allowlist
+                can't cover it — plain <img> loads any domain. */}
+            <img
               src={categoryImg(c)}
               alt={c.name}
               loading="lazy"
-              fill
-              sizes="(min-width: 768px) 33vw, 50vw"
-              className="object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
             <div
               aria-hidden

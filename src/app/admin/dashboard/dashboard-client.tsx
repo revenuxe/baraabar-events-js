@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -46,6 +46,64 @@ const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?
   { key: "fabric_types", label: "Fabrics", icon: Palette },
   { key: "style_presets", label: "Styles", icon: Sparkles },
   { key: "users", label: "Users", icon: UsersIcon },
+];
+
+type Column = {
+  key: string;
+  label: string;
+  type: "text" | "number" | "boolean" | "fk" | "image";
+  required?: boolean;
+  fkTable?: string;
+  /** For `fk` columns targeting garment_types: pick a category first, then a garment within it. */
+  cascadeCategory?: boolean;
+};
+
+// Hoisted to stable module-level constants — CatalogPanel is wrapped in
+// memo() below, which is pointless if its `columns` prop is a fresh array
+// literal on every AdminDashboard render (defeats the shallow prop
+// comparison memo relies on to bail out of re-rendering).
+const CATEGORY_COLUMNS: Column[] = [
+  { key: "name", label: "Name", type: "text", required: true },
+  { key: "image_url", label: "Image", type: "image" },
+  { key: "slug", label: "Slug", type: "text", required: true },
+  { key: "tagline", label: "Tagline", type: "text" },
+  { key: "sort_order", label: "Sort", type: "number" },
+  { key: "is_active", label: "Active", type: "boolean" },
+];
+
+const GARMENT_TYPE_COLUMNS: Column[] = [
+  { key: "name", label: "Name", type: "text", required: true },
+  { key: "image_url", label: "Image", type: "image" },
+  { key: "slug", label: "Slug", type: "text", required: true },
+  { key: "category_id", label: "Category", type: "fk", fkTable: "categories" },
+  { key: "base_price_min", label: "Price min", type: "number" },
+  { key: "base_price_max", label: "Price max", type: "number" },
+  { key: "sort_order", label: "Sort", type: "number" },
+  { key: "is_active", label: "Active", type: "boolean" },
+];
+
+const FABRIC_TYPE_COLUMNS: Column[] = [
+  { key: "name", label: "Name", type: "text", required: true },
+  { key: "image_url", label: "Image", type: "image" },
+  { key: "slug", label: "Slug", type: "text", required: true },
+  { key: "description", label: "Description", type: "text" },
+  { key: "sort_order", label: "Sort", type: "number" },
+  { key: "is_active", label: "Active", type: "boolean" },
+];
+
+const STYLE_PRESET_COLUMNS: Column[] = [
+  { key: "name", label: "Name", type: "text", required: true },
+  { key: "image_url", label: "Image", type: "image" },
+  { key: "slug", label: "Slug", type: "text", required: true },
+  {
+    key: "garment_type_id",
+    label: "Garment",
+    type: "fk",
+    fkTable: "garment_types",
+    cascadeCategory: true,
+  },
+  { key: "sort_order", label: "Sort", type: "number" },
+  { key: "is_active", label: "Active", type: "boolean" },
 ];
 
 export function AdminDashboard({ email }: { email: string }) {
@@ -124,69 +182,25 @@ export function AdminDashboard({ email }: { email: string }) {
           <BookingsPanel />
         </div>
         <div className={tab === "categories" ? "" : "hidden"}>
-          <CatalogPanel
-            title="Categories"
-            table="categories"
-            columns={[
-              { key: "name", label: "Name", type: "text", required: true },
-              { key: "image_url", label: "Image", type: "image" },
-              { key: "slug", label: "Slug", type: "text", required: true },
-              { key: "tagline", label: "Tagline", type: "text" },
-              { key: "sort_order", label: "Sort", type: "number" },
-              { key: "is_active", label: "Active", type: "boolean" },
-            ]}
-          />
+          <CatalogPanel title="Categories" table="categories" columns={CATEGORY_COLUMNS} />
         </div>
         <div className={tab === "garment_types" ? "" : "hidden"}>
           <CatalogPanel
             title="Garment types"
             table="garment_types"
             groupBy="category_id"
-            columns={[
-              { key: "name", label: "Name", type: "text", required: true },
-              { key: "image_url", label: "Image", type: "image" },
-              { key: "slug", label: "Slug", type: "text", required: true },
-              { key: "category_id", label: "Category", type: "fk", fkTable: "categories" },
-              { key: "base_price_min", label: "Price min", type: "number" },
-              { key: "base_price_max", label: "Price max", type: "number" },
-              { key: "sort_order", label: "Sort", type: "number" },
-              { key: "is_active", label: "Active", type: "boolean" },
-            ]}
+            columns={GARMENT_TYPE_COLUMNS}
           />
         </div>
         <div className={tab === "fabric_types" ? "" : "hidden"}>
-          <CatalogPanel
-            title="Fabrics"
-            table="fabric_types"
-            columns={[
-              { key: "name", label: "Name", type: "text", required: true },
-              { key: "image_url", label: "Image", type: "image" },
-              { key: "slug", label: "Slug", type: "text", required: true },
-              { key: "description", label: "Description", type: "text" },
-              { key: "sort_order", label: "Sort", type: "number" },
-              { key: "is_active", label: "Active", type: "boolean" },
-            ]}
-          />
+          <CatalogPanel title="Fabrics" table="fabric_types" columns={FABRIC_TYPE_COLUMNS} />
         </div>
         <div className={tab === "style_presets" ? "" : "hidden"}>
           <CatalogPanel
             title="Style presets"
             table="style_presets"
             groupBy="garment_type_id"
-            columns={[
-              { key: "name", label: "Name", type: "text", required: true },
-              { key: "image_url", label: "Image", type: "image" },
-              { key: "slug", label: "Slug", type: "text", required: true },
-              {
-                key: "garment_type_id",
-                label: "Garment",
-                type: "fk",
-                fkTable: "garment_types",
-                cascadeCategory: true,
-              },
-              { key: "sort_order", label: "Sort", type: "number" },
-              { key: "is_active", label: "Active", type: "boolean" },
-            ]}
+            columns={STYLE_PRESET_COLUMNS}
           />
         </div>
         <div className={tab === "users" ? "" : "hidden"}>
@@ -201,7 +215,7 @@ export function AdminDashboard({ email }: { email: string }) {
 
 const STATUS_OPTIONS = Object.keys(STATUS_LABEL);
 
-function BookingsPanel() {
+const BookingsPanel = memo(function BookingsPanel() {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -336,7 +350,7 @@ function BookingsPanel() {
       />
     </section>
   );
-}
+});
 
 function MeasurementSnapshotView({ snapshot }: { snapshot: any }) {
   if (!snapshot) {
@@ -827,17 +841,7 @@ function AdminAddressBlock({ addr }: { addr: any }) {
 
 /* ---------------- Generic catalog CRUD ---------------- */
 
-type Column = {
-  key: string;
-  label: string;
-  type: "text" | "number" | "boolean" | "fk" | "image";
-  required?: boolean;
-  fkTable?: string;
-  /** For `fk` columns targeting garment_types: pick a category first, then a garment within it. */
-  cascadeCategory?: boolean;
-};
-
-function CatalogPanel({
+const CatalogPanel = memo(function CatalogPanel({
   title,
   table,
   columns,
@@ -1067,7 +1071,7 @@ function CatalogPanel({
       )}
     </section>
   );
-}
+});
 
 function EditableRow({
   columns,
@@ -1290,7 +1294,7 @@ function formatValue(v: any, c: Column, fkOptions: Record<string, { id: string; 
 
 /* ---------------- Users ---------------- */
 
-function UsersPanel() {
+const UsersPanel = memo(function UsersPanel() {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -1342,7 +1346,7 @@ function UsersPanel() {
       )}
     </section>
   );
-}
+});
 
 /* ---------------- misc ---------------- */
 

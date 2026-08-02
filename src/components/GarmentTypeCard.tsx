@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Check, Minus, Plus } from "lucide-react";
 
 export function GarmentTypeCard({
@@ -67,9 +66,12 @@ export function GarmentTypeCard({
       <div className="absolute left-1/2 top-0 -translate-x-1/2">
         <button
           onClick={onToggle}
-          className="relative block h-32 w-24 overflow-hidden rounded-2xl shadow-card transition active:scale-[0.98]"
+          className="block h-32 w-24 overflow-hidden rounded-2xl shadow-card transition active:scale-[0.98]"
         >
-          <Image src={image} alt={label} loading="lazy" fill sizes="96px" className="object-cover" />
+          {/* Admins can paste any external image URL for a garment (see
+              ImageUploadField), so next/image's remotePatterns allowlist
+              can't cover it — plain <img> loads any domain. */}
+          <img src={image} alt={label} loading="lazy" className="h-full w-full object-cover" />
         </button>
         {selected && (
           <span className="absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full bg-accent text-accent-foreground shadow ring-2 ring-background">
