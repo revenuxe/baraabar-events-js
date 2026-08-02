@@ -29,12 +29,18 @@ export function StepPickup({
           When can we come by?
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          We'll collect your fabric and, if you chose it, measure you at home.
+          We&apos;ll collect your fabric and, if you chose it, measure you at home.
         </p>
       </header>
 
       <section className="space-y-3">
         <p className="text-sm font-bold">Address</p>
+        <input
+          value={A.name}
+          onChange={(e) => setA("name", e.target.value)}
+          placeholder="Full name"
+          className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+        />
         <input
           value={A.line1}
           onChange={(e) => setA("line1", e.target.value)}
@@ -134,7 +140,8 @@ export function StepPickup({
         <div>
           <p className="text-sm font-bold">Deliver back to the same address</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Uncheck if you'd like your finished order sent elsewhere — we'll ask when it's ready.
+            Uncheck if you&apos;d like your finished order sent elsewhere — we&apos;ll ask when
+            it&apos;s ready.
           </p>
         </div>
       </label>

@@ -233,25 +233,32 @@ export function BookWizard({
   useEffect(() => {
     if (!ready) return;
     const a = draft.address;
-    if (a.line1 || a.city || a.pincode || a.phone) return;
+    if (a.line1 || a.city || a.pincode || a.phone || a.name) return;
     (async () => {
       const { data: sess } = await supabase.auth.getSession();
       const uid = sess.session?.user.id;
       if (!uid) return;
-      const { data: row } = await supabase
-        .from("addresses")
-        .select("line1, line2, city, pincode, phone")
-        .eq("user_id", uid)
-        .eq("is_default", true)
-        .maybeSingle();
-      if (!row) return;
+      // Saved address covers line1/city/pincode/phone once the customer
+      // has placed an order before; profile covers name/phone even on a
+      // first-ever booking (e.g. right after completing sign-up).
+      const [{ data: row }, { data: profile }] = await Promise.all([
+        supabase
+          .from("addresses")
+          .select("line1, line2, city, pincode, phone")
+          .eq("user_id", uid)
+          .eq("is_default", true)
+          .maybeSingle(),
+        supabase.from("profiles").select("full_name, phone").eq("id", uid).maybeSingle(),
+      ]);
+      if (!row && !profile?.full_name && !profile?.phone) return;
       update({
         address: {
-          line1: row.line1,
-          line2: row.line2 ?? "",
-          city: row.city,
-          pincode: row.pincode,
-          phone: row.phone,
+          name: profile?.full_name ?? "",
+          line1: row?.line1 ?? "",
+          line2: row?.line2 ?? "",
+          city: row?.city ?? "",
+          pincode: row?.pincode ?? "",
+          phone: row?.phone ?? profile?.phone ?? "",
         },
       });
     })();
@@ -332,7 +339,7 @@ export function BookWizard({
       const measurementProfileId = draft.measurements
         ? await upsertMeasurementProfile(userId, draft.measurements)
         : null;
-      await syncProfileContact(userId, draft.address.phone);
+      await syncProfileContact(userId, draft.address.phone, draft.address.name);
 
       const allReferenceUrls = draft.items.flatMap((it) => it.references);
       const referenceUrlMap = await uploadReferenceImages(allReferenceUrls, pendingFilesRef.current);

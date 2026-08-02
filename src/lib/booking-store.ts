@@ -41,6 +41,7 @@ export type BookingDraft = {
    * for single-garment orders. */
   sampleNote?: string;
   address: {
+    name: string;
     line1: string;
     line2: string;
     city: string;
@@ -64,7 +65,7 @@ const empty: BookingDraft = {
   // Defaults to the "send a garment that fits you" option, the easiest
   // path for most customers — they can still switch to another mode.
   measurementMode: "sample",
-  address: { line1: "", line2: "", city: "", pincode: "", phone: "" },
+  address: { name: "", line1: "", line2: "", city: "", pincode: "", phone: "" },
   deliverySame: true,
 };
 
@@ -84,7 +85,16 @@ export function normalizeDraft(raw: any): BookingDraft {
       }))
     : [];
 
-  return { ...empty, ...raw, items, fabrics: Array.isArray(raw?.fabrics) ? raw.fabrics : [] };
+  return {
+    ...empty,
+    ...raw,
+    items,
+    fabrics: Array.isArray(raw?.fabrics) ? raw.fabrics : [],
+    // Shallow-merged so an old saved draft missing a newer address field
+    // (e.g. `name`, added after that draft was saved) falls back to the
+    // empty default instead of ending up `undefined`.
+    address: { ...empty.address, ...raw?.address },
+  };
 }
 
 export function useBookingDraft() {
