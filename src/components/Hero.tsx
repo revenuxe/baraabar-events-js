@@ -1,6 +1,7 @@
 import heroImg from "@/assets/hero section image baraabar.webp";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
+import { PincodeCheck } from "@/components/PincodeCheck";
 
 export function Hero() {
   return (
@@ -23,14 +24,11 @@ export function Hero() {
               to a fit you'll never want to take off.
             </p>
 
-            {/* Primary CTA */}
-            <Link
-              href="/book"
-              className="mt-6 flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:w-fit md:px-8"
-            >
-              Start Designing
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            {/* Service-availability check, in place of the old "Start
+                Designing" CTA */}
+            <div className="mt-6">
+              <PincodeCheck />
+            </div>
 
             {/* Image (mobile shows here, desktop hidden — desktop uses right column) */}
             <div className="relative mt-6 md:hidden">
@@ -60,12 +58,13 @@ export function Hero() {
             </div>
 
             {/* Secondary CTA */}
-            <a
-              href="#services"
-              className="mt-4 flex items-center justify-center rounded-full border border-border bg-card px-6 py-4 text-base font-semibold shadow-card md:mt-5 md:w-fit md:px-8"
+            <Link
+              href="/book"
+              className="mt-4 flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:mt-5 md:w-fit md:px-8"
             >
-              Explore Services
-            </a>
+              Book Now
+              <ArrowRight className="h-4 w-4" />
+            </Link>
 
             <ul className="mt-6 grid grid-cols-3 gap-2 text-center text-[11px] font-medium text-muted-foreground md:max-w-md md:text-xs">
               <li className="glass rounded-2xl p-3">
