@@ -20,12 +20,16 @@ export function GoogleSignInButton({
   async function onClick() {
     setBusy(true);
     setError(null);
+    // The post-login destination travels via cookie, not a query string on
+    // `redirectTo` — Supabase's Redirect URLs allowlist matches that value
+    // exactly, and an allowlisted bare "/auth/callback" won't match
+    // "/auth/callback?redirect=...", silently falling back to the Site URL
+    // instead of ever reaching our callback route.
+    document.cookie = `baraabar_oauth_redirect=${encodeURIComponent(redirectTo)}; path=/; max-age=600; SameSite=Lax`;
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) {
       setError(error.message);
