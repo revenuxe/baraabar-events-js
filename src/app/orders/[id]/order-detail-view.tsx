@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   Package,
@@ -205,12 +206,9 @@ export function OrderDetailView({
               </div>
               <div className="flex gap-2 overflow-x-auto">
                 {order.reference_images.map((src: string, i: number) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt={`Reference ${i + 1}`}
-                    className="h-16 w-16 shrink-0 rounded-xl object-cover"
-                  />
+                  <div key={i} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+                    <Image src={src} alt={`Reference ${i + 1}`} fill sizes="64px" className="object-cover" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -294,7 +292,7 @@ export function OrderDetailView({
                 <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
                 <AlertDialogDescription>
                   Order #{order.order_number} will be cancelled and pickup will not go ahead. This
-                  can't be undone.
+                  can&apos;t be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

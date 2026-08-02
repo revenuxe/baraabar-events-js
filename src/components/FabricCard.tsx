@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Check } from "lucide-react";
 
 /** Distinct swatch treatment per fabric so cards read as material, not text. */
@@ -45,11 +46,13 @@ export function FabricCard({
     >
       <div className="relative h-24 w-full overflow-hidden md:h-28">
         {image ? (
-          <img
+          <Image
             src={image}
             alt={label}
             loading="lazy"
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            fill
+            sizes="(min-width: 768px) 33vw, 50vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="h-full w-full" style={{ backgroundImage: swatchFor(label) }} />

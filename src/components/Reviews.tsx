@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Play, Star } from "lucide-react";
 import sherwani from "@/assets/outfit-sherwani.jpg";
 import lehenga from "@/assets/outfit-lehenga.jpg";
@@ -25,13 +26,13 @@ export function Reviews() {
             key={r.name}
             className="snap-start-safe relative aspect-[9/16] w-56 shrink-0 overflow-hidden rounded-[1.75rem] shadow-elevated"
           >
-            <img
-              src={r.img.src}
+            <Image
+              src={r.img}
               alt={`${r.name} review`}
               loading="lazy"
-              width={800}
-              height={1000}
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              sizes="224px"
+              className="object-cover"
             />
             <div
               aria-hidden

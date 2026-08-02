@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import logo from "@/assets/baraabar tailor logo-webpg.webp";
@@ -72,11 +73,9 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <Link href="/" className="flex items-center">
-          <img
-            src={logo.src}
+          <Image
+            src={logo}
             alt="Baraabar — Custom Clothing. Your Style. Your Fit."
-            width={200}
-            height={56}
             className="h-9 w-auto object-contain"
           />
         </Link>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { jsPDF } from "jspdf";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -679,12 +680,15 @@ function BookingDetailDialog({
                     {Array.isArray(it.reference_images) && it.reference_images.length > 0 && (
                       <div className="mt-1.5 flex gap-2 overflow-x-auto">
                         {it.reference_images.map((src: string, i: number) => (
-                          <img
-                            key={i}
-                            src={src}
-                            alt={`${it.garment_label} reference ${i + 1}`}
-                            className="h-14 w-14 shrink-0 rounded-lg object-cover"
-                          />
+                          <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+                            <Image
+                              src={src}
+                              alt={`${it.garment_label} reference ${i + 1}`}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          </div>
                         ))}
                       </div>
                     )}
@@ -723,12 +727,9 @@ function BookingDetailDialog({
                   </div>
                   <div className="flex gap-2 overflow-x-auto">
                     {booking.reference_images.map((src: string, i: number) => (
-                      <img
-                        key={i}
-                        src={src}
-                        alt={`Reference ${i + 1}`}
-                        className="h-14 w-14 shrink-0 rounded-lg object-cover"
-                      />
+                      <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+                        <Image src={src} alt={`Reference ${i + 1}`} fill sizes="56px" className="object-cover" />
+                      </div>
                     ))}
                   </div>
                 </div>
