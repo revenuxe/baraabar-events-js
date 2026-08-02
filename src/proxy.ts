@@ -31,9 +31,13 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Run on everything except static assets and image optimization files,
-    // so the session cookie stays fresh across the whole app.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)",
-  ],
+  // An explicit allowlist of routes that actually read the session
+  // server-side, rather than a denylist of what to skip. Every match here
+  // costs a Supabase round-trip before the page even starts rendering —
+  // with Supabase hosted in the US and most users in India, that's real,
+  // felt latency, so routes with no server-side auth dependency (/, the
+  // marketing/legal pages, /design, /book — its catalog fetch is a cached,
+  // non-cookie client, and the wizard's own auth check is entirely
+  // client-side) are deliberately left out.
+  matcher: ["/admin/:path*", "/profile/:path*", "/orders/:path*", "/drafts/:path*", "/auth/:path*"],
 };
