@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, ArrowRight, Truck } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { CONTACT } from "@/lib/site";
 
 export function Success({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -24,7 +25,7 @@ export function Success({ orderId }: { orderId: string }) {
 
         <div className="mt-8 space-y-3">
           <a
-            href="https://wa.me/919999999999"
+            href={CONTACT.whatsappHref}
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-sm font-bold text-primary-foreground shadow-glow"

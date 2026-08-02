@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
 import { PincodeCheck } from "@/components/PincodeCheck";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { CONTACT } from "@/lib/site";
 
 export function Hero() {
   return (
@@ -69,13 +71,24 @@ export function Hero() {
             </div>
 
             {/* Secondary CTA */}
-            <Link
-              href="/book"
-              className="mt-4 flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:mt-5 md:w-fit md:px-8"
-            >
-              Book Now
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="mt-4 flex flex-col gap-3 md:mt-5 md:flex-row md:items-center">
+              <Link
+                href="/book"
+                className="flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:w-fit md:px-8"
+              >
+                Book Now
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href={CONTACT.whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-4 text-base font-semibold text-foreground shadow-card transition-transform active:scale-[0.98] md:w-fit md:px-8"
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+                WhatsApp Us
+              </a>
+            </div>
 
             <ul className="mt-6 grid grid-cols-3 gap-2 text-center text-[11px] font-medium text-muted-foreground md:max-w-md md:text-xs">
               <li className="glass rounded-2xl p-3">
