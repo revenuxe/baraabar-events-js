@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import logo from "@/assets/baraabar tailor logo-webpg.webp";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Search } from "lucide-react";
+import { SearchOverlay } from "@/components/SearchOverlay";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -14,16 +17,16 @@ const NAV = [
 
 export function TopBar() {
   const pathname = usePathname();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 pt-[max(0.5rem,env(safe-area-inset-top))] bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-md items-center justify-between gap-2 px-4 py-2.5 md:max-w-6xl md:px-8 md:py-3">
         <Link href="/" className="relative flex shrink-0 items-center">
-          <img
-            src={logo.src}
+          <Image
+            src={logo}
             alt="Baraabar"
-            width={160}
-            height={48}
+            priority
             className="h-11 w-auto object-contain md:h-12"
           />
         </Link>
@@ -49,6 +52,7 @@ export function TopBar() {
         <div className="flex items-center gap-2">
           <button
             aria-label="Search"
+            onClick={() => setSearchOpen(true)}
             className="grid h-11 w-11 place-items-center rounded-full bg-card shadow-card ring-1 ring-border/60"
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -68,6 +72,7 @@ export function TopBar() {
           </Link>
         </div>
       </div>
+      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }

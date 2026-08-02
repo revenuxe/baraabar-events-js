@@ -1,4 +1,5 @@
 import heroImg from "@/assets/hero section image baraabar.webp";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
 import { PincodeCheck } from "@/components/PincodeCheck";
@@ -40,13 +41,20 @@ export function Hero() {
                 href="/book?category=women"
                 className="relative block animate-float-slow overflow-hidden rounded-[2rem] shadow-elevated transition-transform active:scale-[0.98]"
               >
-                <img
-                  src={heroImg.src}
+                <Image
+                  src={heroImg}
                   alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
-                  width={1200}
-                  height={1600}
+                  priority
+                  sizes="100vw"
                   className="h-[400px] w-full object-cover"
                 />
+                <div className="glass-dark absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-primary-foreground">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                  </span>
+                  <span className="text-[11px] font-bold">Online Tailor for Tailored Suits</span>
+                </div>
                 <div className="glass-dark absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                   <div>
                     <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
@@ -95,13 +103,20 @@ export function Hero() {
               href="/book?category=women"
               className="relative block animate-float-slow overflow-hidden rounded-[3rem] shadow-elevated transition-transform hover:-translate-y-1 hover:shadow-elevated"
             >
-              <img
-                src={heroImg.src}
+              <Image
+                src={heroImg}
                 alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
-                width={1200}
-                height={1600}
+                priority
+                sizes="50vw"
                 className="h-[680px] w-full object-cover"
               />
+              <div className="glass-dark absolute left-4 top-4 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-primary-foreground">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
+                <span className="text-xs font-bold">Online Tailor for Tailored Suits</span>
+              </div>
               <div className="glass-dark absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                 <div>
                   <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
