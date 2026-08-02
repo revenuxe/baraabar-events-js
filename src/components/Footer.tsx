@@ -23,7 +23,7 @@ export function Footer() {
           href="/book"
           className="mt-5 flex w-full items-center justify-center rounded-full bg-white py-3.5 text-sm font-bold text-primary shadow-glow active:scale-[0.98] md:mt-0 md:w-auto md:px-10 md:py-4 md:text-base"
         >
-          Start designing — it&apos;s free
+          Claim Free Delivery
         </Link>
       </div>
 
