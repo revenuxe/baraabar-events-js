@@ -21,9 +21,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const SITE_TITLE = "Online Tailor | Tailored Suits | Baraabar";
+const SITE_TITLE = "Online Tailoring Services for Men, Women & Kids | Home Pickup & Delivery";
 const SITE_DESCRIPTION =
-  "Bring your own fabric. Free doorstep pickup and home measurement. Master-tailored delivery in 10–14 days — booked in 3 minutes.";
+  "Custom-tailored outfits for men, women and kids — bring your own fabric and we handle free home pickup, expert stitching and doorstep delivery in 10–14 days. Book online in 3 minutes.";
 // TODO(migration): this og:image still points at the Lovable-hosted preview
 // screenshot from the old app. Replace with a real, self-hosted OG image
 // before cutover — see docs/nextjs-migration-plan.md §8.

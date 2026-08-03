@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AddressesView, type AddressRow } from "./addresses-view";
 
-export const metadata: Metadata = { title: "Addresses — Baraabar" };
+export const metadata: Metadata = { title: "Addresses | Baraabar" };
 
 export default async function AddressesPage() {
   const supabase = await createClient();

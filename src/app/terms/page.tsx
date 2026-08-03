@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
-const TITLE = "Terms & Conditions · Baraabar";
+const TITLE = "Terms & Conditions | Baraabar";
 const DESCRIPTION =
   "The terms and conditions governing fabric pickup, home measurement, made-to-order stitching, delivery, cancellations and refunds on Baraabar.";
 const LAST_UPDATED = "August 3, 2026";

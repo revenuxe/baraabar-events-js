@@ -8,10 +8,10 @@ import { createClient } from "@/lib/supabase/server";
 import { STAGE_PCT, STATUS_LABEL } from "@/lib/orders";
 
 export const metadata: Metadata = {
-  title: "Your orders — Baraabar",
+  title: "Your orders | Baraabar",
   description: "Track every stage of your Baraabar order in real time.",
   openGraph: {
-    title: "Your orders — Baraabar",
+    title: "Your orders | Baraabar",
     description: "Track your custom orders in real time.",
   },
 };

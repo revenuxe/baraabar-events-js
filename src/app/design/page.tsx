@@ -5,11 +5,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeft, Sparkles, Truck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "AI Design Studio — Coming soon · Baraabar",
+  title: "AI Design Studio | Coming Soon | Baraabar",
   description:
     "The Baraabar AI design studio is coming soon. Book a fabric pickup and our master tailors will craft your outfit meanwhile.",
   openGraph: {
-    title: "AI Design Studio — Coming soon",
+    title: "AI Design Studio | Coming Soon",
     description: "Real-time garment previews and AI-guided styling — arriving soon.",
   },
 };

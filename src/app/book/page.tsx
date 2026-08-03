@@ -3,11 +3,11 @@ import { getCatalog } from "./_lib/catalog";
 import { BookWizard } from "./book-wizard";
 
 export const metadata: Metadata = {
-  title: "Book fabric pickup — Baraabar",
+  title: "Book fabric pickup | Baraabar",
   description:
     "Book a free fabric pickup, share your design ideas, and get home measurements. Master-tailored delivery in 10–14 days.",
   openGraph: {
-    title: "Book fabric pickup — Baraabar",
+    title: "Book fabric pickup | Baraabar",
     description: "Free doorstep pickup and measurement. Stitched by master tailors.",
   },
 };

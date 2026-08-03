@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase/server";
 import { OrderDetailView, type Address } from "./order-detail-view";
 
-export const metadata: Metadata = { title: "Order details — Baraabar" };
+export const metadata: Metadata = { title: "Order details | Baraabar" };
 
 export default async function OrderDetailPage({
   params,

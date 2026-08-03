@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeft, Clock, Mail, MapPin, Phone, Truck } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, CONTACT_MAPS_URL } from "@/lib/site";
 
-const TITLE = "Contact Us · Baraabar";
+const TITLE = "Contact Us | Baraabar";
 const DESCRIPTION =
   "Get in touch with Baraabar — call or email us, or find our Bengaluru studio at Shampura. We're happy to help with bookings, orders and fittings.";
 

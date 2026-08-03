@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MeasurementsView, type ProfileRow } from "./measurements-view";
 
-export const metadata: Metadata = { title: "My measurements — Baraabar" };
+export const metadata: Metadata = { title: "My measurements | Baraabar" };
 
 export default async function MeasurementsPage() {
   const supabase = await createClient();

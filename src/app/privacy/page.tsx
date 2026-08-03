@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
-const TITLE = "Privacy Policy · Baraabar";
+const TITLE = "Privacy Policy | Baraabar";
 const DESCRIPTION =
   "How Baraabar collects, uses, and protects your personal information, including body measurements, when you use our tailoring service.";
 const LAST_UPDATED = "August 3, 2026";

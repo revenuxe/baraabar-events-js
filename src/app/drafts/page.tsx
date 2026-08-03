@@ -8,11 +8,11 @@ import type { SavedDraft } from "@/lib/account";
 import { DraftsView } from "./drafts-view";
 
 export const metadata: Metadata = {
-  title: "Saved designs — Baraabar",
+  title: "Saved designs | Baraabar",
   description:
     "Pick up where you left off. Every unfinished Baraabar booking is saved to your account.",
   openGraph: {
-    title: "Saved designs — Baraabar",
+    title: "Saved designs | Baraabar",
     description: "Resume your unfinished tailoring bookings.",
   },
 };

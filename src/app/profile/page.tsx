@@ -19,10 +19,10 @@ import { SignOutRow } from "./sign-out-row";
 import { EditProfileButton } from "./edit-profile-button";
 
 export const metadata: Metadata = {
-  title: "Profile — Baraabar",
+  title: "Profile | Baraabar",
   description: "Manage your measurements, addresses and preferences.",
   openGraph: {
-    title: "Profile — Baraabar",
+    title: "Profile | Baraabar",
     description: "Your Baraabar account.",
   },
 };

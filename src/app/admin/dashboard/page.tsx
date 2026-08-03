@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminDashboard } from "./dashboard-client";
 
 export const metadata: Metadata = {
-  title: "Admin dashboard — Baraabar",
+  title: "Admin dashboard | Baraabar",
   robots: { index: false, follow: false },
 };
 
