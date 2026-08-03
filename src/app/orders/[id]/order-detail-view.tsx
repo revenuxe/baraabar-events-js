@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   ArrowLeft,
   Package,
@@ -20,6 +19,7 @@ import {
 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { RefImageThumb } from "@/components/RefImageThumb";
 import { createClient } from "@/lib/supabase/client";
 import {
   STAGE_PCT,
@@ -228,12 +228,10 @@ export function OrderDetailView({
                     <div className="mt-1.5 flex gap-2 overflow-x-auto">
                       {it.reference_images.map((src, i) => (
                         <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                          <Image
+                          <RefImageThumb
                             src={src}
                             alt={`${it.garment_label} reference ${i + 1}`}
-                            fill
                             sizes="56px"
-                            className="object-cover"
                           />
                         </div>
                       ))}
@@ -276,7 +274,7 @@ export function OrderDetailView({
               <div className="flex gap-2 overflow-x-auto">
                 {order.reference_images.map((src: string, i: number) => (
                   <div key={i} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-                    <Image src={src} alt={`Reference ${i + 1}`} fill sizes="64px" className="object-cover" />
+                    <RefImageThumb src={src} alt={`Reference ${i + 1}`} sizes="64px" />
                   </div>
                 ))}
               </div>

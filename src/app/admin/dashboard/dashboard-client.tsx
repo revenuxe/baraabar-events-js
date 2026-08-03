@@ -3,7 +3,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { jsPDF } from "jspdf";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -36,6 +35,7 @@ import { M_META, type MField } from "@/lib/measurements";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { GarmentPicker } from "@/components/admin/GarmentPicker";
+import { RefImageThumb } from "@/components/RefImageThumb";
 
 type TabKey = "bookings" | "categories" | "garment_types" | "fabric_types" | "style_presets" | "users";
 
@@ -779,12 +779,10 @@ function BookingDetailDialog({
                       <div className="mt-1.5 flex gap-2 overflow-x-auto">
                         {it.reference_images.map((src: string, i: number) => (
                           <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                            <Image
+                            <RefImageThumb
                               src={src}
                               alt={`${it.garment_label} reference ${i + 1}`}
-                              fill
                               sizes="56px"
-                              className="object-cover"
                             />
                           </div>
                         ))}
@@ -826,7 +824,7 @@ function BookingDetailDialog({
                   <div className="flex gap-2 overflow-x-auto">
                     {booking.reference_images.map((src: string, i: number) => (
                       <div key={i} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                        <Image src={src} alt={`Reference ${i + 1}`} fill sizes="56px" className="object-cover" />
+                        <RefImageThumb src={src} alt={`Reference ${i + 1}`} sizes="56px" />
                       </div>
                     ))}
                   </div>
