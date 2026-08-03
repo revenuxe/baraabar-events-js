@@ -36,6 +36,7 @@ import {
   type CategoryRow,
   type FabricTypeRow,
   type GarmentTypeRow,
+  type StylePresetRow,
 } from "./_lib/helpers";
 import { StepCategory } from "./_components/step-category";
 import { StepDetails } from "./_components/step-details";
@@ -51,11 +52,13 @@ export function BookWizard({
   categories,
   garmentTypes,
   fabricTypes,
+  stylePresets,
   initialCategorySlug,
 }: {
   categories: CategoryRow[];
   garmentTypes: GarmentTypeRow[];
   fabricTypes: FabricTypeRow[];
+  stylePresets: StylePresetRow[];
   initialCategorySlug?: string;
 }) {
   const { draft, update, reset, ready, step, setStep, jumpToStep, resumedFromHandoff } =
@@ -508,7 +511,13 @@ export function BookWizard({
           />
         )}
         {step === 2 && (
-          <StepDesign draft={draft} update={update} pendingFilesRef={pendingFilesRef} />
+          <StepDesign
+            draft={draft}
+            update={update}
+            pendingFilesRef={pendingFilesRef}
+            garmentTypes={garmentTypes}
+            stylePresets={stylePresets}
+          />
         )}
         {step === 3 && <StepFabric draft={draft} update={update} fabricTypes={fabricTypes} />}
         {step === 4 && <StepMeasure draft={draft} update={update} />}

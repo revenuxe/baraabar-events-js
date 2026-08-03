@@ -13,6 +13,7 @@ import ethnic from "@/assets/outfit-lehenga.jpg";
 export type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
 export type GarmentTypeRow = Database["public"]["Tables"]["garment_types"]["Row"];
 export type FabricTypeRow = Database["public"]["Tables"]["fabric_types"]["Row"];
+export type StylePresetRow = Database["public"]["Tables"]["style_presets"]["Row"];
 
 const FALLBACK_IMG: Record<string, string> = {
   women: women.src,

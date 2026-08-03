@@ -3,16 +3,20 @@
 import { useRef, type MutableRefObject } from "react";
 import { Check, Image as ImageIcon, Phone, Upload, X } from "lucide-react";
 import type { BookingDraft, BookingItem } from "@/lib/booking-store";
-import { STYLE_MAP } from "../_lib/helpers";
+import { STYLE_MAP, type GarmentTypeRow, type StylePresetRow } from "../_lib/helpers";
 
 export function StepDesign({
   draft,
   update,
   pendingFilesRef,
+  garmentTypes,
+  stylePresets,
 }: {
   draft: BookingDraft;
   update: (p: Partial<BookingDraft>) => void;
   pendingFilesRef: MutableRefObject<Map<string, File>>;
+  garmentTypes: GarmentTypeRow[];
+  stylePresets: StylePresetRow[];
 }) {
   const setItemStyle = (garment: string, styleId: string | undefined) => {
     update({
@@ -59,15 +63,24 @@ export function StepDesign({
         </p>
       </header>
 
-      {draft.items.map((item) => (
-        <GarmentDesignSection
-          key={item.garment}
-          item={item}
-          onAddRefs={(files) => addRefs(item.garment, files)}
-          onRemoveRef={(url) => removeRef(item.garment, url)}
-          onSelectStyle={(styleId) => setItemStyle(item.garment, styleId)}
-        />
-      ))}
+      {draft.items.map((item) => {
+        const garmentType = garmentTypes.find(
+          (g) => g.name.toLowerCase() === item.garment.toLowerCase(),
+        );
+        const presets = garmentType
+          ? stylePresets.filter((s) => s.garment_type_id === garmentType.id)
+          : [];
+        return (
+          <GarmentDesignSection
+            key={item.garment}
+            item={item}
+            presets={presets}
+            onAddRefs={(files) => addRefs(item.garment, files)}
+            onRemoveRef={(url) => removeRef(item.garment, url)}
+            onSelectStyle={(styleId) => setItemStyle(item.garment, styleId)}
+          />
+        );
+      })}
 
       {/* Notes */}
       <section>
@@ -99,7 +112,7 @@ export function StepDesign({
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              A 10-min call to finalise details — we'll ring you before pickup.
+              A 10-min call to finalise details — we&apos;ll ring you before pickup.
             </p>
           </div>
         </label>
@@ -110,17 +123,25 @@ export function StepDesign({
 
 function GarmentDesignSection({
   item,
+  presets,
   onAddRefs,
   onRemoveRef,
   onSelectStyle,
 }: {
   item: BookingItem;
+  presets: StylePresetRow[];
   onAddRefs: (files: FileList | null) => void;
   onRemoveRef: (url: string) => void;
   onSelectStyle: (styleId: string | undefined) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const styles = STYLE_MAP[item.garment] ?? STYLE_MAP.Default;
+  // Admin-managed presets for this garment type (Admin Console > Styles)
+  // take priority; the hardcoded STYLE_MAP is only a fallback for garments
+  // nobody's added real presets for yet.
+  const styles =
+    presets.length > 0
+      ? presets.map((p) => ({ id: p.slug, label: p.name, image: p.image_url }))
+      : (STYLE_MAP[item.garment] ?? STYLE_MAP.Default).map((s) => ({ ...s, image: null as string | null }));
 
   return (
     <section className="space-y-5 rounded-3xl border border-border bg-card/50 p-4">
@@ -192,7 +213,19 @@ function GarmentDesignSection({
                     : "border-border bg-card"
                 }`}
               >
-                <ImageIcon className="mb-2 h-5 w-5 opacity-80" />
+                {s.image ? (
+                  // Admins can paste any external image URL for a style
+                  // preset (see ImageUploadField), so next/image's
+                  // remotePatterns allowlist can't cover it — plain <img>
+                  // loads any domain.
+                  <img
+                    src={s.image}
+                    alt=""
+                    className="mb-2 h-10 w-10 rounded-lg object-cover"
+                  />
+                ) : (
+                  <ImageIcon className="mb-2 h-5 w-5 opacity-80" />
+                )}
                 <p className="text-sm font-bold">{s.label}</p>
                 {active && <Check className="absolute right-2 top-2 h-4 w-4" />}
               </button>

@@ -2,7 +2,7 @@ import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import type { Database } from "@/lib/supabase/types";
-import type { CategoryRow, FabricTypeRow, GarmentTypeRow } from "./helpers";
+import type { CategoryRow, FabricTypeRow, GarmentTypeRow, StylePresetRow } from "./helpers";
 
 // Categories/garment types/fabric types are public (RLS: "Public read ...")
 // and only change when an admin edits the catalog, so they don't need a
@@ -22,20 +22,28 @@ export type Catalog = {
   categories: CategoryRow[];
   garmentTypes: GarmentTypeRow[];
   fabricTypes: FabricTypeRow[];
+  stylePresets: StylePresetRow[];
 };
 
 export const getCatalog = unstable_cache(
   async (): Promise<Catalog> => {
     const supabase = publicSupabaseClient();
-    const [{ data: categories }, { data: garmentTypes }, { data: fabricTypes }] = await Promise.all([
-      supabase.from("categories").select("*").order("sort_order"),
-      supabase.from("garment_types").select("*").order("sort_order"),
-      supabase.from("fabric_types").select("*").order("sort_order"),
-    ]);
+    const [{ data: categories }, { data: garmentTypes }, { data: fabricTypes }, { data: stylePresets }] =
+      await Promise.all([
+        supabase.from("categories").select("*").order("sort_order"),
+        supabase.from("garment_types").select("*").order("sort_order"),
+        supabase.from("fabric_types").select("*").order("sort_order"),
+        supabase
+          .from("style_presets")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order"),
+      ]);
     return {
       categories: categories ?? [],
       garmentTypes: garmentTypes ?? [],
       fabricTypes: fabricTypes ?? [],
+      stylePresets: stylePresets ?? [],
     };
   },
   ["book-catalog"],

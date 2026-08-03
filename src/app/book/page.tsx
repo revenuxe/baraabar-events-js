@@ -30,13 +30,14 @@ export default async function BookPage({
   // types, fabric types) arrives with the initial HTML instead of being
   // fetched client-side after mount — no more blank grid -> pop-in flash
   // on the Outfit step.
-  const { categories, garmentTypes, fabricTypes } = await getCatalog();
+  const { categories, garmentTypes, fabricTypes, stylePresets } = await getCatalog();
 
   return (
     <BookWizard
       categories={categories}
       garmentTypes={garmentTypes}
       fabricTypes={fabricTypes}
+      stylePresets={stylePresets}
       initialCategorySlug={initialCategorySlug}
     />
   );
