@@ -28,10 +28,14 @@ export function StepDetails({
       update({ items: draft.items.filter((it) => it.garment !== g) });
     } else {
       update({
-        items: [
-          ...draft.items,
-          { garment: g, quantity: 1, references: [], measurementMode: "sample" },
-        ],
+        // No measurementMode here — that's a choice the customer makes
+        // later, at the Measure step. Defaulting it to "sample" meant
+        // itemMeasurementSnapshot() (book/_lib/helpers.ts) always found a
+        // truthy it.measurementMode and never fell through to check what
+        // the customer actually picked at Measure for single-garment
+        // orders, so the saved snapshot said "sample" regardless of the
+        // real choice.
+        items: [...draft.items, { garment: g, quantity: 1, references: [] }],
       });
     }
   };
