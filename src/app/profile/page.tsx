@@ -16,6 +16,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutRow } from "./sign-out-row";
+import { EditProfileButton } from "./edit-profile-button";
 
 export const metadata: Metadata = {
   title: "Profile — Baraabar",
@@ -117,16 +118,17 @@ export default async function ProfilePage() {
       <TopBar />
       <main className="mx-auto max-w-md px-5 pb-28 pt-2">
         <div className="rounded-[2rem] bg-gradient-brand p-6 text-primary-foreground shadow-elevated">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-3xl glass-dark font-display text-3xl">
+          <div className="flex items-start gap-4">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl glass-dark font-display text-3xl">
               {initial}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate font-display text-2xl leading-tight">
                 {profile?.full_name ?? "Baraabar member"}
               </p>
               <p className="truncate text-xs opacity-80">{email}</p>
             </div>
+            <EditProfileButton fullName={profile?.full_name ?? ""} phone={profile?.phone ?? ""} />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
             {[
