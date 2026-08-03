@@ -15,7 +15,9 @@ export function Hero() {
           {/* copy + CTAs */}
           <div className="flex flex-col">
             <h1 className="animate-rise-in font-display text-[52px] leading-[0.95] tracking-tight md:text-[84px]">
-              Tailoring <span className="text-gradient-brand italic">Made Easy</span>
+              Tailoring
+              <br />
+              <span className="text-gradient-brand italic">Made Easy</span>
             </h1>
             <p
               className="animate-rise-in mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground md:text-lg"
