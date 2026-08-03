@@ -5,11 +5,25 @@ import type { BookingDraft } from "@/lib/booking-store";
 import { estimatePrice, type GarmentTypeRow } from "../_lib/helpers";
 import { modeSummary } from "./step-measure";
 
-// Same-day pickup for anything booked in the 8 AM – 2 PM window; anything
-// booked later rolls to next-day pickup instead.
-function isSameDayPickupWindow(date: Date): boolean {
-  const hour = date.getHours();
-  return hour >= 8 && hour < 14;
+// Reflects whichever date the customer actually picked in StepPickup
+// (which only offers "Today" as the first option when the 8 AM-2 PM
+// same-day cutoff hasn't passed — see isSameDayPickupWindow there), not
+// the ambient clock time when this Review step happens to render. Using
+// current time here directly caused this message to disagree with the
+// pickup date already shown in the summary above.
+function pickupTimingLabel(pickupDate: string | undefined): string {
+  if (!pickupDate) return "your selected date";
+  const toKey = (d: Date) => d.toISOString().slice(0, 10);
+  const today = new Date();
+  if (pickupDate === toKey(today)) return "today";
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (pickupDate === toKey(tomorrow)) return "tomorrow";
+  return `on ${new Date(pickupDate).toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  })}`;
 }
 
 export function StepReview({
@@ -22,7 +36,7 @@ export function StepReview({
   const timeline = ["Pickup", "Measure", "Stitch", "Fit trial", "Delivery"];
   const { orderPriceMin, orderPriceMax } = estimatePrice(draft.items, garmentTypes);
   const totalReferences = draft.items.reduce((n, it) => n + it.references.length, 0);
-  const pickupToday = isSameDayPickupWindow(new Date());
+  const pickupTiming = pickupTimingLabel(draft.pickupDate);
   return (
     <div className="space-y-6">
       <header>
@@ -151,13 +165,8 @@ export function StepReview({
         <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-muted/60 px-4 py-3">
           <Truck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-xs text-muted-foreground">
-            <span className="font-bold text-foreground">
-              Pickup {pickupToday ? "today" : "tomorrow"}
-            </span>
-            {pickupToday
-              ? " — booked between 8 AM and 2 PM"
-              : " — booking after 2 PM moves to next-day pickup"}
-            , then stitched and delivered in{" "}
+            <span className="font-bold text-foreground">Pickup {pickupTiming}</span>, then
+            stitched and delivered in{" "}
             <span className="font-bold text-foreground">4–5 days</span>.
           </p>
         </div>

@@ -10,9 +10,15 @@ export function StepPickup({
   draft: BookingDraft;
   update: (p: Partial<BookingDraft>) => void;
 }) {
+  // Same-day pickup is only offered for bookings made 8 AM-2 PM — book
+  // after that cutoff and the earliest slot becomes tomorrow instead, same
+  // as StepReview's pickup-timing message (see isSameDayPickupWindow
+  // there, which must stay in sync with this cutoff).
+  const now = new Date();
+  const sameDayEligible = now.getHours() >= 8 && now.getHours() < 14;
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() + i + 1);
+    d.setDate(d.getDate() + i + (sameDayEligible ? 0 : 1));
     return d;
   });
   const windows = ["9–11 AM", "11 AM–1 PM", "2–4 PM", "4–6 PM", "6–8 PM"];
@@ -82,9 +88,10 @@ export function StepPickup({
           <Calendar className="h-4 w-4" /> Pickup date
         </p>
         <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
-          {days.map((d) => {
+          {days.map((d, i) => {
             const key = d.toISOString().slice(0, 10);
             const active = draft.pickupDate === key;
+            const isToday = sameDayEligible && i === 0;
             return (
               <button
                 key={key}
@@ -96,7 +103,7 @@ export function StepPickup({
                 }`}
               >
                 <p className="text-[11px] font-bold uppercase opacity-80">
-                  {d.toLocaleDateString(undefined, { weekday: "short" })}
+                  {isToday ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" })}
                 </p>
                 <p className="text-lg font-black leading-tight">{d.getDate()}</p>
                 <p className="text-[10px] opacity-80">
