@@ -500,7 +500,18 @@ function buildMeasurementsPdf(booking: any, items: any[], profile: any) {
     doc.text(priceLine, marginX, y);
     y += 6;
 
-    const snap = src.snapshot;
+    // Defensive parse — measurement_snapshot is a jsonb column so Supabase
+    // normally hands back a parsed object already, but guard against a
+    // stringified value slipping through so this section never just goes
+    // silently blank on an unexpected shape.
+    let snap = src.snapshot;
+    if (typeof snap === "string") {
+      try {
+        snap = JSON.parse(snap);
+      } catch {
+        // leave as the raw string — falls through to the catch-all below
+      }
+    }
     doc.setTextColor(20);
     doc.setFontSize(9);
     if (!snap) {
@@ -523,6 +534,11 @@ function buildMeasurementsPdf(booking: any, items: any[], profile: any) {
         doc.text("Measurements: no values recorded", marginX, y);
         y += 6;
       } else {
+        // Space for the bold header plus at least its first row — without
+        // this, a header reached near the bottom of the page (e.g. the
+        // 2nd or 3rd garment on a multi-item order) renders past the
+        // page's edge and is simply invisible; jsPDF doesn't wrap or clip.
+        ensureSpace(6 + Math.ceil(entries.length / 3) * 5.5);
         doc.setFont("helvetica", "bold");
         doc.text("Measurements", marginX, y);
         y += 5.5;
@@ -538,6 +554,11 @@ function buildMeasurementsPdf(booking: any, items: any[], profile: any) {
           y += 5.5;
         }
       }
+    } else {
+      // Unrecognized shape — still say something rather than leaving the
+      // section blank with no explanation.
+      doc.text("Measurements: unavailable", marginX, y);
+      y += 6;
     }
     y += 5;
   }
