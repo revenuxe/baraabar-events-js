@@ -1,8 +1,16 @@
 "use client";
 
+import { Truck } from "lucide-react";
 import type { BookingDraft } from "@/lib/booking-store";
 import { estimatePrice, type GarmentTypeRow } from "../_lib/helpers";
 import { modeSummary } from "./step-measure";
+
+// Same-day pickup for anything booked in the 8 AM – 2 PM window; anything
+// booked later rolls to next-day pickup instead.
+function isSameDayPickupWindow(date: Date): boolean {
+  const hour = date.getHours();
+  return hour >= 8 && hour < 14;
+}
 
 export function StepReview({
   draft,
@@ -14,6 +22,7 @@ export function StepReview({
   const timeline = ["Pickup", "Measure", "Stitch", "Fit trial", "Delivery"];
   const { orderPriceMin, orderPriceMax } = estimatePrice(draft.items, garmentTypes);
   const totalReferences = draft.items.reduce((n, it) => n + it.references.length, 0);
+  const pickupToday = isSameDayPickupWindow(new Date());
   return (
     <div className="space-y-6">
       <header>
@@ -139,9 +148,19 @@ export function StepReview({
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Ready for delivery in <span className="font-bold text-foreground">10–14 days</span>
-        </p>
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-muted/60 px-4 py-3">
+          <Truck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p className="text-xs text-muted-foreground">
+            <span className="font-bold text-foreground">
+              Pickup {pickupToday ? "today" : "tomorrow"}
+            </span>
+            {pickupToday
+              ? " — booked between 8 AM and 2 PM"
+              : " — booking after 2 PM moves to next-day pickup"}
+            , then stitched and delivered in{" "}
+            <span className="font-bold text-foreground">4–5 days</span>.
+          </p>
+        </div>
       </div>
 
       <div className="rounded-3xl border border-dashed border-border p-5">
