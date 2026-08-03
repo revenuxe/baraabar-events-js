@@ -16,6 +16,7 @@ import {
   XCircle,
   Truck,
   MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
@@ -43,20 +44,24 @@ import {
 type Order = Database["public"]["Tables"]["bookings"]["Row"];
 type BookingItem = Database["public"]["Tables"]["booking_items"]["Row"];
 export type Address = Database["public"]["Tables"]["addresses"]["Row"];
+type StatusEvent = Database["public"]["Tables"]["booking_status_events"]["Row"];
 
 export function OrderDetailView({
   order: initialOrder,
   items,
   pickupAddr,
   deliveryAddr,
+  statusEvents,
 }: {
   order: Order;
   items: BookingItem[];
   pickupAddr: Address | null;
   deliveryAddr: Address | null;
+  statusEvents: StatusEvent[];
 }) {
   const [order, setOrder] = useState(initialOrder);
   const [cancelling, setCancelling] = useState(false);
+  const [events, setEvents] = useState(statusEvents);
 
   async function cancelOrder() {
     setCancelling(true);
@@ -66,7 +71,16 @@ export function OrderDetailView({
       .update({ status: "cancelled" })
       .eq("id", order.id);
     setCancelling(false);
-    if (!error) setOrder((o) => ({ ...o, status: "cancelled" }));
+    if (!error) {
+      setOrder((o) => ({ ...o, status: "cancelled" }));
+      // The booking_status_events row itself is written server-side by a
+      // DB trigger, not this client — append a matching local entry so the
+      // timeline reflects it immediately instead of waiting on a refetch.
+      setEvents((evs) => [
+        ...evs,
+        { id: crypto.randomUUID(), booking_id: order.id, status: "cancelled", note: null, created_at: new Date().toISOString() },
+      ]);
+    }
   }
 
   const pct = STAGE_PCT[order.status] ?? 10;
@@ -131,6 +145,44 @@ export function OrderDetailView({
             )}
           </div>
         </section>
+
+        {/* status timeline */}
+        {events.length > 0 && (
+          <section className="mt-4 rounded-3xl bg-card p-4 shadow-card">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Order history
+            </div>
+            <ol className="mt-3 space-y-3">
+              {events.map((ev, i) => {
+                const isLatest = i === events.length - 1;
+                return (
+                  <li key={ev.id} className="flex items-start gap-3">
+                    <div
+                      className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${
+                        isLatest ? "bg-primary" : "bg-muted-foreground/40"
+                      }`}
+                    />
+                    <div className="flex-1">
+                      <p className={`text-xs ${isLatest ? "font-bold" : "font-semibold text-muted-foreground"}`}>
+                        {STATUS_LABEL[ev.status] ?? ev.status}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {new Date(ev.created_at).toLocaleString(undefined, {
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                      {ev.note && <p className="mt-0.5 text-[11px] text-muted-foreground">{ev.note}</p>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        )}
 
         {/* garment details */}
         <section className="mt-4 rounded-3xl bg-card p-4 shadow-card">

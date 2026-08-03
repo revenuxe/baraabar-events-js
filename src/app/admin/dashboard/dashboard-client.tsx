@@ -620,7 +620,18 @@ function BookingDetailDialog({
   const [deliveryAddr, setDeliveryAddr] = useState<any | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [statusEvents, setStatusEvents] = useState<any[]>([]);
   const [loadingExtras, setLoadingExtras] = useState(false);
+
+  const refetchStatusEvents = useCallback(async (bookingId: string) => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("booking_status_events")
+      .select("*")
+      .eq("booking_id", bookingId)
+      .order("created_at", { ascending: true });
+    setStatusEvents(data ?? []);
+  }, []);
 
   useEffect(() => {
     if (!booking) {
@@ -628,6 +639,7 @@ function BookingDetailDialog({
       setDeliveryAddr(null);
       setProfile(null);
       setItems([]);
+      setStatusEvents([]);
       return;
     }
     (async () => {
@@ -636,7 +648,7 @@ function BookingDetailDialog({
       const addrIds = [
         ...new Set([booking.pickup_address_id, booking.delivery_address_id].filter(Boolean)),
       ] as string[];
-      const [{ data: addrs }, { data: prof }, { data: bookingItems }] = await Promise.all([
+      const [{ data: addrs }, { data: prof }, { data: bookingItems }, { data: events }] = await Promise.all([
         addrIds.length
           ? supabase.from("addresses").select("*").in("id", addrIds)
           : Promise.resolve({ data: [] as any[] }),
@@ -646,18 +658,29 @@ function BookingDetailDialog({
           .select("*")
           .eq("booking_id", booking.id)
           .order("sort_order", { ascending: true }),
+        supabase
+          .from("booking_status_events")
+          .select("*")
+          .eq("booking_id", booking.id)
+          .order("created_at", { ascending: true }),
       ]);
       const byId = new Map((addrs ?? []).map((a: any) => [a.id, a]));
       setPickupAddr(byId.get(booking.pickup_address_id) ?? null);
       setDeliveryAddr(byId.get(booking.delivery_address_id) ?? null);
       setProfile(prof ?? null);
       setItems(bookingItems ?? []);
+      setStatusEvents(events ?? []);
       setLoadingExtras(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [booking?.id]);
 
   if (!booking) return null;
+
+  async function handleStatusChange(newStatus: string) {
+    await onUpdateStatus(booking.id, newStatus);
+    refetchStatusEvents(booking.id);
+  }
 
   const categoryLabel = booking.category_slug
     ? (CATEGORY_LABELS[booking.category_slug] ?? booking.category_slug)
@@ -679,7 +702,7 @@ function BookingDetailDialog({
             </span>
             <select
               value={booking.status}
-              onChange={(e) => onUpdateStatus(booking.id, e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="ml-auto rounded-full border border-border bg-background px-2.5 py-1 text-xs font-semibold"
             >
               {STATUS_OPTIONS.map((s) => (
@@ -689,6 +712,24 @@ function BookingDetailDialog({
               ))}
             </select>
           </div>
+
+          {statusEvents.length > 0 && (
+            <div className="rounded-2xl border border-border p-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                <RefreshCw className="h-3.5 w-3.5" /> Status history
+              </div>
+              <ol className="mt-2 space-y-1.5">
+                {statusEvents.map((ev) => (
+                  <li key={ev.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-semibold">{STATUS_LABEL[ev.status] ?? ev.status}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(ev.created_at).toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
 
           <div className="rounded-2xl border border-border p-3">
             <div className="flex items-center justify-between gap-2">

@@ -49,7 +49,7 @@ export default async function OrderDetailPage({
     ...new Set([order.pickup_address_id, order.delivery_address_id].filter(Boolean)),
   ] as string[];
 
-  const [{ data: items }, { data: addrs }] = await Promise.all([
+  const [{ data: items }, { data: addrs }, { data: statusEvents }] = await Promise.all([
     supabase
       .from("booking_items")
       .select("*")
@@ -58,6 +58,11 @@ export default async function OrderDetailPage({
     addrIds.length
       ? supabase.from("addresses").select("*").in("id", addrIds)
       : Promise.resolve({ data: [] as Address[] }),
+    supabase
+      .from("booking_status_events")
+      .select("*")
+      .eq("booking_id", order.id)
+      .order("created_at", { ascending: true }),
   ]);
 
   const byId = new Map((addrs ?? []).map((a: Address) => [a.id, a]));
@@ -68,6 +73,7 @@ export default async function OrderDetailPage({
       items={items ?? []}
       pickupAddr={byId.get(order.pickup_address_id ?? "") ?? null}
       deliveryAddr={byId.get(order.delivery_address_id ?? "") ?? null}
+      statusEvents={statusEvents ?? []}
     />
   );
 }

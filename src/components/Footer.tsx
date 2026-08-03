@@ -34,11 +34,17 @@ export function Footer() {
           className="h-8 w-auto object-contain"
         />
         <div className="flex gap-2">
-          {[InstagramIcon, YoutubeIcon, TwitterIcon].map((Icon, i) => (
+          {[
+            { Icon: InstagramIcon, href: "https://www.instagram.com/baraabarmade/", label: "Instagram" },
+            { Icon: YoutubeIcon, href: "#", label: "YouTube" },
+            { Icon: TwitterIcon, href: "#", label: "Twitter" },
+          ].map(({ Icon, href, label }) => (
             <a
-              key={i}
-              href="#"
-              aria-label="Social"
+              key={label}
+              href={href}
+              target={href !== "#" ? "_blank" : undefined}
+              rel={href !== "#" ? "noopener noreferrer" : undefined}
+              aria-label={label}
               className="glass grid h-10 w-10 place-items-center rounded-full"
             >
               <Icon className="h-4 w-4" />
