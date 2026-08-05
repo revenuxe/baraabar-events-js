@@ -2,7 +2,7 @@ import logo from "@/assets/baraabar tailor logo-webpg.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { InstagramIcon, YoutubeIcon, TwitterIcon } from "@/components/SocialIcons";
+import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon } from "@/components/SocialIcons";
 import { CONTACT, CONTACT_ADDRESS_FULL, CONTACT_MAPS_URL } from "@/lib/site";
 
 const LEGAL_LINKS = [
@@ -36,6 +36,7 @@ export function Footer() {
         <div className="flex gap-2">
           {[
             { Icon: InstagramIcon, href: "https://www.instagram.com/baraabarmade/", label: "Instagram" },
+            { Icon: LinkedinIcon, href: "https://www.linkedin.com/company/baraabar", label: "LinkedIn" },
             { Icon: YoutubeIcon, href: "#", label: "YouTube" },
             { Icon: TwitterIcon, href: "#", label: "Twitter" },
           ].map(({ Icon, href, label }) => (
