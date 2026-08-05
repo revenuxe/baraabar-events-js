@@ -40,6 +40,7 @@ export default async function Home() {
           title="Trending"
           titleAccent="setups"
           viewAllHref="/trending"
+          cardBadge="trending"
         />
         <CategoryStrip categories={categories} />
         <FeaturedCollections
@@ -48,6 +49,7 @@ export default async function Home() {
           title="Featured"
           titleAccent="setups"
           viewAllHref="/featured"
+          cardBadge="featured"
         />
         <PickupCta />
         {weddingCategory && (

@@ -1,9 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Flame, Star } from "lucide-react";
+import { Flame, Sparkles, Star } from "lucide-react";
 import type { DecorService } from "@/data/types";
 
-export function ServiceCard({ service }: { service: DecorService }) {
+export function ServiceCard({
+  service,
+  badge = "trending",
+}: {
+  service: DecorService;
+  /** Which flag-driven badge to show, e.g. so a product marked both
+   * trending and featured shows "Featured" (not "Trending") when it's
+   * rendered inside the Featured section. Defaults to trending for every
+   * other context (category pages, related products, search). */
+  badge?: "trending" | "featured";
+}) {
+  const showBadge = badge === "featured" ? service.isFeatured : service.isTrending;
   return (
     <Link
       href={`/categories/${service.categorySlug}/${service.slug}`}
@@ -23,9 +34,17 @@ export function ServiceCard({ service }: { service: DecorService }) {
             {service.discountPct}% off
           </span>
         )}
-        {service.isTrending && (
+        {showBadge && (
           <span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
-            <Flame className="h-3 w-3 fill-current text-orange-400" /> Trending
+            {badge === "featured" ? (
+              <>
+                <Sparkles className="h-3 w-3 fill-current text-accent" /> Featured
+              </>
+            ) : (
+              <>
+                <Flame className="h-3 w-3 fill-current text-orange-400" /> Trending
+              </>
+            )}
           </span>
         )}
       </div>

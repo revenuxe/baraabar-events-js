@@ -8,9 +8,11 @@ import type { DecorService } from "@/data/types";
 export function ServiceGridSearch({
   services,
   searchPlaceholder,
+  cardBadge = "trending",
 }: {
   services: DecorService[];
   searchPlaceholder: string;
+  cardBadge?: "trending" | "featured";
 }) {
   const [query, setQuery] = useState("");
 
@@ -29,7 +31,7 @@ export function ServiceGridSearch({
         {visible.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {visible.map((s) => (
-              <ServiceCard key={s.id} service={s} />
+              <ServiceCard key={s.id} service={s} badge={cardBadge} />
             ))}
           </div>
         ) : (

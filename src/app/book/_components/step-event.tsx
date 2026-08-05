@@ -44,9 +44,42 @@ export function StepEvent({
       </header>
 
       <section>
-        <p className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <CalendarIcon className="h-4 w-4" /> Event date
-        </p>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="flex items-center gap-2 text-sm font-bold">
+            <CalendarIcon className="h-4 w-4" /> Event date
+          </p>
+          <Popover open={customOpen} onOpenChange={setCustomOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  isCustomSelected
+                    ? "border-transparent bg-gradient-brand text-primary-foreground shadow-glow"
+                    : "border-dashed border-border bg-card text-muted-foreground"
+                }`}
+              >
+                <CalendarPlus className="h-3.5 w-3.5" />
+                {isCustomSelected
+                  ? new Date(`${draft.eventDate}T00:00:00`).toLocaleDateString(undefined, {
+                      day: "numeric",
+                      month: "short",
+                    })
+                  : "Pick a date"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={draft.eventDate ? new Date(`${draft.eventDate}T00:00:00`) : undefined}
+                onSelect={(date) => {
+                  if (!date) return;
+                  update({ eventDate: date.toISOString().slice(0, 10) });
+                  setCustomOpen(false);
+                }}
+                disabled={{ before: tomorrow }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
           {days.map((d) => {
             const key = d.toISOString().slice(0, 10);
@@ -71,40 +104,6 @@ export function StepEvent({
               </button>
             );
           })}
-
-          <Popover open={customOpen} onOpenChange={setCustomOpen}>
-            <PopoverTrigger asChild>
-              <button
-                className={`shrink-0 rounded-2xl border px-4 py-3 text-center transition ${
-                  isCustomSelected
-                    ? "border-transparent bg-gradient-brand text-primary-foreground shadow-glow"
-                    : "border-dashed border-border bg-card"
-                }`}
-              >
-                <CalendarPlus className="mx-auto h-4 w-4" />
-                <p className="mt-1 text-[10px] font-bold leading-tight whitespace-nowrap">
-                  {isCustomSelected
-                    ? new Date(`${draft.eventDate}T00:00:00`).toLocaleDateString(undefined, {
-                        day: "numeric",
-                        month: "short",
-                      })
-                    : "Pick date"}
-                </p>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={draft.eventDate ? new Date(`${draft.eventDate}T00:00:00`) : undefined}
-                onSelect={(date) => {
-                  if (!date) return;
-                  update({ eventDate: date.toISOString().slice(0, 10) });
-                  setCustomOpen(false);
-                }}
-                disabled={{ before: tomorrow }}
-              />
-            </PopoverContent>
-          </Popover>
         </div>
       </section>
 

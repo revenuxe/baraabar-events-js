@@ -29,7 +29,7 @@ export default async function FeaturedPage() {
           </p>
         </section>
 
-        <ServiceGridSearch services={services} searchPlaceholder="Search featured setups…" />
+        <ServiceGridSearch services={services} searchPlaceholder="Search featured setups…" cardBadge="featured" />
       </main>
       <Footer />
       <BottomNav />
