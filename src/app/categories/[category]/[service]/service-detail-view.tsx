@@ -277,13 +277,13 @@ export function ServiceDetailView({
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3.5 text-sm font-bold shadow-card active:scale-[0.98]"
+                  className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3.5 text-sm font-bold shadow-card active:scale-[0.98]"
                 >
                   <ShoppingBag className="h-4 w-4" /> Add to Cart
                 </button>
                 <button
                   onClick={handleBookNow}
-                  className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98]"
+                  className="flex-1 whitespace-nowrap rounded-full bg-gradient-brand px-4 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98]"
                 >
                   Book Now
                 </button>

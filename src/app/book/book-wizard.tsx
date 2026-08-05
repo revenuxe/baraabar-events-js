@@ -21,6 +21,7 @@ export function BookWizard() {
   const [done, setDone] = useState(false);
   const [orderCode, setOrderCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [checkingAccount, setCheckingAccount] = useState(false);
   const router = useRouter();
 
   const ready = draftReady && cartReady;
@@ -131,10 +132,52 @@ export function BookWizard() {
     setDone(true);
   }
 
-  const next = () => {
-    if (step < lastStep) setStep(step + 1);
-    else submitBooking();
-  };
+  async function saveVenueAddress() {
+    if (draft.venue.addressId) return true;
+    const supabase = createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      router.push("/auth?redirect=%2Fbook");
+      return false;
+    }
+    const { data: existing, error: lookupError } = await supabase
+      .from("addresses").select("id").eq("user_id", user.id)
+      .eq("line1", draft.venue.line1).eq("city", draft.venue.city)
+      .eq("pincode", draft.venue.pincode).eq("phone", draft.venue.phone).maybeSingle();
+    if (lookupError) { toast.error("Could not save your address. Please try again."); return false; }
+    if (existing) { update({ venue: { ...draft.venue, addressId: existing.id } }); return true; }
+    const { count, error: countError } = await supabase
+      .from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id);
+    if (countError) { toast.error("Could not save your address. Please try again."); return false; }
+    const { data: address, error: saveError } = await supabase.from("addresses").insert({
+      user_id: user.id, label: draft.venue.label || "Home", line1: draft.venue.line1,
+      line2: draft.venue.line2 || null, city: draft.venue.city, pincode: draft.venue.pincode,
+      phone: draft.venue.phone, is_default: (count ?? 0) === 0,
+    }).select("id").single();
+    if (saveError || !address) { toast.error(saveError?.message ?? "Could not save your address. Please try again."); return false; }
+    update({ venue: { ...draft.venue, addressId: address.id } });
+    return true;
+  }
+
+  async function next() {
+    if (step === 0) {
+      setCheckingAccount(true);
+      const { data: { user } } = await createClient().auth.getUser();
+      setCheckingAccount(false);
+      if (!user) {
+        // The local booking draft keeps the completed event step through sign-in.
+        router.push("/auth?redirect=%2Fbook");
+        return;
+      }
+      setStep(1);
+      return;
+    }
+    if (step === 1) {
+      if (await saveVenueAddress()) setStep(2);
+      return;
+    }
+    submitBooking();
+  }
   const back = () => {
     if (step > 0) setStep(step - 1);
     else router.push("/cart");
@@ -202,10 +245,10 @@ export function BookWizard() {
             </button>
             <button
               onClick={next}
-              disabled={!canContinue() || submitting}
+              disabled={!canContinue() || submitting || checkingAccount}
               className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
             >
-              {submitting ? "Booking…" : step === lastStep ? "Confirm Booking" : "Continue"}
+              {submitting ? "Booking…" : checkingAccount ? "Checking account…" : step === lastStep ? "Confirm Booking" : "Continue"}
             </button>
           </div>
         </div>
