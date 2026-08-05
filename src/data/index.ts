@@ -23,7 +23,7 @@ const getCatalog = unstable_cache(
       supabase.from("subcategories").select("*, categories(slug)").order("sort_order"),
       supabase
         .from("products")
-        .select("*, categories(slug), subcategories(slug), product_addons(*)")
+        .select("*, categories(slug), subcategories(slug), product_addon_links(addons(*))")
         .order("sort_order"),
     ]);
 
@@ -54,8 +54,9 @@ const getCatalog = unstable_cache(
         p.sale_price != null && p.price > 0
           ? Math.round(((p.price - p.sale_price) / p.price) * 100)
           : 0;
-      const addOns: ServiceAddOn[] = (p.product_addons ?? [])
-        .slice()
+      const addOns: ServiceAddOn[] = (p.product_addon_links ?? [])
+        .map((l) => l.addons)
+        .filter((a): a is NonNullable<typeof a> => a !== null && a.is_active)
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((a) => ({ id: a.id, name: a.name, price: a.price }));
 
@@ -125,6 +126,11 @@ export async function getServiceBySlug(
 ): Promise<DecorService | undefined> {
   const { services } = await getCatalog();
   return services.find((s) => s.categorySlug === categorySlug && s.slug === serviceSlug);
+}
+
+export async function getTrendingServices(limit = 8): Promise<DecorService[]> {
+  const { services } = await getCatalog();
+  return services.filter((s) => s.isTrending).slice(0, limit);
 }
 
 export async function getFeaturedServices(limit = 8): Promise<DecorService[]> {

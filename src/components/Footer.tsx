@@ -1,4 +1,4 @@
-import logo from "@/assets/baraabar tailor logo-webpg.webp";
+import logo from "@/assets/baraabar event logo.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";

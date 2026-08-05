@@ -4,7 +4,7 @@ import { testimonials } from "@/data";
 
 export function Reviews() {
   return (
-    <section className="py-10 md:py-16">
+    <section className="pb-10 md:pb-16">
       <div className="mx-auto w-full max-w-md px-5 md:max-w-6xl md:px-8">
         <p className="text-xs font-bold uppercase tracking-widest text-accent">Loved by 500+</p>
         <h2 className="font-display text-3xl md:text-5xl">Real stories, in their words</h2>

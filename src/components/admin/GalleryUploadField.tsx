@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { GripVertical, Loader2, Plus, X } from "lucide-react";
-import { deleteCatalogImage, uploadCatalogImage } from "@/lib/supabase-upload-client";
+import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
 export function GalleryUploadField({
   value,

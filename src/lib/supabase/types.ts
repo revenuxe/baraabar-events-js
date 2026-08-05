@@ -39,6 +39,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      addons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           city: string
@@ -84,6 +114,152 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_items: {
+        Row: {
+          addons: Json
+          booking_id: string
+          category_slug: string
+          created_at: string
+          id: string
+          image: string | null
+          original_price: number | null
+          product_id: string | null
+          quantity: number
+          service_name: string
+          service_slug: string
+          unit_price: number
+        }
+        Insert: {
+          addons?: Json
+          booking_id: string
+          category_slug: string
+          created_at?: string
+          id?: string
+          image?: string | null
+          original_price?: number | null
+          product_id?: string | null
+          quantity?: number
+          service_name: string
+          service_slug: string
+          unit_price: number
+        }
+        Update: {
+          addons?: Json
+          booking_id?: string
+          category_slug?: string
+          created_at?: string
+          id?: string
+          image?: string | null
+          original_price?: number | null
+          product_id?: string | null
+          quantity?: number
+          service_name?: string
+          service_slug?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_items_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_status_events: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["booking_status"]
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          status: Database["public"]["Enums"]["booking_status"]
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_status_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_time: string
+          id: string
+          notes: string | null
+          order_code: string
+          status: Database["public"]["Enums"]["booking_status"]
+          total: number
+          updated_at: string
+          user_id: string
+          venue_city: string
+          venue_line1: string
+          venue_line2: string | null
+          venue_name: string | null
+          venue_phone: string
+          venue_pincode: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          event_time: string
+          id?: string
+          notes?: string | null
+          order_code?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          total: number
+          updated_at?: string
+          user_id: string
+          venue_city: string
+          venue_line1: string
+          venue_line2?: string | null
+          venue_name?: string | null
+          venue_phone: string
+          venue_pincode: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_time?: string
+          id?: string
+          notes?: string | null
+          order_code?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          total?: number
+          updated_at?: string
+          user_id?: string
+          venue_city?: string
+          venue_line1?: string
+          venue_line2?: string | null
+          venue_name?: string | null
+          venue_phone?: string
+          venue_pincode?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           accent: string | null
@@ -123,34 +299,35 @@ export type Database = {
         }
         Relationships: []
       }
-      product_addons: {
+      product_addon_links: {
         Row: {
+          addon_id: string
           created_at: string
           id: string
-          name: string
-          price: number
           product_id: string
-          sort_order: number
         }
         Insert: {
+          addon_id: string
           created_at?: string
           id?: string
-          name: string
-          price: number
           product_id: string
-          sort_order?: number
         }
         Update: {
+          addon_id?: string
           created_at?: string
           id?: string
-          name?: string
-          price?: number
           product_id?: string
-          sort_order?: number
         }
         Relationships: [
           {
-            foreignKeyName: "product_addons_product_id_fkey"
+            foreignKeyName: "product_addon_links_addon_id_fkey"
+            columns: ["addon_id"]
+            isOneToOne: false
+            referencedRelation: "addons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_addon_links_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -351,6 +528,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_booking: { Args: { _booking_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -361,6 +539,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "customer"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "preparing"
+        | "completed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -492,6 +676,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "customer"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "preparing",
+        "completed",
+        "cancelled",
+      ],
     },
   },
 } as const

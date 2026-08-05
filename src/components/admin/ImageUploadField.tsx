@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { deleteCatalogImage, uploadCatalogImage } from "@/lib/supabase-upload-client";
+import { deleteCatalogImage, uploadCatalogImage } from "@/lib/s3-upload-client";
 
 export function ImageUploadField({
   value,

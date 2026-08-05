@@ -8,6 +8,7 @@ import { ProductForm } from "../product-form";
 
 type CategoryOption = { id: string; name: string };
 type SubcategoryOption = { id: string; name: string; category_id: string };
+type AddonOption = { id: string; name: string; price: number };
 
 export default function NewProductPage() {
   const searchParams = useSearchParams();
@@ -17,20 +18,23 @@ export default function NewProductPage() {
   const [categories, setCategories] = useState<CategoryOption[] | null>(null);
   const [subcategories, setSubcategories] = useState<SubcategoryOption[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [allAddons, setAllAddons] = useState<AddonOption[]>([]);
 
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const [{ data: cats }, { data: subs }, { data: products }] = await Promise.all([
+      const [{ data: cats }, { data: subs }, { data: products }, { data: addons }] = await Promise.all([
         supabase.from("categories").select("id,name").order("name"),
         supabase.from("subcategories").select("id,name,category_id").order("name"),
         supabase.from("products").select("tags"),
+        supabase.from("addons").select("id,name,price").order("sort_order"),
       ]);
       setCategories(cats ?? []);
       setSubcategories(subs ?? []);
       const tagSet = new Set<string>();
       for (const p of products ?? []) for (const t of p.tags) tagSet.add(t);
       setAllTags(Array.from(tagSet).sort());
+      setAllAddons(addons ?? []);
     })();
   }, []);
 
@@ -42,6 +46,7 @@ export default function NewProductPage() {
       categories={categories}
       subcategories={subcategories}
       allTags={allTags}
+      allAddons={allAddons}
       defaultCategoryId={defaultCategoryId}
       defaultSubcategoryId={defaultSubcategoryId}
     />

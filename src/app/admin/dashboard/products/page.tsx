@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, ChevronUp, Flame, Layers, Loader2, Plus, Search, Sparkles, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { deleteCatalogImage } from "@/lib/supabase-upload-client";
+import { deleteCatalogImage } from "@/lib/s3-upload-client";
 import type { Database } from "@/lib/supabase/types";
 
 type ProductRow = Database["public"]["Tables"]["products"]["Row"] & {

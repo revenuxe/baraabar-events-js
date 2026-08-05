@@ -36,7 +36,7 @@ export const config = {
   // costs a Supabase round-trip before the page even starts rendering —
   // with Supabase hosted in the US and most users in India, that's real,
   // felt latency, so routes with no server-side auth dependency (/, the
-  // marketing/legal pages, /design, /book — its catalog fetch is a cached,
+  // marketing/legal pages, /book — its catalog fetch is a cached,
   // non-cookie client, and the wizard's own auth check is entirely
   // client-side) are deliberately left out.
   matcher: ["/admin/:path*", "/profile/:path*", "/auth/:path*"],

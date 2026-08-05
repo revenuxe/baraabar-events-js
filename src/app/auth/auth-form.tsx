@@ -7,7 +7,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
-import logo from "@/assets/baraabar tailor logo-webpg.webp";
+import logo from "@/assets/baraabar event logo.webp";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();

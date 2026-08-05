@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -9,7 +9,14 @@ import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { ServiceCard } from "@/components/ServiceCard";
 import { SearchBar } from "@/components/SearchBar";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { useCart } from "@/lib/cart-store";
 import type { DecorCategory, DecorService, ServiceAddOn } from "@/data/types";
 
@@ -26,6 +33,18 @@ export function ServiceDetailView({
   const { addItem } = useCart();
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [relatedQuery, setRelatedQuery] = useState("");
+  const [galleryApi, setGalleryApi] = useState<CarouselApi>();
+  const [activeImage, setActiveImage] = useState(0);
+
+  useEffect(() => {
+    if (!galleryApi) return;
+    const onSelect = () => setActiveImage(galleryApi.selectedScrollSnap());
+    onSelect();
+    galleryApi.on("select", onSelect);
+    return () => {
+      galleryApi.off("select", onSelect);
+    };
+  }, [galleryApi]);
 
   const selectedAddOns = useMemo(
     () => service.addOns.filter((a) => selectedAddOnIds.includes(a.id)),
@@ -42,6 +61,7 @@ export function ServiceDetailView({
   function buildCartItem() {
     return {
       id: `${service.categorySlug}/${service.slug}`,
+      productId: service.id,
       categorySlug: service.categorySlug,
       categoryName: category.name,
       serviceSlug: service.slug,
@@ -68,9 +88,9 @@ export function ServiceDetailView({
       <TopBar />
       <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-6xl md:px-8 md:py-10">
         <div className="md:grid md:grid-cols-2 md:items-start md:gap-10 lg:gap-16">
-          {/* Left: Gallery */}
+          {/* Left: Gallery + buy box */}
           <div className="md:sticky md:top-24">
-            <Carousel className="overflow-hidden rounded-3xl shadow-elevated">
+            <Carousel setApi={setGalleryApi} className="overflow-hidden rounded-3xl shadow-elevated">
               <CarouselContent className="-ml-0">
                 {service.images.map((img, i) => (
                   <CarouselItem key={i} className="pl-0">
@@ -93,7 +113,60 @@ export function ServiceDetailView({
                   <CarouselNext className="right-3" />
                 </>
               )}
+
+              {/* Floating thumbnail strip — top-right corner of the gallery image */}
+              {service.images.length > 1 && (
+                <div className="glass absolute top-3 right-3 z-10 flex max-h-[calc(100%-2.5rem)] flex-col gap-1.5 overflow-y-auto rounded-2xl p-1.5">
+                  {service.images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => galleryApi?.scrollTo(i)}
+                      aria-label={`View photo ${i + 1}`}
+                      className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 transition ${
+                        activeImage === i ? "border-primary" : "border-transparent opacity-70"
+                      }`}
+                    >
+                      <Image src={img} alt="" fill sizes="44px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </Carousel>
+
+            {/* Desktop-only buy box — mirrors the mobile sticky bar below,
+                filling the empty space the shorter gallery column leaves
+                next to the taller details column. */}
+            <div className="mt-6 hidden rounded-3xl border border-border bg-card p-5 shadow-card md:block">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Total {selectedAddOns.length > 0 && `(incl. ${selectedAddOns.length} add-on${selectedAddOns.length > 1 ? "s" : ""})`}
+                  </p>
+                  <p className="mt-1 text-3xl font-black text-gradient-brand">
+                    ₹{(service.priceDiscounted + addOnsTotal).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                {service.discountPct > 0 && (
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+                    {service.discountPct}% off
+                  </span>
+                )}
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border bg-background px-5 py-3.5 text-sm font-bold shadow-card transition-transform active:scale-[0.98]"
+                >
+                  <ShoppingBag className="h-4 w-4" /> Add to Cart
+                </button>
+                <button
+                  onClick={handleBookNow}
+                  className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98]"
+                >
+                  Book Now
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Right: Content */}
@@ -110,8 +183,8 @@ export function ServiceDetailView({
               </div>
             </div>
 
-            {/* Price */}
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+            {/* Price — mobile only; desktop shows this in the buy box next to the gallery */}
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card md:hidden">
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-gradient-brand">
                   ₹{service.priceDiscounted.toLocaleString("en-IN")}
@@ -193,10 +266,10 @@ export function ServiceDetailView({
               </section>
             )}
 
-            {/* Sticky CTAs */}
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
-              <div className="mx-auto flex max-w-md items-center gap-3 px-5 md:max-w-none md:px-0">
-                <div className="flex-1 md:hidden">
+            {/* Sticky CTAs — mobile only; desktop uses the buy box next to the gallery */}
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:hidden">
+              <div className="mx-auto flex max-w-md items-center gap-3 px-5">
+                <div className="flex-1">
                   <p className="text-[11px] text-muted-foreground">Total</p>
                   <p className="text-lg font-black text-gradient-brand">
                     ₹{(service.priceDiscounted + addOnsTotal).toLocaleString("en-IN")}
@@ -204,13 +277,13 @@ export function ServiceDetailView({
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3.5 text-sm font-bold shadow-card active:scale-[0.98] md:flex-1"
+                  className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3.5 text-sm font-bold shadow-card active:scale-[0.98]"
                 >
                   <ShoppingBag className="h-4 w-4" /> Add to Cart
                 </button>
                 <button
                   onClick={handleBookNow}
-                  className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98] md:flex-1"
+                  className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98]"
                 >
                   Book Now
                 </button>

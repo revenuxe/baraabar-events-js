@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import logo from "@/assets/baraabar tailor logo-webpg.webp";
+import logo from "@/assets/baraabar event logo.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

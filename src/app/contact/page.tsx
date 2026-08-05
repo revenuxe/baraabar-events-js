@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
-import { ArrowLeft, Clock, Mail, MapPin, Phone, Truck } from "lucide-react";
+import { ArrowLeft, Clock, Mail, MapPin, Phone, Sparkles } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, CONTACT_MAPS_URL } from "@/lib/site";
 
 const TITLE = "Contact Us | Baraabar";
 const DESCRIPTION =
-  "Get in touch with Baraabar — call or email us, or find our Bengaluru studio at Shampura. We're happy to help with bookings, orders and fittings.";
+  "Get in touch with Baraabar — call or email us, or find our Bengaluru studio at Shampura. We're happy to help with bookings and events.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -66,8 +66,9 @@ export default function ContactPage() {
             We&apos;d love to hear from you
           </h1>
           <p className="mt-3 max-w-lg text-sm text-muted-foreground md:text-base">
-            Questions about a booking, an order in progress, or a fitting? Reach the
-            Baraabar team directly — we usually reply within a few hours.
+            Questions about a booking, an event in progress, or a custom decoration
+            request? Reach the Baraabar team directly — we usually reply within a
+            few hours.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -101,19 +102,19 @@ export default function ContactPage() {
             <div>
               <p className="text-sm font-bold">Studio hours</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Monday – Saturday, 10:00 AM – 7:00 PM IST. Fabric pickup and home
-                measurement slots are booked separately online, any day of the week.
+                Monday – Saturday, 10:00 AM – 7:00 PM IST. Decoration bookings are
+                made separately online, any day of the week.
               </p>
             </div>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-2">
             <Link
-              href="/book"
+              href="/categories"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-brand px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow"
             >
-              <Truck className="h-4 w-4" />
-              Book a fabric pickup
+              <Sparkles className="h-4 w-4" />
+              Browse decorations
             </Link>
             <Link
               href="/"

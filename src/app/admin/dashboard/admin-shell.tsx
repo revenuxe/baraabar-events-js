@@ -3,13 +3,25 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ShieldCheck, LogOut, LayoutGrid, Layers, FolderTree, PartyPopper, Users as UsersIcon } from "lucide-react";
+import {
+  ShieldCheck,
+  LogOut,
+  LayoutGrid,
+  Layers,
+  FolderTree,
+  PartyPopper,
+  Gift,
+  CalendarCheck,
+  Users as UsersIcon,
+} from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
+  { href: "/admin/dashboard/bookings", label: "Bookings", icon: CalendarCheck, exact: false },
   { href: "/admin/dashboard/categories", label: "Categories", icon: Layers, exact: false },
   { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree, exact: false },
   { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper, exact: false },
+  { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift, exact: false },
   { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
 ];
 

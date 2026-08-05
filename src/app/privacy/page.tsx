@@ -7,7 +7,7 @@ import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
 const TITLE = "Privacy Policy | Baraabar";
 const DESCRIPTION =
-  "How Baraabar collects, uses, and protects your personal information, including body measurements, when you use our tailoring service.";
+  "How Baraabar collects, uses, and protects your personal information when you book our event and balloon decoration services.";
 const LAST_UPDATED = "August 3, 2026";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
         This Privacy Policy explains how {SITE_NAME} (&quot;{SITE_NAME}&quot;,
         &quot;we&quot;, &quot;us&quot;, &quot;our&quot;) collects, uses, discloses, and
         protects your personal information when you visit our website, create an
-        account, or use our fabric pickup, home measurement, and tailoring services.
+        account, or book our event and balloon decoration services.
       </p>
     ),
   },
@@ -36,17 +36,16 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
       <>
         <p>
           <strong className="text-foreground">Account &amp; contact information:</strong>{" "}
-          name, email address, phone number, and delivery/pickup addresses.
+          name, email address, phone number, and venue addresses.
         </p>
         <p>
-          <strong className="text-foreground">Body measurements:</strong> the
-          measurements taken during home-measurement appointments or entered by you,
-          which we treat as sensitive personal data and use solely to produce your
-          garments.
+          <strong className="text-foreground">Event &amp; booking details:</strong> your
+          event date, time window, venue address, and any theme, colour, or styling
+          preferences you share with us to plan your decoration.
         </p>
         <p>
           <strong className="text-foreground">Order &amp; payment information:</strong>{" "}
-          order history, fabric and garment preferences, and payment confirmation
+          booking history, decoration and add-on preferences, and payment confirmation
           details. Full card or bank details are handled directly by our payment
           processor and are never stored on our servers.
         </p>
@@ -62,8 +61,8 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: "3. How we use your information",
     body: (
       <p>
-        We use your information to fulfil orders (scheduling pickup, taking and
-        applying measurements, stitching, and delivering garments), operate your
+        We use your information to fulfil bookings (scheduling venue visits, planning
+        and setting up your decoration, and coordinating teardown), operate your
         account, process payments, provide customer support, send order and booking
         updates, improve our services, and comply with legal obligations. We do not
         sell your personal information.
@@ -74,13 +73,13 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: "4. How we share your information",
     body: (
       <p>
-        We share information only as needed to run the Service: with our tailoring
-        and production team to cut and stitch your garment, with logistics partners
-        to pick up fabric and deliver orders, with our payment processor to complete
-        transactions, and with trusted cloud hosting and infrastructure providers
-        who store data on our behalf under confidentiality obligations. We do not
-        share your body measurements with any party outside this production and
-        delivery chain.
+        We share information only as needed to run the Service: with our decorators
+        and event crew to plan and set up your event, with logistics partners to
+        transport decor materials to your venue, with our payment processor to
+        complete transactions, and with trusted cloud hosting and infrastructure
+        providers who store data on our behalf under confidentiality obligations. We
+        do not share your booking or venue details with any party outside this
+        planning and delivery chain.
       </p>
     ),
   },
@@ -99,11 +98,11 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: "6. Data retention",
     body: (
       <p>
-        We retain your account and order information for as long as your account is
+        We retain your account and booking information for as long as your account is
         active and for a reasonable period afterwards to resolve disputes, meet
-        accounting and tax obligations, and enforce our agreements. Measurement data
-        is retained so that repeat orders don&apos;t require a new measurement
-        appointment, and can be deleted at your request as described below.
+        accounting and tax obligations, and enforce our agreements. Past event and
+        venue details are retained so that repeat bookings are faster, and can be
+        deleted at your request as described below.
       </p>
     ),
   },

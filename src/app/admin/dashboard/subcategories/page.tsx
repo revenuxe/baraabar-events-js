@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { FolderTree, Loader2, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { deleteCatalogImage } from "@/lib/supabase-upload-client";
+import { deleteCatalogImage } from "@/lib/s3-upload-client";
 import type { Database } from "@/lib/supabase/types";
 
 type SubcategoryRow = Database["public"]["Tables"]["subcategories"]["Row"];

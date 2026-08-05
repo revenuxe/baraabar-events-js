@@ -3,22 +3,34 @@ import Link from "next/link";
 import { ServiceCard } from "@/components/ServiceCard";
 import type { DecorService } from "@/data/types";
 
-export function FeaturedCollections({ services }: { services: DecorService[] }) {
+export function FeaturedCollections({
+  services,
+  eyebrow,
+  title,
+  titleAccent,
+  viewAllHref,
+}: {
+  services: DecorService[];
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  viewAllHref: string;
+}) {
   if (services.length === 0) return null;
   return (
-    <section className="mx-auto w-full max-w-md px-5 py-10 md:max-w-6xl md:px-8 md:py-16">
-      <div className="mb-6 flex items-end justify-between gap-4">
+    <section className="mx-auto w-full max-w-md px-5 pb-10 md:max-w-6xl md:px-8 md:pb-16">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-accent">Trending now</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-accent">{eyebrow}</p>
           <h2 className="mt-1 font-display text-3xl leading-tight md:text-5xl">
-            Featured <span className="italic text-gradient-brand">setups</span>
+            {title} <span className="italic text-gradient-brand">{titleAccent}</span>
           </h2>
         </div>
         <Link
-          href="/categories"
-          className="hidden shrink-0 text-sm font-semibold text-primary md:inline-flex md:items-center md:gap-1"
+          href={viewAllHref}
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary md:text-sm"
         >
-          View all <ArrowUpRight className="h-4 w-4" />
+          View all <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </Link>
       </div>
 

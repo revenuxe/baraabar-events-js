@@ -33,8 +33,14 @@ export function Success({ orderId }: { orderId: string }) {
             <WhatsAppIcon className="h-4 w-4" /> WhatsApp us
           </a>
           <button
-            onClick={() => router.push("/categories")}
+            onClick={() => router.push("/bookings")}
             className="w-full rounded-full border border-border bg-card px-6 py-4 text-sm font-bold"
+          >
+            View my bookings
+          </button>
+          <button
+            onClick={() => router.push("/categories")}
+            className="w-full py-2 text-xs font-semibold text-muted-foreground"
           >
             Browse more decorations
           </button>

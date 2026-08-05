@@ -8,15 +8,22 @@ import { SubcategoryGrid } from "@/components/SubcategoryGrid";
 import { Journey } from "@/components/Journey";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
-import { getCategories, getFeaturedServices, getServicesByCategory, getCategoryBySlug } from "@/data";
+import {
+  getCategories,
+  getTrendingServices,
+  getFeaturedServices,
+  getServicesByCategory,
+  getCategoryBySlug,
+} from "@/data";
 
 // Below-the-fold and non-critical for first paint — split into its own
 // chunk instead of the initial homepage bundle.
 const Reviews = dynamic(() => import("@/components/Reviews").then((m) => m.Reviews));
 
 export default async function Home() {
-  const [categories, featuredServices, weddingCategory] = await Promise.all([
+  const [categories, trendingServices, featuredServices, weddingCategory] = await Promise.all([
     getCategories(),
+    getTrendingServices(8),
     getFeaturedServices(8),
     getCategoryBySlug("wedding"),
   ]);
@@ -27,8 +34,21 @@ export default async function Home() {
       <TopBar />
       <main>
         <Hero />
+        <FeaturedCollections
+          services={trendingServices}
+          eyebrow="Trending now"
+          title="Trending"
+          titleAccent="setups"
+          viewAllHref="/trending"
+        />
         <CategoryStrip categories={categories} />
-        <FeaturedCollections services={featuredServices} />
+        <FeaturedCollections
+          services={featuredServices}
+          eyebrow="Hand-picked"
+          title="Featured"
+          titleAccent="setups"
+          viewAllHref="/featured"
+        />
         <PickupCta />
         {weddingCategory && (
           <SubcategoryGrid

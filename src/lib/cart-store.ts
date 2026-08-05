@@ -5,6 +5,7 @@ import type { ServiceAddOn } from "@/data/types";
 
 export type CartItem = {
   id: string; // `${categorySlug}/${serviceSlug}`
+  productId: string;
   categorySlug: string;
   categoryName: string;
   serviceSlug: string;

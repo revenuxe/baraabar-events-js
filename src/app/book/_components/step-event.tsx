@@ -1,6 +1,9 @@
 "use client";
 
-import { Calendar } from "lucide-react";
+import { useState } from "react";
+import { Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DecorBookingDraft } from "@/lib/decor-booking-store";
 
 export function StepEvent({
@@ -10,12 +13,23 @@ export function StepEvent({
   draft: DecorBookingDraft;
   update: (p: Partial<DecorBookingDraft>) => void;
 }) {
+  const [customOpen, setCustomOpen] = useState(false);
   const days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i + 1);
     return d;
   });
-  const windows = ["9–11 AM", "11 AM–1 PM", "2–4 PM", "4–6 PM", "6–8 PM"];
+  const quickKeys = new Set(days.map((d) => d.toISOString().slice(0, 10)));
+  const isCustomSelected = !!draft.eventDate && !quickKeys.has(draft.eventDate);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  const windows = [
+    { label: "Morning", range: "8–11 AM" },
+    { label: "Afternoon", range: "11 AM–3 PM" },
+    { label: "Evening", range: "3–7 PM" },
+    { label: "Night", range: "7–10 PM" },
+  ];
 
   return (
     <div className="space-y-8">
@@ -31,7 +45,7 @@ export function StepEvent({
 
       <section>
         <p className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Calendar className="h-4 w-4" /> Event date
+          <CalendarIcon className="h-4 w-4" /> Event date
         </p>
         <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
           {days.map((d) => {
@@ -57,25 +71,65 @@ export function StepEvent({
               </button>
             );
           })}
+
+          <Popover open={customOpen} onOpenChange={setCustomOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`shrink-0 rounded-2xl border px-4 py-3 text-center transition ${
+                  isCustomSelected
+                    ? "border-transparent bg-gradient-brand text-primary-foreground shadow-glow"
+                    : "border-dashed border-border bg-card"
+                }`}
+              >
+                <CalendarPlus className="mx-auto h-4 w-4" />
+                <p className="mt-1 text-[10px] font-bold leading-tight whitespace-nowrap">
+                  {isCustomSelected
+                    ? new Date(`${draft.eventDate}T00:00:00`).toLocaleDateString(undefined, {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "Pick date"}
+                </p>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={draft.eventDate ? new Date(`${draft.eventDate}T00:00:00`) : undefined}
+                onSelect={(date) => {
+                  if (!date) return;
+                  update({ eventDate: date.toISOString().slice(0, 10) });
+                  setCustomOpen(false);
+                }}
+                disabled={{ before: tomorrow }}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </section>
 
       <section>
         <p className="mb-3 text-sm font-bold">Setup time window</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
           {windows.map((w) => {
-            const active = draft.eventTime === w;
+            const value = `${w.label} (${w.range})`;
+            const active = draft.eventTime === value;
             return (
               <button
-                key={w}
-                onClick={() => update({ eventTime: w })}
-                className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition ${
+                key={w.label}
+                onClick={() => update({ eventTime: value })}
+                className={`rounded-2xl border px-1.5 py-2.5 text-center transition sm:px-2 ${
                   active
                     ? "border-transparent bg-gradient-brand text-primary-foreground shadow-glow"
                     : "border-border bg-card"
                 }`}
               >
-                {w}
+                <span className="block text-[12px] font-bold sm:text-sm">{w.label}</span>
+                <span
+                  className={`block text-[9px] leading-tight sm:text-[11px] ${active ? "opacity-80" : "text-muted-foreground"}`}
+                >
+                  {w.range}
+                </span>
               </button>
             );
           })}

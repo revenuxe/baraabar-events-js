@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { TopBar } from "@/components/TopBar";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { CONTACT } from "@/lib/site";
 import { useCart } from "@/lib/cart-store";
 import { useDecorBookingDraft } from "@/lib/decor-booking-store";
+import { createClient } from "@/lib/supabase/client";
 import { StepEvent } from "./_components/step-event";
 import { StepVenue } from "./_components/step-venue";
 import { StepReview } from "./_components/step-review";
@@ -17,7 +19,7 @@ export function BookWizard() {
   const { draft, update, reset, ready: draftReady, step, setStep } = useDecorBookingDraft();
   const { items, ready: cartReady, subtotal, clear } = useCart();
   const [done, setDone] = useState(false);
-  const orderId = useMemo(() => "BR" + Math.random().toString(36).slice(2, 7).toUpperCase(), []);
+  const [orderCode, setOrderCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
@@ -45,17 +47,68 @@ export function BookWizard() {
     return true;
   };
 
-  function submitBooking() {
+  async function submitBooking() {
     setSubmitting(true);
-    // Mock submission — no backend yet (see decor-booking-store.ts). Once the
-    // DB phase lands, this inserts a real booking instead of just clearing
-    // local state.
-    setTimeout(() => {
-      clear();
-      reset();
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      // Draft and cart already persist to localStorage, so the wizard picks
+      // up where it left off once the user is back from signing in.
+      router.push("/auth?redirect=%2Fbook");
+      return;
+    }
+
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .insert({
+        user_id: user.id,
+        event_date: draft.eventDate!,
+        event_time: draft.eventTime!,
+        venue_name: draft.venue.name || null,
+        venue_line1: draft.venue.line1,
+        venue_line2: draft.venue.line2 || null,
+        venue_city: draft.venue.city,
+        venue_pincode: draft.venue.pincode,
+        venue_phone: draft.venue.phone,
+        notes: draft.notes || null,
+        total: subtotal,
+      })
+      .select("id, order_code")
+      .single();
+
+    if (error || !booking) {
       setSubmitting(false);
-      setDone(true);
-    }, 500);
+      toast.error(error?.message ?? "Could not create your booking. Please try again.");
+      return;
+    }
+
+    const { error: itemsError } = await supabase.from("booking_items").insert(
+      items.map((it) => ({
+        booking_id: booking.id,
+        product_id: it.productId,
+        category_slug: it.categorySlug,
+        service_slug: it.serviceSlug,
+        service_name: it.serviceName,
+        image: it.image,
+        unit_price: it.unitPrice,
+        original_price: it.originalPrice ?? null,
+        quantity: it.quantity,
+        addons: it.addOns,
+      })),
+    );
+    if (itemsError) {
+      setSubmitting(false);
+      toast.error(itemsError.message);
+      return;
+    }
+
+    clear();
+    reset();
+    setSubmitting(false);
+    setOrderCode(booking.order_code);
+    setDone(true);
   }
 
   const next = () => {
@@ -67,7 +120,7 @@ export function BookWizard() {
     else router.push("/cart");
   };
 
-  if (done) return <Success orderId={orderId} />;
+  if (done) return <Success orderId={orderCode} />;
 
   return (
     <div className="min-h-dvh bg-background pb-32">

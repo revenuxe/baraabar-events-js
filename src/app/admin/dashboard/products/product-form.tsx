@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Gift, Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { GalleryUploadField } from "@/components/admin/GalleryUploadField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { TagInput } from "@/components/admin/TagInput";
@@ -13,8 +13,7 @@ import type { Database } from "@/lib/supabase/types";
 type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 type CategoryOption = { id: string; name: string };
 type SubcategoryOption = { id: string; name: string; category_id: string };
-
-type AddonDraft = { id?: string; name: string; price: number };
+type AddonOption = { id: string; name: string; price: number };
 
 const TABS = [
   { key: "details", label: "Details" },
@@ -38,14 +37,20 @@ export function ProductForm({
   categories,
   subcategories,
   allTags,
+  allAddons,
+  selectedAddonIds: initialSelectedAddonIds,
   defaultCategoryId,
   defaultSubcategoryId,
 }: {
   /** null = creating a new product */
-  product: (ProductRow & { product_addons?: AddonDraft[] }) | null;
+  product: ProductRow | null;
   categories: CategoryOption[];
   subcategories: SubcategoryOption[];
   allTags: string[];
+  /** The shared add-ons library to pick from. */
+  allAddons: AddonOption[];
+  /** Add-on ids already linked to this product. */
+  selectedAddonIds?: string[];
   /** Pre-selects category/subcategory when arriving from the sidebar's "+" shortcut. */
   defaultCategoryId?: string;
   defaultSubcategoryId?: string;
@@ -77,9 +82,7 @@ export function ProductForm({
   const [images, setImages] = useState<string[]>(product?.images ?? []);
 
   const [included, setIncluded] = useState<string[]>(product?.included ?? [""]);
-  const [addOns, setAddOns] = useState<AddonDraft[]>(
-    product?.product_addons?.length ? product.product_addons : [],
-  );
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>(initialSelectedAddonIds ?? []);
   const [rating, setRating] = useState(product?.rating ?? 4.8);
   const [reviewCount, setReviewCount] = useState(product?.review_count ?? 0);
 
@@ -113,14 +116,8 @@ export function ProductForm({
     setIncluded((items) => [...items, ""]);
   }
 
-  function updateAddOn(i: number, patch: Partial<AddonDraft>) {
-    setAddOns((items) => items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
-  }
-  function removeAddOn(i: number) {
-    setAddOns((items) => items.filter((_, idx) => idx !== i));
-  }
-  function addAddOn() {
-    setAddOns((items) => [...items, { name: "", price: 0 }]);
+  function toggleAddon(id: string) {
+    setSelectedAddonIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
   }
 
   async function handleSave() {
@@ -182,18 +179,12 @@ export function ProductForm({
     }
 
     const productId = savedProduct.id;
-    // Simplest correct approach for a short add-on list: replace wholesale
+    // Simplest correct approach for a short link list: replace wholesale
     // rather than diffing inserts/updates/deletes.
-    await supabase.from("product_addons").delete().eq("product_id", productId);
-    const cleanAddOns = addOns.filter((a) => a.name.trim());
-    if (cleanAddOns.length) {
-      await supabase.from("product_addons").insert(
-        cleanAddOns.map((a, i) => ({
-          product_id: productId,
-          name: a.name.trim(),
-          price: a.price,
-          sort_order: i,
-        })),
+    await supabase.from("product_addon_links").delete().eq("product_id", productId);
+    if (selectedAddonIds.length) {
+      await supabase.from("product_addon_links").insert(
+        selectedAddonIds.map((addonId) => ({ product_id: productId, addon_id: addonId })),
       );
     }
 
@@ -397,40 +388,50 @@ export function ProductForm({
               </div>
 
               <div>
-                <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Add-ons</h3>
-                <div className="space-y-2">
-                  {addOns.map((addOn, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input
-                        value={addOn.name}
-                        onChange={(e) => updateAddOn(i, { name: e.target.value })}
-                        placeholder="Add-on name"
-                        className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      />
-                      <input
-                        type="number"
-                        value={addOn.price}
-                        onChange={(e) => updateAddOn(i, { price: Number(e.target.value) })}
-                        placeholder="Price"
-                        className="w-28 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeAddOn(i)}
-                        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addAddOn}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold"
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Add-ons</h3>
+                  <Link
+                    href="/admin/dashboard/addons/new"
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Add add-on
-                  </button>
+                    <Plus className="h-3 w-3" /> New add-on
+                  </Link>
                 </div>
+                {allAddons.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+                    No add-ons in your library yet. Create some from the Add-ons tab, then assign them here.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {allAddons.map((addOn) => {
+                      const selected = selectedAddonIds.includes(addOn.id);
+                      return (
+                        <button
+                          key={addOn.id}
+                          type="button"
+                          onClick={() => toggleAddon(addOn.id)}
+                          className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition ${
+                            selected ? "border-primary ring-2 ring-primary/30 bg-primary/5" : "border-border bg-background"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <span
+                              className={`grid h-4 w-4 shrink-0 place-items-center rounded border ${
+                                selected ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                              }`}
+                            >
+                              {selected && <Check className="h-3 w-3" />}
+                            </span>
+                            <Gift className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm font-semibold">{addOn.name}</span>
+                          </span>
+                          <span className="text-sm font-bold">₹{addOn.price.toLocaleString("en-IN")}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div>

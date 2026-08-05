@@ -7,7 +7,7 @@ import { Home, LayoutGrid, CalendarCheck, User } from "lucide-react";
 const ITEMS = [
   { to: "/", label: "Home", Icon: Home, exact: true },
   { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
-  { to: "/book", label: "Booking", Icon: CalendarCheck, exact: false },
+  { to: "/bookings", label: "Booking", Icon: CalendarCheck, exact: false },
   { to: "/profile", label: "Profile", Icon: User, exact: false },
 ] as const;
 
