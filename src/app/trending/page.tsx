@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
 import { ServiceGridSearch } from "@/components/ServiceGridSearch";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getTrendingServices } from "@/data";
 
+const TITLE = "Trending Now";
+const DESCRIPTION = "Our most-loved event decoration setups, all in one place.";
+
 export const metadata: Metadata = {
-  title: "Trending Now | Baraabar",
-  description: "Our most-loved event decoration setups, all in one place.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/trending" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/trending" },
 };
 
 export default async function TrendingPage() {
@@ -17,6 +24,8 @@ export default async function TrendingPage() {
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Trending", path: "/trending" }])} />
+      <JsonLd data={itemListJsonLd(services)} />
       <TopBar />
       <main>
         <section className="mx-auto w-full max-w-md px-5 pt-8 md:max-w-6xl md:px-8 md:pt-12">

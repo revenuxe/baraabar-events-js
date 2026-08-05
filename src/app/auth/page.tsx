@@ -4,12 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { AuthForm } from "./auth-form";
 
 export const metadata: Metadata = {
-  title: "Sign in | Baraabar",
-  description: "Sign in or create your Baraabar account to book pickups and track orders.",
-  openGraph: {
-    title: "Sign in | Baraabar",
-    description: "Your Baraabar account.",
-  },
+  title: "Sign in",
+  description: "Sign in or create your Baraabar account to book decorations and track your bookings.",
+  robots: { index: false, follow: true },
 };
 
 export default async function AuthPage({

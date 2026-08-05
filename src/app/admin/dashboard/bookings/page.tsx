@@ -11,6 +11,13 @@ type BookingItemRow = Database["public"]["Tables"]["booking_items"]["Row"];
 type StatusEventRow = Database["public"]["Tables"]["booking_status_events"]["Row"];
 type ProfileLite = { full_name: string | null; phone: string | null };
 
+// profiles.full_name can be unset (e.g. Google sign-in that skipped the
+// complete-profile step), so fall back to the name typed into this specific
+// booking's venue form before giving up and showing "Guest".
+function customerName(profile: ProfileLite | undefined, booking: BookingRow): string {
+  return profile?.full_name || booking.venue_name || "Guest";
+}
+
 const FILTERS: { key: "all" | BookingStatus; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "Pending" },
@@ -151,7 +158,7 @@ export default function AdminBookingsPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">
-                    #{b.order_code} · {profile?.full_name ?? "Guest"}
+                    #{b.order_code} · {customerName(profile, b)}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
                     {items.length} item{items.length === 1 ? "" : "s"} ·{" "}
@@ -182,7 +189,7 @@ export default function AdminBookingsPage() {
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">#{selected.order_code}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {profiles[selected.user_id]?.full_name ?? "Guest"}
+                  {customerName(profiles[selected.user_id], selected)}
                 </p>
               </div>
               <button

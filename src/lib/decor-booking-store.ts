@@ -9,6 +9,12 @@ export type VenueAddress = {
   city: string;
   pincode: string;
   phone: string;
+  /** Home / Work / Other — only meaningful when addressId is unset (i.e.
+   * this is a new address about to be saved), see step-venue.tsx. */
+  label: string;
+  /** Set when the venue was populated by picking a saved address, so
+   * book-wizard.tsx knows not to re-save it as a new one. */
+  addressId?: string;
 };
 
 export type DecorBookingDraft = {
@@ -21,7 +27,7 @@ export type DecorBookingDraft = {
 const KEY = "baraabar_decor_booking_draft_v1";
 
 const empty: DecorBookingDraft = {
-  venue: { name: "", line1: "", line2: "", city: "", pincode: "", phone: "" },
+  venue: { name: "", line1: "", line2: "", city: "", pincode: "", phone: "", label: "Home" },
   notes: "",
 };
 
@@ -33,10 +39,9 @@ function normalizeDraft(raw: any): DecorBookingDraft {
   };
 }
 
-// Local-only — no Supabase, no account handoff. A booking here is a UI-only
-// mock (see book-wizard.tsx's submitBooking) until the backend phase wires
-// this up to real bookings, so persistence is deliberately just enough to
-// survive an accidental page refresh mid-flow.
+// Local-only draft state — just enough persistence to survive an
+// accidental page refresh mid-flow. The account-level address book lives
+// in the `addresses` table (see step-venue.tsx), separate from this draft.
 export function useDecorBookingDraft() {
   const [draft, setDraft] = useState<DecorBookingDraft>(empty);
   const [step, setStep] = useState(0);

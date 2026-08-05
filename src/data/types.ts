@@ -12,6 +12,7 @@ export type DecorCategory = {
   accent: string;
   heroImage: string;
   sortOrder: number;
+  updatedAt: string;
 };
 
 export type DecorSubcategory = {
@@ -22,6 +23,7 @@ export type DecorSubcategory = {
   tagline: string;
   image: string;
   sortOrder: number;
+  updatedAt: string;
 };
 
 export type ServiceAddOn = {
@@ -56,6 +58,7 @@ export type DecorService = {
   metaTitle?: string;
   metaDescription?: string;
   ogImage?: string;
+  updatedAt: string;
 };
 
 export type Testimonial = {

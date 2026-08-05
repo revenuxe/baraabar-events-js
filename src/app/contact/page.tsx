@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { ArrowLeft, Clock, Mail, MapPin, Phone, Sparkles } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, CONTACT_MAPS_URL } from "@/lib/site";
 
-const TITLE = "Contact Us | Baraabar";
+const TITLE = "Contact Us";
 const DESCRIPTION =
   "Get in touch with Baraabar — call or email us, or find our Bengaluru studio at Shampura. We're happy to help with bookings and events.";
 
@@ -47,6 +49,7 @@ const CHANNELS = [
 export default function ContactPage() {
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }])} />
       <TopBar />
       <main>
         <div className="mx-auto max-w-md px-5 pt-2 md:max-w-3xl md:px-8">

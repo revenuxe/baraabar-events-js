@@ -35,6 +35,7 @@ const getCatalog = unstable_cache(
       accent: c.accent ?? "from-slate-800/70 to-indigo-700/70",
       heroImage: c.image_url ?? "",
       sortOrder: c.sort_order,
+      updatedAt: c.updated_at,
     }));
 
     const subcategories: DecorSubcategory[] = (subcategoryRows ?? []).map((s) => ({
@@ -45,6 +46,7 @@ const getCatalog = unstable_cache(
       tagline: s.tagline ?? "",
       image: s.image_url ?? "",
       sortOrder: s.sort_order,
+      updatedAt: s.updated_at,
     }));
 
     const services: DecorService[] = (productRows ?? []).map((p) => {
@@ -83,6 +85,7 @@ const getCatalog = unstable_cache(
         metaTitle: p.meta_title ?? undefined,
         metaDescription: p.meta_description ?? undefined,
         ogImage: p.og_image_url ?? undefined,
+        updatedAt: p.updated_at,
       };
     });
 
@@ -105,6 +108,18 @@ export async function getCategoryBySlug(slug: string): Promise<DecorCategory | u
 export async function getSubcategoriesByCategory(categorySlug: string): Promise<DecorSubcategory[]> {
   const { subcategories } = await getCatalog();
   return subcategories.filter((s) => s.categorySlug === categorySlug);
+}
+
+/** Every subcategory across every category — for enumerating sitemap.xml. */
+export async function getAllSubcategories(): Promise<DecorSubcategory[]> {
+  const { subcategories } = await getCatalog();
+  return subcategories;
+}
+
+/** Every active product across every category — for enumerating sitemap.xml. */
+export async function getAllServices(): Promise<DecorService[]> {
+  const { services } = await getCatalog();
+  return services;
 }
 
 export async function getSubcategoryBySlug(

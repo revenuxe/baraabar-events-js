@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getCategoryBySlug, getServicesByCategory, getSubcategoriesByCategory } from "@/data";
 import { CategoryProductsSection } from "./category-products-section";
 
@@ -15,9 +17,15 @@ export async function generateMetadata({
   const { category: categorySlug } = await params;
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return {};
+  const title = `${category.name} Decoration`;
+  const description =
+    category.tagline ||
+    `Book ${category.name.toLowerCase()} decoration — designed and installed by trained decorators.`;
   return {
-    title: `${category.name} Decoration | Baraabar`,
-    description: category.tagline,
+    title,
+    description,
+    alternates: { canonical: `/categories/${categorySlug}` },
+    openGraph: { title, description, url: `/categories/${categorySlug}`, images: [category.heroImage] },
   };
 }
 
@@ -36,6 +44,14 @@ export default async function CategoryPage({
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Categories", path: "/categories" },
+          { name: category.name, path: `/categories/${categorySlug}` },
+        ])}
+      />
+      {services.length > 0 && <JsonLd data={itemListJsonLd(services)} />}
       <TopBar />
       <main>
         <section className="relative overflow-hidden">

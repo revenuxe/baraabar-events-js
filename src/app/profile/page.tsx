@@ -9,12 +9,9 @@ import { SignOutRow } from "./sign-out-row";
 import { EditProfileButton } from "./edit-profile-button";
 
 export const metadata: Metadata = {
-  title: "Profile | Baraabar",
+  title: "Profile",
   description: "Manage your addresses and preferences.",
-  openGraph: {
-    title: "Profile | Baraabar",
-    description: "Your Baraabar account.",
-  },
+  robots: { index: false, follow: true },
 };
 
 export default async function ProfilePage() {

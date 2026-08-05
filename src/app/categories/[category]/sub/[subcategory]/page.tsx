@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getCategoryBySlug, getServicesByCategory, getSubcategoryBySlug } from "@/data";
 import { SubcategoryProductsSection } from "./subcategory-products-section";
 
@@ -15,11 +17,24 @@ export async function generateMetadata({
   params: Promise<{ category: string; subcategory: string }>;
 }): Promise<Metadata> {
   const { category: categorySlug, subcategory: subcategorySlug } = await params;
-  const subcategory = await getSubcategoryBySlug(categorySlug, subcategorySlug);
+  const [category, subcategory] = await Promise.all([
+    getCategoryBySlug(categorySlug),
+    getSubcategoryBySlug(categorySlug, subcategorySlug),
+  ]);
   if (!subcategory) return {};
+  const title = subcategory.name;
+  const description =
+    subcategory.tagline || `${subcategory.name} decoration${category ? ` for your ${category.name.toLowerCase()}` : ""}.`;
   return {
-    title: `${subcategory.name} | Baraabar`,
-    description: subcategory.tagline,
+    title,
+    description,
+    alternates: { canonical: `/categories/${categorySlug}/sub/${subcategorySlug}` },
+    openGraph: {
+      title,
+      description,
+      url: `/categories/${categorySlug}/sub/${subcategorySlug}`,
+      images: [subcategory.image || category?.heroImage].filter((u): u is string => !!u),
+    },
   };
 }
 
@@ -41,6 +56,15 @@ export default async function SubcategoryPage({
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Categories", path: "/categories" },
+          { name: category.name, path: `/categories/${categorySlug}` },
+          { name: subcategory.name, path: `/categories/${categorySlug}/sub/${subcategorySlug}` },
+        ])}
+      />
+      {services.length > 0 && <JsonLd data={itemListJsonLd(services)} />}
       <TopBar />
       <main>
         <section className="relative overflow-hidden">

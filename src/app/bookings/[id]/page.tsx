@@ -9,7 +9,8 @@ import { STATUS_META, STATUS_ORDER, type BookingStatus } from "../status-meta";
 import { CancelBookingButton } from "./cancel-booking-button";
 import type { Json } from "@/lib/supabase/types";
 
-export const metadata: Metadata = { title: "Booking details | Baraabar" };
+// Signed-in, per-user booking record — no organic value.
+export const metadata: Metadata = { title: "Booking details", robots: { index: false, follow: true } };
 
 type AddOnSnapshot = { id: string; name: string; price: number };
 

@@ -8,9 +8,11 @@ import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_META } from "./status-meta";
 
+// Signed-in, user-specific account page — no organic value.
 export const metadata: Metadata = {
-  title: "My Bookings | Baraabar",
+  title: "My Bookings",
   description: "Track your event decoration bookings.",
+  robots: { index: false, follow: true },
 };
 
 export default async function BookingsPage() {

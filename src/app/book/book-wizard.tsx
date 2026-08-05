@@ -60,6 +60,26 @@ export function BookWizard() {
       return;
     }
 
+    // A hand-typed venue (not one picked from the saved-address list) gets
+    // added to the account's address book so it's available to pre-fill
+    // next time — best-effort, never blocks the booking itself on failure.
+    if (!draft.venue.addressId) {
+      const { count } = await supabase
+        .from("addresses")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      await supabase.from("addresses").insert({
+        user_id: user.id,
+        label: draft.venue.label || "Home",
+        line1: draft.venue.line1,
+        line2: draft.venue.line2 || null,
+        city: draft.venue.city,
+        pincode: draft.venue.pincode,
+        phone: draft.venue.phone,
+        is_default: (count ?? 0) === 0,
+      });
+    }
+
     const { data: booking, error } = await supabase
       .from("bookings")
       .insert({

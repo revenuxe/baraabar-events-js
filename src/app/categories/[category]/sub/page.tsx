@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { getCategoryBySlug, getSubcategoriesByCategory } from "@/data";
 import { SubcategoriesGrid } from "./subcategories-grid";
 
@@ -16,9 +18,13 @@ export async function generateMetadata({
   const { category: categorySlug } = await params;
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return {};
+  const title = `All ${category.name} Types`;
+  const description = `Every type of ${category.name.toLowerCase()} decor we offer.`;
   return {
-    title: `All ${category.name} Types | Baraabar`,
-    description: `Every type of ${category.name.toLowerCase()} decor we offer.`,
+    title,
+    description,
+    alternates: { canonical: `/categories/${categorySlug}/sub` },
+    openGraph: { title, description, url: `/categories/${categorySlug}/sub` },
   };
 }
 
@@ -34,6 +40,14 @@ export default async function AllSubcategoriesPage({
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Categories", path: "/categories" },
+          { name: category.name, path: `/categories/${categorySlug}` },
+          { name: "All types", path: `/categories/${categorySlug}/sub` },
+        ])}
+      />
       <TopBar />
       <main className="mx-auto w-full max-w-md px-5 py-8 md:max-w-6xl md:px-8 md:py-12">
         <Link

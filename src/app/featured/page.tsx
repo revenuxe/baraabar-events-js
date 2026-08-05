@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
 import { ServiceGridSearch } from "@/components/ServiceGridSearch";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/jsonld";
 import { getFeaturedServices } from "@/data";
 
+const TITLE = "Featured Setups";
+const DESCRIPTION = "Our team's hand-picked event decoration setups.";
+
 export const metadata: Metadata = {
-  title: "Featured Setups | Baraabar",
-  description: "Our team's hand-picked event decoration setups.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/featured" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/featured" },
 };
 
 export default async function FeaturedPage() {
@@ -17,6 +24,8 @@ export default async function FeaturedPage() {
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Featured", path: "/featured" }])} />
+      <JsonLd data={itemListJsonLd(services)} />
       <TopBar />
       <main>
         <section className="mx-auto w-full max-w-md px-5 pt-8 md:max-w-6xl md:px-8 md:pt-12">

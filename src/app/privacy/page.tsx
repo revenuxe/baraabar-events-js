@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
-const TITLE = "Privacy Policy | Baraabar";
+const TITLE = "Privacy Policy";
 const DESCRIPTION =
   "How Baraabar collects, uses, and protects your personal information when you book our event and balloon decoration services.";
 const LAST_UPDATED = "August 3, 2026";
@@ -173,6 +175,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
 export default function PrivacyPage() {
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy" }])} />
       <TopBar />
       <main>
         <div className="mx-auto max-w-md px-5 pt-2 md:max-w-3xl md:px-8">

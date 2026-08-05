@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { getCategories } from "@/data";
 import { CategoriesGrid } from "./categories-grid";
 
+const TITLE = "All Decoration Categories";
+const DESCRIPTION =
+  "Browse every occasion we decorate for — birthdays, weddings, baby showers, corporate events and more.";
+
 export const metadata: Metadata = {
-  title: "All Decoration Categories | Baraabar",
-  description:
-    "Browse every occasion we decorate for — birthdays, weddings, baby showers, corporate events and more.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/categories" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/categories" },
 };
 
 export default async function CategoriesPage() {
@@ -16,6 +23,7 @@ export default async function CategoriesPage() {
 
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Categories", path: "/categories" }])} />
       <TopBar />
       <main className="mx-auto w-full max-w-md px-5 py-8 md:max-w-6xl md:px-8 md:py-12">
         <header className="mb-6">

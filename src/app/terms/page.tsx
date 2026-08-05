@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT, CONTACT_ADDRESS_FULL, SITE_NAME } from "@/lib/site";
 
-const TITLE = "Terms & Conditions | Baraabar";
+const TITLE = "Terms & Conditions";
 const DESCRIPTION =
   "The terms and conditions governing venue bookings, event decoration setup, cancellations and refunds on Baraabar.";
 const LAST_UPDATED = "August 3, 2026";
@@ -205,6 +207,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
 export default function TermsPage() {
   return (
     <div className="min-h-dvh bg-background pb-24">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Terms & Conditions", path: "/terms" }])} />
       <TopBar />
       <main>
         <div className="mx-auto max-w-md px-5 pt-2 md:max-w-3xl md:px-8">

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CompleteProfileForm } from "./complete-profile-form";
 
-export const metadata: Metadata = { title: "One more step | Baraabar" };
+export const metadata: Metadata = { title: "One more step", robots: { index: false, follow: true } };
 
 export default async function CompleteProfilePage({
   searchParams,

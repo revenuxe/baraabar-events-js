@@ -4,7 +4,10 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { CONTACT, SITE_NAME, SITE_URL } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationJsonLd } from "@/lib/jsonld";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { unsplash } from "@/data/images";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
@@ -24,15 +27,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 const SITE_TITLE = "Balloon & Event Decoration Services | Birthday, Wedding & More";
 const SITE_DESCRIPTION =
   "Professional balloon and event decoration for birthdays, weddings, baby showers, corporate events and more — book online in minutes, get a same-week setup at your venue.";
-// TODO(migration): this og:image still points at the Lovable-hosted preview
-// screenshot from the old app. Replace with a real, self-hosted OG image
-// before cutover — see docs/nextjs-migration-plan.md §8.
-const OG_IMAGE =
-  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2fc3eab6-c27f-4cec-82f1-f5fef3729da6/id-preview-f00fef45--6508bba4-1382-469c-a8c4-f6b832c7c367.lovable.app-1784038901448.png";
+// A real, already-live photo (also the homepage hero image) — replaces the
+// old Lovable-hosted preview screenshot, which 404s.
+const OG_IMAGE = unsplash("balloonArch", 1200, 630);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: SITE_TITLE,
+  title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   keywords: [
     "balloon decoration",
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     "corporate event decoration India",
   ],
   authors: [{ name: SITE_NAME }],
-  icons: { icon: "/favicon-48x48.png" },
+  icons: { icon: "/favicon-48x48.png", apple: "/favicon-48x48.png" },
   alternates: { canonical: "/" },
   openGraph: {
     title: SITE_TITLE,
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     url: "/",
     siteName: SITE_NAME,
     locale: "en_IN",
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: SITE_TITLE }],
   },
   twitter: {
     card: "summary_large_image",
@@ -60,25 +61,6 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE],
   },
-};
-
-const localBusinessJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  name: SITE_NAME,
-  url: SITE_URL,
-  telephone: CONTACT.phone,
-  email: CONTACT.email,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: `${CONTACT.address.line1}, ${CONTACT.address.line2}`,
-    addressLocality: CONTACT.address.city,
-    addressRegion: CONTACT.address.state,
-    postalCode: CONTACT.address.postalCode,
-    addressCountry: CONTACT.address.country,
-  },
-  description: SITE_DESCRIPTION,
-  areaServed: "Bengaluru",
 };
 
 export const viewport: Viewport = {
@@ -95,10 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${instrumentSerif.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
-        />
+        <JsonLd data={organizationJsonLd()} />
         <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
