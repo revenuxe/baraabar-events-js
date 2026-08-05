@@ -1,1 +1,0 @@
-ALTER TYPE public.measurement_mode ADD VALUE IF NOT EXISTS 'sample';

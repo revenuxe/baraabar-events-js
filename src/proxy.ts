@@ -39,5 +39,5 @@ export const config = {
   // marketing/legal pages, /design, /book — its catalog fetch is a cached,
   // non-cookie client, and the wizard's own auth check is entirely
   // client-side) are deliberately left out.
-  matcher: ["/admin/:path*", "/profile/:path*", "/orders/:path*", "/drafts/:path*", "/auth/:path*"],
+  matcher: ["/admin/:path*", "/profile/:path*", "/auth/:path*"],
 };

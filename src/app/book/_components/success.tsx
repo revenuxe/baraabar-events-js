@@ -16,11 +16,11 @@ export function Success({ orderId }: { orderId: string }) {
         <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-brand shadow-glow">
           <Check className="h-10 w-10 text-primary-foreground" />
         </div>
-        <h1 className="mt-6 font-display text-4xl">Pickup booked</h1>
+        <h1 className="mt-6 font-display text-4xl">Event decoration booked</h1>
         <p className="mt-2 text-sm text-muted-foreground">Your reference number is</p>
         <p className="mt-1 text-xl font-black tracking-widest text-gradient-brand">#{orderId}</p>
         <p className="mt-6 text-sm text-muted-foreground">
-          We'll WhatsApp you a confirmation and reach out before the pickup window.
+          We'll WhatsApp you a confirmation and reach out before your setup window.
         </p>
 
         <div className="mt-8 space-y-3">
@@ -33,10 +33,10 @@ export function Success({ orderId }: { orderId: string }) {
             <WhatsAppIcon className="h-4 w-4" /> WhatsApp us
           </a>
           <button
-            onClick={() => router.push("/orders")}
+            onClick={() => router.push("/categories")}
             className="w-full rounded-full border border-border bg-card px-6 py-4 text-sm font-bold"
           >
-            Track my order
+            Browse more decorations
           </button>
           <Link
             href="/"
@@ -47,7 +47,7 @@ export function Success({ orderId }: { orderId: string }) {
         </div>
 
         <div className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Truck className="h-4 w-4" /> Free pickup · No payment now
+          <Truck className="h-4 w-4" /> Free venue visit · No payment now
         </div>
       </main>
     </div>

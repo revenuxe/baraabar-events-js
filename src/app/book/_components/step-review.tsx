@@ -1,42 +1,18 @@
 "use client";
 
-import { Truck } from "lucide-react";
-import type { BookingDraft } from "@/lib/booking-store";
-import { estimatePrice, type GarmentTypeRow } from "../_lib/helpers";
-import { modeSummary } from "./step-measure";
-
-// Reflects whichever date the customer actually picked in StepPickup
-// (which only offers "Today" as the first option when the 8 AM-2 PM
-// same-day cutoff hasn't passed — see isSameDayPickupWindow there), not
-// the ambient clock time when this Review step happens to render. Using
-// current time here directly caused this message to disagree with the
-// pickup date already shown in the summary above.
-function pickupTimingLabel(pickupDate: string | undefined): string {
-  if (!pickupDate) return "your selected date";
-  const toKey = (d: Date) => d.toISOString().slice(0, 10);
-  const today = new Date();
-  if (pickupDate === toKey(today)) return "today";
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  if (pickupDate === toKey(tomorrow)) return "tomorrow";
-  return `on ${new Date(pickupDate).toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  })}`;
-}
+import { PartyPopper } from "lucide-react";
+import type { DecorBookingDraft } from "@/lib/decor-booking-store";
+import type { CartItem } from "@/lib/cart-store";
 
 export function StepReview({
   draft,
-  garmentTypes,
+  items,
+  subtotal,
 }: {
-  draft: BookingDraft;
-  garmentTypes: GarmentTypeRow[];
+  draft: DecorBookingDraft;
+  items: CartItem[];
+  subtotal: number;
 }) {
-  const timeline = ["Pickup", "Measure", "Stitch", "Fit trial", "Delivery"];
-  const { orderPriceMin, orderPriceMax } = estimatePrice(draft.items, garmentTypes);
-  const totalReferences = draft.items.reduce((n, it) => n + it.references.length, 0);
-  const pickupTiming = pickupTimingLabel(draft.pickupDate);
   return (
     <div className="space-y-6">
       <header>
@@ -49,15 +25,17 @@ export function StepReview({
       <div className="space-y-3 rounded-3xl border border-border bg-card p-5 shadow-card">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Garments
+            Decorations
           </p>
           <div className="mt-1.5 space-y-1">
-            {draft.items.map((it) => (
-              <div key={it.garment} className="flex items-center justify-between text-sm">
+            {items.map((it) => (
+              <div key={it.id} className="flex items-center justify-between text-sm">
                 <span className="font-semibold">
-                  {it.garment}
-                  {it.styleId && (
-                    <span className="ml-1.5 font-normal text-muted-foreground">· {it.styleId}</span>
+                  {it.serviceName}
+                  {it.addOns.length > 0 && (
+                    <span className="ml-1.5 font-normal text-muted-foreground">
+                      · {it.addOns.map((a) => a.name).join(", ")}
+                    </span>
                   )}
                 </span>
                 <span className="font-semibold">× {it.quantity}</span>
@@ -65,122 +43,37 @@ export function StepReview({
             ))}
           </div>
         </div>
-        <Row label="Fabric" value={draft.fabrics.length ? draft.fabrics.join(", ") : "—"} />
-        <Row label="Occasion" value={draft.occasion ?? "—"} />
         <Row
-          label="Design"
+          label="Event"
           value={
-            [
-              totalReferences > 0 &&
-                `${totalReferences} reference${totalReferences > 1 ? "s" : ""}`,
-              draft.notes.trim() && "notes",
-              draft.wantsStylistCall && "stylist call",
-            ]
-              .filter(Boolean)
-              .join(" · ") || "—"
-          }
-        />
-        {draft.items.map(
-          (it) =>
-            it.references.length > 0 && (
-              <div key={it.garment} className="space-y-1">
-                <p className="text-[11px] font-semibold text-muted-foreground">{it.garment}</p>
-                <div className="flex gap-2">
-                  {it.references.map((u) => (
-                    <img key={u} src={u} alt="" className="h-14 w-14 rounded-xl object-cover" />
-                  ))}
-                </div>
-              </div>
-            ),
-        )}
-        {draft.items.length > 1 ? (
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Measurement
-            </p>
-            <div className="mt-1.5 space-y-1">
-              {draft.items.map((it) => (
-                <div key={it.garment} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold">{it.garment}</span>
-                  <span className="font-semibold text-muted-foreground">
-                    {modeSummary(it)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <Row
-            label="Measurement"
-            value={
-              draft.measurementMode === "doorstep"
-                ? "Free doorstep visit"
-                : draft.measurementMode === "sample"
-                  ? `Sample garment pickup${draft.sampleNote ? ` · ${draft.sampleNote}` : ""}`
-                  : draft.measurementMode === "self"
-                    ? `Self-measured (${Object.keys(draft.measurements?.values ?? {}).length} fields)`
-                    : draft.measurementMode === "saved"
-                      ? "Using saved profile"
-                      : "—"
-            }
-          />
-        )}
-
-        <Row
-          label="Pickup"
-          value={
-            draft.pickupDate
-              ? `${new Date(draft.pickupDate).toLocaleDateString(undefined, {
+            draft.eventDate
+              ? `${new Date(draft.eventDate).toLocaleDateString(undefined, {
                   weekday: "short",
                   day: "numeric",
                   month: "short",
-                })} · ${draft.pickupWindow}`
+                })} · ${draft.eventTime ?? "—"}`
               : "—"
           }
         />
         <Row
-          label="Address"
-          value={`${draft.address.line1}, ${draft.address.city} — ${draft.address.pincode}`}
+          label="Venue"
+          value={
+            draft.venue.line1
+              ? `${draft.venue.line1}, ${draft.venue.city} — ${draft.venue.pincode}`
+              : "—"
+          }
         />
-      </div>
-
-      <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
-        <p className="text-sm font-bold">Estimated timeline</p>
-        <div className="mt-4 flex items-center justify-between">
-          {timeline.map((t, i) => (
-            <div key={t} className="flex flex-1 flex-col items-center text-center">
-              <div
-                className={`grid h-9 w-9 place-items-center rounded-full text-[11px] font-bold ${
-                  i === 0
-                    ? "bg-gradient-brand text-primary-foreground"
-                    : "border border-border bg-card text-muted-foreground"
-                }`}
-              >
-                {i + 1}
-              </div>
-              <p className="mt-2 text-[10px] font-bold text-muted-foreground">{t}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-muted/60 px-4 py-3">
-          <Truck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <p className="text-xs text-muted-foreground">
-            <span className="font-bold text-foreground">Pickup {pickupTiming}</span>, then
-            stitched and delivered in{" "}
-            <span className="font-bold text-foreground">4–5 days</span>.
-          </p>
-        </div>
+        {draft.notes.trim() && <Row label="Notes" value={draft.notes} />}
       </div>
 
       <div className="rounded-3xl border border-dashed border-border p-5">
-        <p className="text-sm font-bold">Stitching estimate</p>
+        <p className="text-sm font-bold">Total</p>
         <p className="mt-1 text-2xl font-black text-gradient-brand">
-          {orderPriceMin != null && orderPriceMax != null
-            ? `₹${orderPriceMin.toLocaleString("en-IN")} – ₹${orderPriceMax.toLocaleString("en-IN")}`
-            : "Shared after fabric review"}
+          ₹{subtotal.toLocaleString("en-IN")}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Final quote shared after our tailor assesses your fabric. No payment needed now.
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <PartyPopper className="h-3.5 w-3.5" />
+          No payment needed now — we&apos;ll confirm final pricing after a quick venue check.
         </p>
       </div>
     </div>

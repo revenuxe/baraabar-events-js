@@ -1,0 +1,228 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { toast } from "sonner";
+import { Check, ShoppingBag, Star } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
+import { Footer } from "@/components/Footer";
+import { ServiceCard } from "@/components/ServiceCard";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useCart } from "@/lib/cart-store";
+import type { DecorCategory, DecorService, ServiceAddOn } from "@/data/types";
+
+export function ServiceDetailView({
+  service,
+  category,
+  related,
+}: {
+  service: DecorService;
+  category: DecorCategory;
+  related: DecorService[];
+}) {
+  const router = useRouter();
+  const { addItem } = useCart();
+  const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
+
+  const selectedAddOns = useMemo(
+    () => service.addOns.filter((a) => selectedAddOnIds.includes(a.id)),
+    [service.addOns, selectedAddOnIds],
+  );
+  const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price, 0);
+
+  function toggleAddOn(addOn: ServiceAddOn) {
+    setSelectedAddOnIds((ids) =>
+      ids.includes(addOn.id) ? ids.filter((id) => id !== addOn.id) : [...ids, addOn.id],
+    );
+  }
+
+  function buildCartItem() {
+    return {
+      id: `${service.categorySlug}/${service.slug}`,
+      categorySlug: service.categorySlug,
+      categoryName: category.name,
+      serviceSlug: service.slug,
+      serviceName: service.name,
+      image: service.images[0],
+      unitPrice: service.priceDiscounted,
+      originalPrice: service.priceOriginal,
+      addOns: selectedAddOns,
+    };
+  }
+
+  function handleAddToCart() {
+    addItem(buildCartItem());
+    toast.success(`${service.name} added to cart`);
+  }
+
+  function handleBookNow() {
+    addItem(buildCartItem());
+    router.push("/book");
+  }
+
+  return (
+    <div className="min-h-dvh bg-background pb-32">
+      <TopBar />
+      <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-4xl md:px-8 md:py-10">
+        {/* Gallery */}
+        <Carousel className="overflow-hidden rounded-3xl shadow-elevated">
+          <CarouselContent className="-ml-0">
+            {service.images.map((img, i) => (
+              <CarouselItem key={i} className="pl-0">
+                <div className="relative aspect-[4/3] w-full">
+                  <Image
+                    src={img}
+                    alt={`${service.name} photo ${i + 1}`}
+                    fill
+                    priority={i === 0}
+                    sizes="(min-width: 768px) 700px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {service.images.length > 1 && (
+            <>
+              <CarouselPrevious className="left-3" />
+              <CarouselNext className="right-3" />
+            </>
+          )}
+        </Carousel>
+
+        {/* Title + rating */}
+        <div className="mt-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-accent">{category.name}</p>
+          <h1 className="mt-1 font-display text-3xl leading-tight md:text-5xl">{service.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground md:text-base">{service.tagline}</p>
+          <div className="mt-2 flex items-center gap-1.5 text-sm">
+            <Star className="h-4 w-4 fill-current text-accent" />
+            <span className="font-bold">{service.rating}</span>
+            <span className="text-muted-foreground">({service.reviewCount} reviews)</span>
+          </div>
+        </div>
+
+        {/* Price */}
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-gradient-brand">
+              ₹{service.priceDiscounted.toLocaleString("en-IN")}
+            </span>
+            {service.priceOriginal > service.priceDiscounted && (
+              <span className="text-sm text-muted-foreground line-through">
+                ₹{service.priceOriginal.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
+          {service.discountPct > 0 && (
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+              {service.discountPct}% off
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        <p className="mt-5 text-sm leading-relaxed text-muted-foreground md:text-base">
+          {service.description}
+        </p>
+
+        {service.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {service.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* What's included */}
+        <section className="mt-6">
+          <h2 className="text-sm font-bold">What&apos;s included</h2>
+          <ul className="mt-3 space-y-2">
+            {service.included.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Add-ons */}
+        {service.addOns.length > 0 && (
+          <section className="mt-6">
+            <h2 className="text-sm font-bold">Add-ons</h2>
+            <div className="mt-3 space-y-2">
+              {service.addOns.map((addOn) => {
+                const selected = selectedAddOnIds.includes(addOn.id);
+                return (
+                  <button
+                    key={addOn.id}
+                    onClick={() => toggleAddOn(addOn)}
+                    className={`flex w-full items-center justify-between rounded-2xl border p-3.5 text-left transition ${
+                      selected ? "border-accent ring-2 ring-accent/40 bg-accent/5" : "border-border bg-card"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span
+                        className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border ${
+                          selected ? "border-accent bg-accent text-accent-foreground" : "border-border"
+                        }`}
+                      >
+                        {selected && <Check className="h-3 w-3" />}
+                      </span>
+                      <span className="text-sm font-semibold">{addOn.name}</span>
+                    </span>
+                    <span className="text-sm font-bold">+₹{addOn.price.toLocaleString("en-IN")}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Sticky CTAs */}
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
+          <div className="mx-auto flex max-w-md items-center gap-3 px-5 md:max-w-4xl md:px-0">
+            <div className="flex-1 md:hidden">
+              <p className="text-[11px] text-muted-foreground">Total</p>
+              <p className="text-lg font-black text-gradient-brand">
+                ₹{(service.priceDiscounted + addOnsTotal).toLocaleString("en-IN")}
+              </p>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3.5 text-sm font-bold shadow-card active:scale-[0.98] md:flex-1"
+            >
+              <ShoppingBag className="h-4 w-4" /> Add to Cart
+            </button>
+            <button
+              onClick={handleBookNow}
+              className="flex-1 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98] md:flex-1"
+            >
+              Book Now
+            </button>
+          </div>
+        </div>
+
+        {/* Related */}
+        {related.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-display text-2xl md:text-3xl">You might also like</h2>
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
+              {related.map((s) => (
+                <ServiceCard key={s.id} service={s} />
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+}

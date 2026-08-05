@@ -1,10 +1,12 @@
-import heroImg from "@/assets/hero section image baraabar.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
-import { PincodeCheck } from "@/components/PincodeCheck";
+import { HeroSearchBar } from "@/components/HeroSearchBar";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { CONTACT } from "@/lib/site";
+import { unsplash } from "@/data/images";
+
+const heroImg = unsplash("balloonArch", 1200, 1400);
 
 export function Hero() {
   return (
@@ -15,7 +17,7 @@ export function Hero() {
           {/* copy + CTAs */}
           <div className="flex flex-col">
             <h1 className="animate-rise-in font-display text-[52px] leading-[1.15] tracking-tight md:text-[84px]">
-              Tailoring <span className="text-gradient-brand italic">Made</span>
+              Celebrations <span className="text-gradient-brand italic">Made</span>
               <br />
               <span className="text-gradient-brand italic">Easy</span> in{" "}
               <span className="text-gradient-brand italic">Bangalore</span>
@@ -24,14 +26,12 @@ export function Hero() {
               className="animate-rise-in mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground md:text-lg"
               style={{ animationDelay: "0.1s" }}
             >
-              We pick your own fabric, measure you at home, and stitch it to a fit
-              you&apos;ll never want to take off.
+              Balloon arches, theme decor and full event styling — designed by pros and set up
+              at your venue, right on time.
             </p>
 
-            {/* Service-availability check, in place of the old "Start
-                Designing" CTA */}
             <div className="mt-6">
-              <PincodeCheck />
+              <HeroSearchBar />
             </div>
 
             {/* Image (mobile shows here, desktop hidden — desktop uses right column) */}
@@ -41,14 +41,17 @@ export function Hero() {
                 className="absolute -inset-4 rounded-[3rem] bg-gradient-brand opacity-25 blur-3xl"
               />
               <Link
-                href="/book?category=women"
+                href="/categories/birthday"
                 className="relative block animate-float-slow overflow-hidden rounded-[2rem] shadow-elevated transition-transform active:scale-[0.98]"
               >
                 <Image
                   src={heroImg}
-                  alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
+                  alt="A balloon arch decoration set up for a birthday party"
                   priority
                   sizes="100vw"
+                  fill={false}
+                  width={1200}
+                  height={1400}
                   className="h-[400px] w-full object-cover"
                 />
                 <div className="glass-dark absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-primary-foreground">
@@ -56,16 +59,16 @@ export function Hero() {
                     <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
                   </span>
-                  <span className="text-[11px] font-bold">Online Tailor for Tailored Suits</span>
+                  <span className="text-[11px] font-bold">Trusted Event Decorators</span>
                 </div>
                 <div className="glass-dark absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                   <div>
-                    <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
-                    <p className="font-semibold">Salwar Kameez</p>
+                    <p className="text-[11px] uppercase tracking-widest opacity-80">Popular</p>
+                    <p className="font-semibold">Balloon Arch Decoration</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
-                    <p className="font-semibold">₹699</p>
+                    <p className="font-semibold">₹3,499</p>
                   </div>
                 </div>
               </Link>
@@ -74,10 +77,10 @@ export function Hero() {
             {/* Secondary CTA */}
             <div className="mt-4 flex flex-col gap-3 md:mt-5 md:flex-row md:items-center">
               <Link
-                href="/book"
+                href="/categories"
                 className="flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:w-fit md:px-8"
               >
-                Book Now
+                Explore Decorations
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
@@ -94,15 +97,15 @@ export function Hero() {
             <ul className="mt-6 grid grid-cols-3 gap-2 text-center text-[11px] font-medium text-muted-foreground md:max-w-md md:text-xs">
               <li className="glass rounded-2xl p-3">
                 <Clock className="mx-auto mb-1 h-4 w-4 text-primary" />
-                3-min booking
+                Same-week slots
               </li>
               <li className="glass rounded-2xl p-3">
                 <ShieldCheck className="mx-auto mb-1 h-4 w-4 text-primary" />
-                Perfect fit
+                Trained decorators
               </li>
               <li className="glass rounded-2xl p-3">
                 <Truck className="mx-auto mb-1 h-4 w-4 text-primary" />
-                Free pickup
+                Setup & teardown
               </li>
             </ul>
           </div>
@@ -114,14 +117,16 @@ export function Hero() {
               className="absolute -inset-6 rounded-[3rem] bg-gradient-brand opacity-30 blur-3xl"
             />
             <Link
-              href="/book?category=women"
+              href="/categories/birthday"
               className="relative block animate-float-slow overflow-hidden rounded-[3rem] shadow-elevated transition-transform hover:-translate-y-1 hover:shadow-elevated"
             >
               <Image
                 src={heroImg}
-                alt="Woman wearing a custom-tailored purple lehenga by Baraabar"
+                alt="A balloon arch decoration set up for a birthday party"
                 priority
                 sizes="50vw"
+                width={1200}
+                height={1400}
                 className="h-[680px] w-full object-cover"
               />
               <div className="glass-dark absolute left-4 top-4 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-primary-foreground">
@@ -129,16 +134,16 @@ export function Hero() {
                   <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
                 </span>
-                <span className="text-xs font-bold">Online Tailor for Tailored Suits</span>
+                <span className="text-xs font-bold">Trusted Event Decorators</span>
               </div>
               <div className="glass-dark absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
                 <div>
-                  <p className="text-[11px] uppercase tracking-widest opacity-80">Design #A1</p>
-                  <p className="font-semibold">Salwar Kameez</p>
+                  <p className="text-[11px] uppercase tracking-widest opacity-80">Popular</p>
+                  <p className="font-semibold">Balloon Arch Decoration</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
-                  <p className="font-semibold">₹699</p>
+                  <p className="font-semibold">₹3,499</p>
                 </div>
               </div>
               <span aria-hidden className="absolute right-4 top-4 flex h-3 w-3">

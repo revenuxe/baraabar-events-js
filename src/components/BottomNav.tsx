@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Scissors, Package, Bookmark, User } from "lucide-react";
+import { Home, LayoutGrid, ShoppingBag, User } from "lucide-react";
+import { useCart } from "@/lib/cart-store";
 
 const ITEMS = [
   { to: "/", label: "Home", Icon: Home, exact: true },
-  { to: "/design", label: "Design", Icon: Scissors, exact: false },
-  { to: "/orders", label: "Orders", Icon: Package, exact: false },
-  { to: "/drafts", label: "Drafts", Icon: Bookmark, exact: false },
+  { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
+  { to: "/cart", label: "Cart", Icon: ShoppingBag, exact: false },
   { to: "/profile", label: "Profile", Icon: User, exact: false },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { itemCount } = useCart();
 
   return (
     <nav
@@ -33,11 +34,16 @@ export function BottomNav() {
                 }`}
               >
                 <span
-                  className={`grid h-10 w-10 place-items-center rounded-full transition-all ${
+                  className={`relative grid h-10 w-10 place-items-center rounded-full transition-all ${
                     active ? "bg-gradient-brand text-primary-foreground shadow-glow" : ""
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                  {to === "/cart" && itemCount > 0 && (
+                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground ring-2 ring-background">
+                      {itemCount}
+                    </span>
+                  )}
                 </span>
                 <span className="leading-none">{label}</span>
               </Link>

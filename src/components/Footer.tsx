@@ -16,21 +16,21 @@ export function Footer() {
     <footer className="mx-auto w-full max-w-md px-5 pt-8 pb-28 md:max-w-6xl md:px-8 md:pb-16">
       <div className="rounded-[2rem] bg-gradient-brand p-6 text-primary-foreground shadow-elevated md:flex md:items-center md:justify-between md:gap-10 md:rounded-[3rem] md:p-12">
         <h2 className="font-display text-3xl leading-tight md:text-5xl">
-          Ready to wear something<br />
-          <span className="italic">truly yours</span>?
+          Ready to plan something<br />
+          <span className="italic">truly special</span>?
         </h2>
         <Link
-          href="/book"
+          href="/categories"
           className="mt-5 flex w-full items-center justify-center rounded-full bg-white py-3.5 text-sm font-bold text-primary shadow-glow active:scale-[0.98] md:mt-0 md:w-auto md:px-10 md:py-4 md:text-base"
         >
-          Claim Free Delivery
+          Claim Free Consultation
         </Link>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
         <Image
           src={logo}
-          alt="Baraabar — Custom Clothing. Your Style. Your Fit."
+          alt="Baraabar — Balloon & Event Decoration"
           className="h-8 w-auto object-contain"
         />
         <div className="flex gap-2">

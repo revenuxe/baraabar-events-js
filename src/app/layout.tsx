@@ -21,9 +21,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const SITE_TITLE = "Online Tailoring Services for Men, Women & Kids | Home Pickup & Delivery";
+const SITE_TITLE = "Balloon & Event Decoration Services | Birthday, Wedding & More";
 const SITE_DESCRIPTION =
-  "Custom-tailored outfits for men, women and kids — bring your own fabric and we handle free home pickup, expert stitching and doorstep delivery in 10–14 days. Book online in 3 minutes.";
+  "Professional balloon and event decoration for birthdays, weddings, baby showers, corporate events and more — book online in minutes, get a same-week setup at your venue.";
 // TODO(migration): this og:image still points at the Lovable-hosted preview
 // screenshot from the old app. Replace with a real, self-hosted OG image
 // before cutover — see docs/nextjs-migration-plan.md §8.
@@ -35,12 +35,12 @@ export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   keywords: [
-    "online tailor",
-    "tailored suits",
-    "custom tailoring",
-    "made to measure",
-    "bespoke tailoring India",
-    "Bengaluru tailor",
+    "balloon decoration",
+    "birthday decoration",
+    "event decorators",
+    "wedding decoration",
+    "baby shower decoration",
+    "corporate event decoration India",
   ],
   authors: [{ name: SITE_NAME }],
   icons: { icon: "/favicon-48x48.png" },
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
 
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
-  "@type": "ClothingStore",
+  "@type": "LocalBusiness",
   name: SITE_NAME,
   url: SITE_URL,
   telephone: CONTACT.phone,

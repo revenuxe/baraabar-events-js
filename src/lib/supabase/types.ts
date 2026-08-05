@@ -84,328 +84,6 @@ export type Database = {
         }
         Relationships: []
       }
-      booking_drafts: {
-        Row: {
-          category_slug: string | null
-          created_at: string
-          data: Json
-          garment_label: string | null
-          id: string
-          step: number
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category_slug?: string | null
-          created_at?: string
-          data?: Json
-          garment_label?: string | null
-          id?: string
-          step?: number
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category_slug?: string | null
-          created_at?: string
-          data?: Json
-          garment_label?: string | null
-          id?: string
-          step?: number
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      booking_items: {
-        Row: {
-          booking_id: string
-          category_slug: string | null
-          created_at: string
-          estimated_price_max: number | null
-          estimated_price_min: number | null
-          garment_label: string
-          id: string
-          measurement_snapshot: Json | null
-          quantity: number
-          reference_images: string[]
-          sort_order: number
-          style_label: string | null
-        }
-        Insert: {
-          booking_id: string
-          category_slug?: string | null
-          created_at?: string
-          estimated_price_max?: number | null
-          estimated_price_min?: number | null
-          garment_label: string
-          id?: string
-          measurement_snapshot?: Json | null
-          quantity?: number
-          reference_images?: string[]
-          sort_order?: number
-          style_label?: string | null
-        }
-        Update: {
-          booking_id?: string
-          category_slug?: string | null
-          created_at?: string
-          estimated_price_max?: number | null
-          estimated_price_min?: number | null
-          garment_label?: string
-          id?: string
-          measurement_snapshot?: Json | null
-          quantity?: number
-          reference_images?: string[]
-          sort_order?: number
-          style_label?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_items_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      booking_references: {
-        Row: {
-          booking_id: string
-          created_at: string
-          id: string
-          image_url: string
-          sort_order: number
-        }
-        Insert: {
-          booking_id: string
-          created_at?: string
-          id?: string
-          image_url: string
-          sort_order?: number
-        }
-        Update: {
-          booking_id?: string
-          created_at?: string
-          id?: string
-          image_url?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_references_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      booking_status_events: {
-        Row: {
-          booking_id: string
-          created_at: string
-          id: string
-          note: string | null
-          status: Database["public"]["Enums"]["booking_status"]
-        }
-        Insert: {
-          booking_id: string
-          created_at?: string
-          id?: string
-          note?: string | null
-          status: Database["public"]["Enums"]["booking_status"]
-        }
-        Update: {
-          booking_id?: string
-          created_at?: string
-          id?: string
-          note?: string | null
-          status?: Database["public"]["Enums"]["booking_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_status_events_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bookings: {
-        Row: {
-          category_id: string | null
-          category_slug: string | null
-          contact_phone: string | null
-          created_at: string
-          delivery_address_id: string | null
-          estimated_price_max: number | null
-          estimated_price_min: number | null
-          fabric_label: string | null
-          fabric_type_id: string | null
-          garment_label: string | null
-          garment_type_id: string | null
-          id: string
-          measurement_mode:
-            | Database["public"]["Enums"]["measurement_mode"]
-            | null
-          measurement_profile_id: string | null
-          measurement_snapshot: Json | null
-          notes: string | null
-          occasion_id: string | null
-          order_number: string
-          pickup_address_id: string | null
-          pickup_date: string | null
-          pickup_window: string | null
-          quantity: number
-          reference_images: string[]
-          status: Database["public"]["Enums"]["booking_status"]
-          style_label: string | null
-          style_preset_id: string | null
-          subcategory_id: string | null
-          updated_at: string
-          user_id: string
-          wants_stylist_call: boolean
-        }
-        Insert: {
-          category_id?: string | null
-          category_slug?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          delivery_address_id?: string | null
-          estimated_price_max?: number | null
-          estimated_price_min?: number | null
-          fabric_label?: string | null
-          fabric_type_id?: string | null
-          garment_label?: string | null
-          garment_type_id?: string | null
-          id?: string
-          measurement_mode?:
-            | Database["public"]["Enums"]["measurement_mode"]
-            | null
-          measurement_profile_id?: string | null
-          measurement_snapshot?: Json | null
-          notes?: string | null
-          occasion_id?: string | null
-          order_number?: string
-          pickup_address_id?: string | null
-          pickup_date?: string | null
-          pickup_window?: string | null
-          quantity?: number
-          reference_images?: string[]
-          status?: Database["public"]["Enums"]["booking_status"]
-          style_label?: string | null
-          style_preset_id?: string | null
-          subcategory_id?: string | null
-          updated_at?: string
-          user_id: string
-          wants_stylist_call?: boolean
-        }
-        Update: {
-          category_id?: string | null
-          category_slug?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          delivery_address_id?: string | null
-          estimated_price_max?: number | null
-          estimated_price_min?: number | null
-          fabric_label?: string | null
-          fabric_type_id?: string | null
-          garment_label?: string | null
-          garment_type_id?: string | null
-          id?: string
-          measurement_mode?:
-            | Database["public"]["Enums"]["measurement_mode"]
-            | null
-          measurement_profile_id?: string | null
-          measurement_snapshot?: Json | null
-          notes?: string | null
-          occasion_id?: string | null
-          order_number?: string
-          pickup_address_id?: string | null
-          pickup_date?: string | null
-          pickup_window?: string | null
-          quantity?: number
-          reference_images?: string[]
-          status?: Database["public"]["Enums"]["booking_status"]
-          style_label?: string | null
-          style_preset_id?: string | null
-          subcategory_id?: string | null
-          updated_at?: string
-          user_id?: string
-          wants_stylist_call?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookings_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_delivery_address_id_fkey"
-            columns: ["delivery_address_id"]
-            isOneToOne: false
-            referencedRelation: "addresses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_fabric_type_id_fkey"
-            columns: ["fabric_type_id"]
-            isOneToOne: false
-            referencedRelation: "fabric_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_garment_type_id_fkey"
-            columns: ["garment_type_id"]
-            isOneToOne: false
-            referencedRelation: "garment_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_measurement_profile_id_fkey"
-            columns: ["measurement_profile_id"]
-            isOneToOne: false
-            referencedRelation: "measurement_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_occasion_id_fkey"
-            columns: ["occasion_id"]
-            isOneToOne: false
-            referencedRelation: "occasions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_pickup_address_id_fkey"
-            columns: ["pickup_address_id"]
-            isOneToOne: false
-            referencedRelation: "addresses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_style_preset_id_fkey"
-            columns: ["style_preset_id"]
-            isOneToOne: false
-            referencedRelation: "style_presets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_subcategory_id_fkey"
-            columns: ["subcategory_id"]
-            isOneToOne: false
-            referencedRelation: "subcategories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       categories: {
         Row: {
           accent: string | null
@@ -445,167 +123,133 @@ export type Database = {
         }
         Relationships: []
       }
-      fabric_types: {
+      product_addons: {
         Row: {
           created_at: string
-          description: string | null
           id: string
-          image_url: string | null
-          is_active: boolean
           name: string
-          slug: string
+          price: number
+          product_id: string
           sort_order: number
         }
         Insert: {
           created_at?: string
-          description?: string | null
           id?: string
-          image_url?: string | null
-          is_active?: boolean
           name: string
-          slug: string
+          price: number
+          product_id: string
           sort_order?: number
         }
         Update: {
           created_at?: string
-          description?: string | null
           id?: string
-          image_url?: string | null
-          is_active?: boolean
           name?: string
-          slug?: string
+          price?: number
+          product_id?: string
           sort_order?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_addons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      garment_types: {
+      products: {
         Row: {
-          base_price_max: number | null
-          base_price_min: number | null
-          category_id: string | null
+          category_id: string
           created_at: string
           description: string | null
           id: string
-          image_url: string | null
+          images: string[]
+          included: string[]
           is_active: boolean
-          measurement_fields: string[]
+          is_featured: boolean
+          is_trending: boolean
+          meta_description: string | null
+          meta_title: string | null
           name: string
+          og_image_url: string | null
+          price: number
+          rating: number
+          review_count: number
+          sale_price: number | null
           slug: string
           sort_order: number
           subcategory_id: string | null
+          tagline: string | null
+          tags: string[]
           updated_at: string
         }
         Insert: {
-          base_price_max?: number | null
-          base_price_min?: number | null
-          category_id?: string | null
+          category_id: string
           created_at?: string
           description?: string | null
           id?: string
-          image_url?: string | null
+          images?: string[]
+          included?: string[]
           is_active?: boolean
-          measurement_fields?: string[]
+          is_featured?: boolean
+          is_trending?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name: string
+          og_image_url?: string | null
+          price: number
+          rating?: number
+          review_count?: number
+          sale_price?: number | null
           slug: string
           sort_order?: number
           subcategory_id?: string | null
+          tagline?: string | null
+          tags?: string[]
           updated_at?: string
         }
         Update: {
-          base_price_max?: number | null
-          base_price_min?: number | null
-          category_id?: string | null
+          category_id?: string
           created_at?: string
           description?: string | null
           id?: string
-          image_url?: string | null
+          images?: string[]
+          included?: string[]
           is_active?: boolean
-          measurement_fields?: string[]
+          is_featured?: boolean
+          is_trending?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name?: string
+          og_image_url?: string | null
+          price?: number
+          rating?: number
+          review_count?: number
+          sale_price?: number | null
           slug?: string
           sort_order?: number
           subcategory_id?: string | null
+          tagline?: string | null
+          tags?: string[]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "garment_types_category_id_fkey"
+            foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "garment_types_subcategory_id_fkey"
+            foreignKeyName: "products_subcategory_id_fkey"
             columns: ["subcategory_id"]
             isOneToOne: false
             referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
-      }
-      measurement_profiles: {
-        Row: {
-          created_at: string
-          id: string
-          is_default: boolean
-          name: string
-          unit: string
-          updated_at: string
-          user_id: string
-          values: Json
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          name?: string
-          unit?: string
-          updated_at?: string
-          user_id: string
-          values?: Json
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          name?: string
-          unit?: string
-          updated_at?: string
-          user_id?: string
-          values?: Json
-        }
-        Relationships: []
-      }
-      occasions: {
-        Row: {
-          created_at: string
-          icon: string | null
-          id: string
-          is_active: boolean
-          name: string
-          slug: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          slug: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          slug?: string
-          sort_order?: number
-        }
-        Relationships: []
       }
       profiles: {
         Row: {
@@ -633,91 +277,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      reviews: {
-        Row: {
-          booking_id: string | null
-          comment: string | null
-          created_at: string
-          id: string
-          is_published: boolean
-          rating: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          booking_id?: string | null
-          comment?: string | null
-          created_at?: string
-          id?: string
-          is_published?: boolean
-          rating: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          booking_id?: string | null
-          comment?: string | null
-          created_at?: string
-          id?: string
-          is_published?: boolean
-          rating?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      style_presets: {
-        Row: {
-          created_at: string
-          description: string | null
-          garment_type_id: string
-          id: string
-          image_url: string | null
-          is_active: boolean
-          name: string
-          slug: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          garment_type_id: string
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          name: string
-          slug: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          garment_type_id?: string
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          name?: string
-          slug?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "style_presets_garment_type_id_fkey"
-            columns: ["garment_type_id"]
-            isOneToOne: false
-            referencedRelation: "garment_types"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       subcategories: {
         Row: {
@@ -787,35 +346,6 @@ export type Database = {
         }
         Relationships: []
       }
-      wishlist: {
-        Row: {
-          created_at: string
-          garment_type_id: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          garment_type_id: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          garment_type_id?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wishlist_garment_type_id_fkey"
-            columns: ["garment_type_id"]
-            isOneToOne: false
-            referencedRelation: "garment_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -830,19 +360,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "tailor" | "customer"
-      booking_status:
-        | "draft"
-        | "pending"
-        | "confirmed"
-        | "picked_up"
-        | "measuring"
-        | "stitching"
-        | "ready"
-        | "out_for_delivery"
-        | "delivered"
-        | "cancelled"
-      measurement_mode: "doorstep" | "self" | "saved" | "sample"
+      app_role: "admin" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -973,20 +491,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["admin", "tailor", "customer"],
-      booking_status: [
-        "draft",
-        "pending",
-        "confirmed",
-        "picked_up",
-        "measuring",
-        "stitching",
-        "ready",
-        "out_for_delivery",
-        "delivered",
-        "cancelled",
-      ],
-      measurement_mode: ["doorstep", "self", "saved", "sample"],
+      app_role: ["admin", "customer"],
     },
   },
 } as const

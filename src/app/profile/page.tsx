@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ChevronRight,
-  Ruler,
-  MapPin,
-  Bell,
-  HelpCircle,
-  Gift,
-  LogIn,
-  Bookmark,
-  Package,
-} from "lucide-react";
+import { ChevronRight, MapPin, Bell, HelpCircle, Gift, LogIn } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
@@ -20,7 +10,7 @@ import { EditProfileButton } from "./edit-profile-button";
 
 export const metadata: Metadata = {
   title: "Profile | Baraabar",
-  description: "Manage your measurements, addresses and preferences.",
+  description: "Manage your addresses and preferences.",
   openGraph: {
     title: "Profile | Baraabar",
     description: "Your Baraabar account.",
@@ -43,7 +33,7 @@ export default async function ProfilePage() {
           </div>
           <h1 className="mt-5 font-display text-3xl">Sign in to Baraabar</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Create an account or sign in to save measurements, track orders and book pickups.
+            Create an account or sign in to save addresses and book decorations faster.
           </p>
           <Link
             href="/auth?redirect=%2Fprofile"
@@ -63,49 +53,19 @@ export default async function ProfilePage() {
     );
   }
 
-  const [{ data: profile }, { count: orders }, { count: drafts }, { count: addresses }, { count: measurementCount }] =
-    await Promise.all([
-      supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
-      supabase.from("bookings").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase
-        .from("booking_drafts")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
-      supabase.from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase
-        .from("measurement_profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
-    ]);
+  const [{ data: profile }, { count: addresses }] = await Promise.all([
+    supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
+    supabase.from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
 
   const email = user.email ?? "";
   const initial = (profile?.full_name ?? email).trim().charAt(0).toUpperCase();
 
   const rows: { icon: React.ElementType; label: string; meta?: string; href?: string }[] = [
     {
-      icon: Bookmark,
-      label: "Saved designs",
-      meta: drafts ? `${drafts} in progress` : "Nothing saved yet",
-      href: "/drafts",
-    },
-    {
-      icon: Package,
-      label: "My orders",
-      meta: orders ? `${orders} placed` : "No orders yet",
-      href: "/orders",
-    },
-    {
-      icon: Ruler,
-      label: "My measurements",
-      meta: measurementCount
-        ? `${measurementCount} profile${measurementCount > 1 ? "s" : ""} saved`
-        : "Add during your first booking",
-      href: "/profile/measurements",
-    },
-    {
       icon: MapPin,
       label: "Addresses",
-      meta: addresses ? `${addresses} saved` : "Added at pickup booking",
+      meta: addresses ? `${addresses} saved` : "Add a venue address",
       href: "/profile/addresses",
     },
     { icon: Bell, label: "Notifications", meta: "On" },
@@ -130,10 +90,9 @@ export default async function ProfilePage() {
             </div>
             <EditProfileButton fullName={profile?.full_name ?? ""} phone={profile?.phone ?? ""} />
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-center">
             {[
-              [String(orders ?? 0), "Orders"],
-              [String(drafts ?? 0), "Drafts"],
+              [String(addresses ?? 0), "Addresses"],
               ["₹100", "Credits"],
             ].map(([v, l]) => (
               <div key={l} className="glass-dark rounded-2xl px-2 py-2">

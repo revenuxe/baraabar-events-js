@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.s3.*.amazonaws.com",
       },
+      // Stock photography for the decor catalog mock data (see src/data/).
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   compiler: {

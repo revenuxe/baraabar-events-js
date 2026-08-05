@@ -5,19 +5,20 @@ import logo from "@/assets/baraabar tailor logo-webpg.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, ShoppingBag } from "lucide-react";
 import { SearchOverlay } from "@/components/SearchOverlay";
+import { useCart } from "@/lib/cart-store";
 
 const NAV = [
   { to: "/", label: "Home" },
-  { to: "/design", label: "Design" },
-  { to: "/orders", label: "Orders" },
-  { to: "/drafts", label: "Drafts" },
+  { to: "/categories", label: "Categories" },
+  { to: "/profile", label: "Profile" },
 ];
 
 export function TopBar() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { itemCount } = useCart();
 
   return (
     <header className="sticky top-0 z-40 pt-[max(0.5rem,env(safe-area-inset-top))] bg-background/70 backdrop-blur-xl">
@@ -57,18 +58,30 @@ export function TopBar() {
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.2} />
           </button>
+          <Link
+            href="/cart"
+            aria-label="Cart"
+            className="relative grid h-11 w-11 place-items-center rounded-full bg-card shadow-card ring-1 ring-border/60"
+          >
+            <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            {itemCount > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground ring-2 ring-card">
+                {itemCount}
+              </span>
+            )}
+          </Link>
           <button
             aria-label="Notifications"
-            className="relative grid h-11 w-11 place-items-center rounded-full bg-card shadow-card ring-1 ring-border/60"
+            className="relative hidden h-11 w-11 place-items-center rounded-full bg-card shadow-card ring-1 ring-border/60 md:grid"
           >
             <Bell className="h-[18px] w-[18px]" strokeWidth={2.2} />
             <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-card" />
           </button>
           <Link
-            href="/book"
+            href="/categories"
             className="hidden rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background md:inline-flex"
           >
-            Book pickup
+            Get Started
           </Link>
         </div>
       </div>

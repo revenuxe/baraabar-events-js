@@ -1,0 +1,119 @@
+import { unstable_cache } from "next/cache";
+import { publicSupabaseClient } from "@/lib/supabase/public";
+import { testimonials } from "./testimonials";
+import { cities } from "./cities";
+import type { DecorCategory, DecorService, ServiceAddOn } from "./types";
+
+type Catalog = { categories: DecorCategory[]; services: DecorService[] };
+
+// Cached, server-only fetch of the whole active catalog — mirrors the old
+// getCatalog() pattern (see git history's book/_lib/catalog.ts): a plain
+// anon client (not cookie-bound) so it can live inside unstable_cache,
+// short revalidate window so admin edits show up on the storefront without
+// a full redeploy.
+const getCatalog = unstable_cache(
+  async (): Promise<Catalog> => {
+    const supabase = publicSupabaseClient();
+    const [{ data: categoryRows }, { data: productRows }] = await Promise.all([
+      supabase.from("categories").select("*").order("sort_order"),
+      supabase
+        .from("products")
+        .select("*, categories(slug), product_addons(*)")
+        .order("sort_order"),
+    ]);
+
+    const categories: DecorCategory[] = (categoryRows ?? []).map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      name: c.name,
+      tagline: c.tagline ?? "",
+      accent: c.accent ?? "from-slate-800/70 to-indigo-700/70",
+      heroImage: c.image_url ?? "",
+      sortOrder: c.sort_order,
+    }));
+
+    const services: DecorService[] = (productRows ?? []).map((p) => {
+      const priceOriginal = p.price;
+      const priceDiscounted = p.sale_price ?? p.price;
+      const discountPct =
+        p.sale_price != null && p.price > 0
+          ? Math.round(((p.price - p.sale_price) / p.price) * 100)
+          : 0;
+      const addOns: ServiceAddOn[] = (p.product_addons ?? [])
+        .slice()
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((a) => ({ id: a.id, name: a.name, price: a.price }));
+
+      return {
+        id: p.id,
+        slug: p.slug,
+        categorySlug: p.categories?.slug ?? "",
+        name: p.name,
+        tagline: p.tagline ?? "",
+        description: p.description ?? "",
+        images: p.images,
+        priceOriginal,
+        priceDiscounted,
+        discountPct,
+        rating: p.rating,
+        reviewCount: p.review_count,
+        included: p.included,
+        tags: p.tags,
+        addOns,
+        sortOrder: p.sort_order,
+        isFeatured: p.is_featured,
+        isTrending: p.is_trending,
+        metaTitle: p.meta_title ?? undefined,
+        metaDescription: p.meta_description ?? undefined,
+        ogImage: p.og_image_url ?? undefined,
+      };
+    });
+
+    return { categories, services };
+  },
+  ["decor-catalog"],
+  { revalidate: 60, tags: ["catalog"] },
+);
+
+export async function getCategories(): Promise<DecorCategory[]> {
+  const { categories } = await getCatalog();
+  return categories;
+}
+
+export async function getCategoryBySlug(slug: string): Promise<DecorCategory | undefined> {
+  const { categories } = await getCatalog();
+  return categories.find((c) => c.slug === slug);
+}
+
+export async function getServicesByCategory(categorySlug: string): Promise<DecorService[]> {
+  const { services } = await getCatalog();
+  return services.filter((s) => s.categorySlug === categorySlug);
+}
+
+export async function getServiceBySlug(
+  categorySlug: string,
+  serviceSlug: string,
+): Promise<DecorService | undefined> {
+  const { services } = await getCatalog();
+  return services.find((s) => s.categorySlug === categorySlug && s.slug === serviceSlug);
+}
+
+export async function getFeaturedServices(limit = 8): Promise<DecorService[]> {
+  const { services } = await getCatalog();
+  return services.filter((s) => s.isFeatured).slice(0, limit);
+}
+
+export async function getRelatedServices(service: DecorService, limit = 4): Promise<DecorService[]> {
+  const { services } = await getCatalog();
+  const sameCategory = services.filter(
+    (s) => s.categorySlug === service.categorySlug && s.slug !== service.slug,
+  );
+  if (sameCategory.length >= limit) return sameCategory.slice(0, limit);
+  const others = services.filter(
+    (s) => s.categorySlug !== service.categorySlug && s.slug !== service.slug,
+  );
+  return [...sameCategory, ...others].slice(0, limit);
+}
+
+export { testimonials, cities };
+export type { DecorCategory, DecorService } from "./types";

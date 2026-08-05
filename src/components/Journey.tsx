@@ -1,21 +1,21 @@
-import { Palette, Ruler, Scissors, ShieldCheck, Truck } from "lucide-react";
+import { CalendarCheck, Palette, HardHat, ShieldCheck, PartyPopper } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type Step = { icon: LucideIcon; title: string; sub: string };
 
 const STEPS: Step[] = [
-  { icon: Palette, title: "Design", sub: "Pick fabric, colors, details" },
-  { icon: Ruler, title: "Measure", sub: "AI scan or home visit" },
-  { icon: Scissors, title: "Stitch", sub: "By master tailors" },
-  { icon: ShieldCheck, title: "Quality", sub: "3-point inspection" },
-  { icon: Truck, title: "Delivery", sub: "At your door, on time" },
+  { icon: CalendarCheck, title: "Book your date", sub: "Pick a category & event date" },
+  { icon: Palette, title: "Design the theme", sub: "Colors, styling & add-ons" },
+  { icon: HardHat, title: "Venue setup", sub: "Our team installs on-site" },
+  { icon: ShieldCheck, title: "Quality check", sub: "Final walkthrough before you arrive" },
+  { icon: PartyPopper, title: "Event day", sub: "You celebrate, we handle the rest" },
 ];
 
 export function Journey() {
   return (
     <section className="mx-auto w-full max-w-md px-5 py-10 md:max-w-6xl md:px-8 md:py-16">
       <p className="text-xs font-bold uppercase tracking-widest text-accent">The Baraabar way</p>
-      <h2 className="mt-1 font-display text-3xl md:text-5xl">Your order, orchestrated</h2>
+      <h2 className="mt-1 font-display text-3xl md:text-5xl">Your event, orchestrated</h2>
 
       <ol className="relative mt-6 space-y-4 pl-2">
         <span
@@ -32,9 +32,6 @@ export function Journey() {
                 <h3 className="text-sm font-bold">
                   {i + 1}. {title}
                 </h3>
-                <span className="text-[10px] font-semibold text-muted-foreground">
-                  Day {[1, 2, "3–8", 9, 10][i]}
-                </span>
               </div>
               <p className="text-[12px] text-muted-foreground">{sub}</p>
             </div>

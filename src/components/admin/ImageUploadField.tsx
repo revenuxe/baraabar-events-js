@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { deleteS3Upload, uploadFileToS3 } from "@/lib/s3-upload-client";
+import { deleteCatalogImage, uploadCatalogImage } from "@/lib/supabase-upload-client";
 
 export function ImageUploadField({
   value,
@@ -21,12 +21,12 @@ export function ImageUploadField({
     setUploading(true);
     setError(null);
     try {
-      const publicUrl = await uploadFileToS3(file, "catalog", pathPrefix);
+      const publicUrl = await uploadCatalogImage(file, pathPrefix);
       const previous = value;
       onChange(publicUrl);
-      // Replacing an existing image — clean up the old S3 object now that
-      // the new one is live. Best-effort; never blocks the UI.
-      if (previous) void deleteS3Upload(previous);
+      // Replacing an existing image — clean up the old object now that the
+      // new one is live. Best-effort; never blocks the UI.
+      if (previous) void deleteCatalogImage(previous);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -35,7 +35,7 @@ export function ImageUploadField({
   }
 
   function handleRemove() {
-    if (value) void deleteS3Upload(value);
+    if (value) void deleteCatalogImage(value);
     onChange(null);
   }
 
