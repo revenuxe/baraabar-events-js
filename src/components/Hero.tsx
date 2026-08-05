@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
-import { HeroSearchBar } from "@/components/HeroSearchBar";
+import { SearchBar } from "@/components/SearchBar";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { CONTACT } from "@/lib/site";
 import { unsplash } from "@/data/images";
@@ -31,7 +31,7 @@ export function Hero() {
             </p>
 
             <div className="mt-6">
-              <HeroSearchBar />
+              <SearchBar />
             </div>
 
             {/* Image (mobile shows here, desktop hidden — desktop uses right column) */}

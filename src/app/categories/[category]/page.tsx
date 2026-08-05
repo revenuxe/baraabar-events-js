@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
-import { ServiceCard } from "@/components/ServiceCard";
-import { getCategoryBySlug, getServicesByCategory } from "@/data";
+import { getCategoryBySlug, getServicesByCategory, getSubcategoriesByCategory } from "@/data";
+import { CategoryProductsSection } from "./category-products-section";
 
 export async function generateMetadata({
   params,
@@ -29,7 +29,10 @@ export default async function CategoryPage({
   const { category: categorySlug } = await params;
   const category = await getCategoryBySlug(categorySlug);
   if (!category) notFound();
-  const services = await getServicesByCategory(categorySlug);
+  const [services, subcategories] = await Promise.all([
+    getServicesByCategory(categorySlug),
+    getSubcategoriesByCategory(categorySlug),
+  ]);
 
   return (
     <div className="min-h-dvh bg-background pb-24">
@@ -62,19 +65,11 @@ export default async function CategoryPage({
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-md px-5 py-8 md:max-w-6xl md:px-8 md:py-12">
-          {services.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-              {services.map((s) => (
-                <ServiceCard key={s.id} service={s} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-sm text-muted-foreground">
-              No services listed for this category yet — check back soon.
-            </p>
-          )}
-        </section>
+        <CategoryProductsSection
+          categorySlug={categorySlug}
+          services={services}
+          subcategories={subcategories}
+        />
       </main>
       <Footer />
       <BottomNav />

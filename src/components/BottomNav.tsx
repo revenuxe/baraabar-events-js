@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, ShoppingBag, User } from "lucide-react";
-import { useCart } from "@/lib/cart-store";
+import { Home, LayoutGrid, CalendarCheck, User } from "lucide-react";
 
 const ITEMS = [
   { to: "/", label: "Home", Icon: Home, exact: true },
   { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
-  { to: "/cart", label: "Cart", Icon: ShoppingBag, exact: false },
+  { to: "/book", label: "Booking", Icon: CalendarCheck, exact: false },
   { to: "/profile", label: "Profile", Icon: User, exact: false },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { itemCount } = useCart();
 
   return (
     <nav
@@ -39,11 +37,6 @@ export function BottomNav() {
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                  {to === "/cart" && itemCount > 0 && (
-                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground ring-2 ring-background">
-                      {itemCount}
-                    </span>
-                  )}
                 </span>
                 <span className="leading-none">{label}</span>
               </Link>

@@ -14,6 +14,16 @@ export type DecorCategory = {
   sortOrder: number;
 };
 
+export type DecorSubcategory = {
+  id: string;
+  slug: string;
+  categorySlug: string;
+  name: string;
+  tagline: string;
+  image: string;
+  sortOrder: number;
+};
+
 export type ServiceAddOn = {
   id: string;
   name: string;
@@ -25,6 +35,7 @@ export type DecorService = {
   id: string;
   slug: string;
   categorySlug: string;
+  subcategorySlug?: string;
   name: string;
   tagline: string;
   description: string;

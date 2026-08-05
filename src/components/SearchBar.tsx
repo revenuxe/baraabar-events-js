@@ -54,7 +54,21 @@ function useTypingPlaceholder(active: boolean) {
   return text;
 }
 
-export function HeroSearchBar() {
+export function SearchBar({
+  className,
+  placeholder,
+  mode = "dropdown",
+  onQueryChange,
+}: {
+  className?: string;
+  placeholder?: string;
+  /** "dropdown" (default) shows a site-wide results popover — used on the
+   * homepage where there's no local list to narrow. "filter" hides the
+   * popover entirely and reports the query via onQueryChange instead, for
+   * pages that filter their own already-loaded cards in place. */
+  mode?: "dropdown" | "filter";
+  onQueryChange?: (query: string) => void;
+}) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +76,7 @@ export function HeroSearchBar() {
   const showTyping = !focused && value.length === 0;
   const typed = useTypingPlaceholder(showTyping);
 
-  const { categories, services } = useCatalogSearch();
+  const { categories, services } = useCatalogSearch(mode === "dropdown");
   const q = value.trim().toLowerCase();
   const matchedCategories = useMemo(
     () =>
@@ -83,9 +97,14 @@ export function HeroSearchBar() {
     [q, services],
   );
 
+  useEffect(() => {
+    if (mode === "filter") onQueryChange?.(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, mode]);
+
   // Inline results only — no full-screen search popup here. Closes on
   // outside click so it behaves like a normal dropdown, not a modal.
-  const showResults = focused && q.length > 0;
+  const showResults = mode === "dropdown" && focused && q.length > 0;
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -100,7 +119,7 @@ export function HeroSearchBar() {
   const noResults = showResults && matchedCategories.length + matchedServices.length === 0;
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={`relative w-full ${className ?? ""}`}>
       <div className="flex w-full items-center gap-2 rounded-full border border-border bg-card pl-5 pr-1.5 py-1.5 shadow-card transition focus-within:ring-2 focus-within:ring-primary">
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         <input
@@ -110,7 +129,7 @@ export function HeroSearchBar() {
           onKeyDown={(e) => {
             if (e.key === "Escape") setFocused(false);
           }}
-          placeholder={showTyping ? `Search ${typed}` : "Search decorations…"}
+          placeholder={placeholder ?? (showTyping ? `Search ${typed}` : "Search decorations…")}
           className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground"
         />
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow">

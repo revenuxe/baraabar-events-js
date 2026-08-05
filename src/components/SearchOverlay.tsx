@@ -26,7 +26,7 @@ export function SearchOverlay({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Seeds the search field when the overlay opens — e.g. a query already
-   * typed into a trigger like HeroSearchBar, so it isn't lost on handoff. */
+   * typed into a trigger like SearchBar, so it isn't lost on handoff. */
   initialQuery?: string;
 }) {
   const [query, setQuery] = useState(initialQuery ?? "");

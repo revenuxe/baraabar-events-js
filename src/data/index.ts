@@ -2,9 +2,13 @@ import { unstable_cache } from "next/cache";
 import { publicSupabaseClient } from "@/lib/supabase/public";
 import { testimonials } from "./testimonials";
 import { cities } from "./cities";
-import type { DecorCategory, DecorService, ServiceAddOn } from "./types";
+import type { DecorCategory, DecorService, DecorSubcategory, ServiceAddOn } from "./types";
 
-type Catalog = { categories: DecorCategory[]; services: DecorService[] };
+type Catalog = {
+  categories: DecorCategory[];
+  subcategories: DecorSubcategory[];
+  services: DecorService[];
+};
 
 // Cached, server-only fetch of the whole active catalog — mirrors the old
 // getCatalog() pattern (see git history's book/_lib/catalog.ts): a plain
@@ -14,11 +18,12 @@ type Catalog = { categories: DecorCategory[]; services: DecorService[] };
 const getCatalog = unstable_cache(
   async (): Promise<Catalog> => {
     const supabase = publicSupabaseClient();
-    const [{ data: categoryRows }, { data: productRows }] = await Promise.all([
+    const [{ data: categoryRows }, { data: subcategoryRows }, { data: productRows }] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
+      supabase.from("subcategories").select("*, categories(slug)").order("sort_order"),
       supabase
         .from("products")
-        .select("*, categories(slug), product_addons(*)")
+        .select("*, categories(slug), subcategories(slug), product_addons(*)")
         .order("sort_order"),
     ]);
 
@@ -30,6 +35,16 @@ const getCatalog = unstable_cache(
       accent: c.accent ?? "from-slate-800/70 to-indigo-700/70",
       heroImage: c.image_url ?? "",
       sortOrder: c.sort_order,
+    }));
+
+    const subcategories: DecorSubcategory[] = (subcategoryRows ?? []).map((s) => ({
+      id: s.id,
+      slug: s.slug,
+      categorySlug: s.categories?.slug ?? "",
+      name: s.name,
+      tagline: s.tagline ?? "",
+      image: s.image_url ?? "",
+      sortOrder: s.sort_order,
     }));
 
     const services: DecorService[] = (productRows ?? []).map((p) => {
@@ -48,6 +63,7 @@ const getCatalog = unstable_cache(
         id: p.id,
         slug: p.slug,
         categorySlug: p.categories?.slug ?? "",
+        subcategorySlug: p.subcategories?.slug ?? undefined,
         name: p.name,
         tagline: p.tagline ?? "",
         description: p.description ?? "",
@@ -69,7 +85,7 @@ const getCatalog = unstable_cache(
       };
     });
 
-    return { categories, services };
+    return { categories, subcategories, services };
   },
   ["decor-catalog"],
   { revalidate: 60, tags: ["catalog"] },
@@ -83,6 +99,19 @@ export async function getCategories(): Promise<DecorCategory[]> {
 export async function getCategoryBySlug(slug: string): Promise<DecorCategory | undefined> {
   const { categories } = await getCatalog();
   return categories.find((c) => c.slug === slug);
+}
+
+export async function getSubcategoriesByCategory(categorySlug: string): Promise<DecorSubcategory[]> {
+  const { subcategories } = await getCatalog();
+  return subcategories.filter((s) => s.categorySlug === categorySlug);
+}
+
+export async function getSubcategoryBySlug(
+  categorySlug: string,
+  subcategorySlug: string,
+): Promise<DecorSubcategory | undefined> {
+  const { subcategories } = await getCatalog();
+  return subcategories.find((s) => s.categorySlug === categorySlug && s.slug === subcategorySlug);
 }
 
 export async function getServicesByCategory(categorySlug: string): Promise<DecorService[]> {
@@ -116,4 +145,4 @@ export async function getRelatedServices(service: DecorService, limit = 4): Prom
 }
 
 export { testimonials, cities };
-export type { DecorCategory, DecorService } from "./types";
+export type { DecorCategory, DecorService, DecorSubcategory } from "./types";

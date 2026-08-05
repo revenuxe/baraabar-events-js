@@ -51,17 +51,18 @@ async function fetchCatalog(): Promise<SearchCatalog> {
   return { categories, services };
 }
 
-export function useCatalogSearch(): SearchCatalog {
+export function useCatalogSearch(enabled: boolean = true): SearchCatalog {
   const [data, setData] = useState<SearchCatalog>(cache ?? { categories: [], services: [] });
 
   useEffect(() => {
+    if (!enabled) return;
     if (cache) {
       setData(cache);
       return;
     }
     if (!inflight) inflight = fetchCatalog().then((result) => (cache = result));
     inflight.then(setData);
-  }, []);
+  }, [enabled]);
 
   return data;
 }

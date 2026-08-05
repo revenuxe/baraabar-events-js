@@ -7,13 +7,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Search, ShoppingBag } from "lucide-react";
 import { SearchOverlay } from "@/components/SearchOverlay";
+import { CategoriesMegaMenu } from "@/components/CategoriesMegaMenu";
 import { useCart } from "@/lib/cart-store";
 
-const NAV = [
-  { to: "/", label: "Home" },
-  { to: "/categories", label: "Categories" },
-  { to: "/profile", label: "Profile" },
-];
 
 export function TopBar() {
   const pathname = usePathname();
@@ -34,20 +30,23 @@ export function TopBar() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
-          {NAV.map((n) => {
-            const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
-            return (
-              <Link
-                key={n.to}
-                href={n.to}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:text-primary ${
-                  active ? "text-primary" : "text-foreground/80"
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
+          <Link
+            href="/"
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:text-primary ${
+              pathname === "/" ? "text-primary" : "text-foreground/80"
+            }`}
+          >
+            Home
+          </Link>
+          <CategoriesMegaMenu />
+          <Link
+            href="/profile"
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors hover:text-primary ${
+              pathname.startsWith("/profile") ? "text-primary" : "text-foreground/80"
+            }`}
+          >
+            Profile
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
