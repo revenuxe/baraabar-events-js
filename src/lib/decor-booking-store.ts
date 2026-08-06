@@ -25,6 +25,7 @@ export type DecorBookingDraft = {
 };
 
 const KEY = "baraabar_decor_booking_draft_v1";
+const STEP_KEY = "baraabar_decor_booking_step_v1";
 
 const empty: DecorBookingDraft = {
   venue: { name: "", line1: "", line2: "", city: "", pincode: "", phone: "", label: "Home" },
@@ -51,6 +52,8 @@ export function useDecorBookingDraft() {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) setDraft(normalizeDraft(JSON.parse(raw)));
+      const rawStep = Number(localStorage.getItem(STEP_KEY));
+      if (Number.isFinite(rawStep) && rawStep > 0) setStep(rawStep);
     } catch {}
     setReady(true);
   }, []);
@@ -62,12 +65,23 @@ export function useDecorBookingDraft() {
     } catch {}
   }, [draft, ready]);
 
+  // Persisted separately from the draft so a mid-flow remount (e.g. the
+  // redirect out to /auth and back for the sign-in gate between Event and
+  // Venue) resumes on the same step instead of snapping back to Event.
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      localStorage.setItem(STEP_KEY, String(step));
+    } catch {}
+  }, [step, ready]);
+
   const update = (patch: Partial<DecorBookingDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const reset = () => {
     setDraft(empty);
     setStep(0);
     try {
       localStorage.removeItem(KEY);
+      localStorage.removeItem(STEP_KEY);
     } catch {}
   };
 

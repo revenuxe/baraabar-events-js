@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      // Cloudinary-hosted content images (e.g. festival/promo banners).
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
   compiler: {

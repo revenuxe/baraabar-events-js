@@ -137,6 +137,7 @@ export function BookWizard() {
     const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      setStep(2);
       router.push("/auth?redirect=%2Fbook");
       return false;
     }
@@ -165,7 +166,10 @@ export function BookWizard() {
       const { data: { user } } = await createClient().auth.getUser();
       setCheckingAccount(false);
       if (!user) {
-        // The local booking draft keeps the completed event step through sign-in.
+        // The local booking draft keeps the completed event step through
+        // sign-in — advance the step before leaving so the wizard resumes
+        // on Venue (not back at Event) once the user returns from /auth.
+        setStep(1);
         router.push("/auth?redirect=%2Fbook");
         return;
       }

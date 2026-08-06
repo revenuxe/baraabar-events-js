@@ -77,7 +77,7 @@ export default async function BookingsPage() {
             </Link>
           </div>
         ) : (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
             {bookings.map((b) => {
               const status = STATUS_META[b.status];
               const firstItem = b.booking_items[0];
