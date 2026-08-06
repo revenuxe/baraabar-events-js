@@ -224,6 +224,7 @@ export type Database = {
           vendor_paid_at: string | null
           vendor_payment_status: Database["public"]["Enums"]["vendor_payment_status"]
           vendor_quote_amount: number | null
+          vendor_quote_items: Json
           venue_city: string
           venue_line1: string
           venue_line2: string | null
@@ -251,6 +252,7 @@ export type Database = {
           vendor_paid_at?: string | null
           vendor_payment_status?: Database["public"]["Enums"]["vendor_payment_status"]
           vendor_quote_amount?: number | null
+          vendor_quote_items?: Json
           venue_city: string
           venue_line1: string
           venue_line2?: string | null
@@ -278,6 +280,7 @@ export type Database = {
           vendor_paid_at?: string | null
           vendor_payment_status?: Database["public"]["Enums"]["vendor_payment_status"]
           vendor_quote_amount?: number | null
+          vendor_quote_items?: Json
           venue_city?: string
           venue_line1?: string
           venue_line2?: string | null
@@ -669,6 +672,14 @@ export type Database = {
       }
       vendor_decline_assignment: {
         Args: { _booking_id: string }
+        Returns: undefined
+      }
+      vendor_finalize_payment: {
+        Args: { _booking_id: string; _final_amount: number }
+        Returns: undefined
+      }
+      vendor_save_quote: {
+        Args: { _booking_id: string; _items: Json; _total: number }
         Returns: undefined
       }
       vendor_submit_quote: {

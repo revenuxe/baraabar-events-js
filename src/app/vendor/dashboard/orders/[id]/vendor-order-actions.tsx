@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Check, CheckCircle2, Loader2, Upload, X, XCircle } from "lucide-react";
+import { Check, CheckCircle2, Download, FileEdit, Loader2, Upload, Wallet, X, XCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadVendorOrderImage } from "@/lib/vendor-upload-client";
 import type { Database } from "@/lib/supabase/types";
@@ -59,6 +60,9 @@ export function VendorOrderActions({
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
   const [savingPayment, setSavingPayment] = useState(false);
+  const [showFinalizePopup, setShowFinalizePopup] = useState(false);
+  const [finalAmount, setFinalAmount] = useState(billAmount ? String(billAmount) : quoteAmount ? String(quoteAmount) : "");
+  const [finalizing, setFinalizing] = useState(false);
 
   async function respond(accept: boolean) {
     setResponding(true);
@@ -124,12 +128,26 @@ export function VendorOrderActions({
       });
       if (error) throw error;
       toast.success("Order marked as Completed");
+      setShowFinalizePopup(true);
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not complete this order");
     } finally {
       setCompleting(false);
     }
+  }
+
+  async function finalizePayment() {
+    const amount = Number(finalAmount);
+    if (!amount || amount <= 0) return toast.error("Enter a final price greater than 0");
+    setFinalizing(true);
+    const supabase = createClient();
+    const { error } = await supabase.rpc("vendor_finalize_payment", { _booking_id: bookingId, _final_amount: amount });
+    setFinalizing(false);
+    if (error) return toast.error(error.message);
+    toast.success("Payment completed");
+    setShowFinalizePopup(false);
+    router.refresh();
   }
 
   async function recordPayment() {
@@ -184,7 +202,31 @@ export function VendorOrderActions({
   return (
     <>
       <section className="mt-4 rounded-3xl border border-border bg-card p-5 shadow-card">
-        <h2 className="mb-3 text-sm font-bold">Quote & billing</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-bold">Quote & billing</h2>
+          <div className="flex items-center gap-1.5">
+            {quoteAmount != null && (
+              <a
+                href={`/api/vendor/orders/${bookingId}/quote-pdf`}
+                className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground"
+                aria-label="Download quotation PDF"
+                title="Download quotation PDF"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </a>
+            )}
+            {paymentStatus === "paid" && (
+              <a
+                href={`/api/vendor/orders/${bookingId}/invoice-pdf`}
+                className="grid h-8 w-8 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow"
+                aria-label="Download invoice PDF"
+                title="Download invoice PDF"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
         <div className="space-y-3 text-sm">
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -207,6 +249,14 @@ export function VendorOrderActions({
                 {savingQuote ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
               </button>
             </div>
+            {paymentStatus !== "paid" && (
+              <Link
+                href={`/vendor/dashboard/orders/${bookingId}/quote`}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary"
+              >
+                <FileEdit className="h-3.5 w-3.5" /> Create a detailed quote
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center justify-between border-t border-border/60 pt-3">
@@ -223,6 +273,15 @@ export function VendorOrderActions({
               {paymentStatus === "paid" ? `Paid — ${money(paidAmount)}` : `${money(paidAmount)} paid so far`}
             </span>
           </div>
+
+          {status === "completed" && paymentStatus !== "paid" && (
+            <button
+              onClick={() => setShowFinalizePopup(true)}
+              className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-brand px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-glow"
+            >
+              <Wallet className="h-3.5 w-3.5" /> Complete payment
+            </button>
+          )}
 
           {billAmount != null && paymentStatus !== "paid" && (
             <div className="space-y-2 border-t border-border/60 pt-3">
@@ -337,6 +396,53 @@ export function VendorOrderActions({
           </div>
         )}
       </section>
+
+      {showFinalizePopup && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4"
+          onClick={() => setShowFinalizePopup(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-t-3xl bg-card p-5 shadow-elevated md:rounded-3xl"
+          >
+            <div className="mb-1 flex items-center gap-2">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-brand text-primary-foreground">
+                <Wallet className="h-4 w-4" />
+              </span>
+              <h3 className="text-sm font-bold">Complete payment</h3>
+            </div>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Order completed — enter the final price and confirm payment to close it out.
+            </p>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Final price (Rs.)
+            </label>
+            <input
+              type="number"
+              value={finalAmount}
+              onChange={(e) => setFinalAmount(e.target.value)}
+              placeholder="e.g. 3600"
+              className="mb-3 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowFinalizePopup(false)}
+                className="flex-1 rounded-full border border-border px-4 py-2.5 text-xs font-semibold"
+              >
+                Later
+              </button>
+              <button
+                onClick={finalizePayment}
+                disabled={finalizing}
+                className="flex-1 rounded-full bg-gradient-brand px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+              >
+                {finalizing ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Complete payment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
