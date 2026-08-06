@@ -16,9 +16,9 @@ type AddOnSnapshot = { id: string; name: string; price: number };
 // assigned soon") — this vendor IS the decorator, so it needs its own take
 // on what each status means from their side.
 const VENDOR_STATUS_DESCRIPTION: Record<Database["public"]["Enums"]["booking_status"], string> = {
-  pending: "Waiting for admin to confirm this booking before you can start.",
-  confirmed: "Ready for you to start — upload a setup photo when you begin.",
-  preparing: "In progress — upload a completion photo once the job is done.",
+  pending: "Confirm the order below once you're ready to take it on.",
+  confirmed: "Start preparing when you begin setting up.",
+  preparing: "In progress — mark it completed once the decoration and team photos are uploaded.",
   completed: "This order is complete.",
   cancelled: "This order was cancelled.",
 };
@@ -122,8 +122,8 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
         bookingId={booking.id}
         status={booking.status}
         acceptedAt={booking.vendor_accepted_at}
-        setupImageUrl={booking.setup_image_url}
-        completionImageUrl={booking.completion_image_url}
+        decorationImageUrl={booking.decoration_image_url}
+        teamImageUrl={booking.team_image_url}
         quoteAmount={booking.vendor_quote_amount}
         billAmount={booking.vendor_bill_amount}
         paymentStatus={booking.vendor_payment_status}

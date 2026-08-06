@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   if (!(file instanceof File) || typeof bookingId !== "string" || !bookingId) {
     return NextResponse.json({ error: "Missing file or bookingId" }, { status: 400 });
   }
-  if (kind !== "setup" && kind !== "completion") {
+  if (kind !== "decoration" && kind !== "team") {
     return NextResponse.json({ error: "Invalid upload kind" }, { status: 400 });
   }
 

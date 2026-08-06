@@ -4,13 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Check, CheckCircle2, Loader2, Upload, X } from "lucide-react";
+import { Check, CheckCircle2, Loader2, Upload, X, XCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadVendorOrderImage } from "@/lib/vendor-upload-client";
 import type { Database } from "@/lib/supabase/types";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 type PaymentStatus = Database["public"]["Enums"]["vendor_payment_status"];
+
+const NEXT_STATUS_LABEL: Partial<Record<BookingStatus, string>> = {
+  pending: "Confirm order",
+  confirmed: "Start preparing",
+};
+const NEXT_STATUS: Partial<Record<BookingStatus, BookingStatus>> = {
+  pending: "confirmed",
+  confirmed: "preparing",
+};
 
 function money(n: number | null): string {
   return `Rs. ${Number(n ?? 0).toLocaleString("en-IN")}`;
@@ -20,8 +29,8 @@ export function VendorOrderActions({
   bookingId,
   status,
   acceptedAt,
-  setupImageUrl,
-  completionImageUrl,
+  decorationImageUrl,
+  teamImageUrl,
   quoteAmount,
   billAmount,
   paymentStatus,
@@ -30,8 +39,8 @@ export function VendorOrderActions({
   bookingId: string;
   status: BookingStatus;
   acceptedAt: string | null;
-  setupImageUrl: string | null;
-  completionImageUrl: string | null;
+  decorationImageUrl: string | null;
+  teamImageUrl: string | null;
   quoteAmount: number | null;
   billAmount: number | null;
   paymentStatus: PaymentStatus;
@@ -40,8 +49,13 @@ export function VendorOrderActions({
   const router = useRouter();
   const [quote, setQuote] = useState(quoteAmount ? String(quoteAmount) : "");
   const [savingQuote, setSavingQuote] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [responding, setResponding] = useState(false);
+  const [decorationFile, setDecorationFile] = useState<File | null>(null);
+  const [teamFile, setTeamFile] = useState<File | null>(null);
+  const [completing, setCompleting] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
   const [savingPayment, setSavingPayment] = useState(false);
@@ -71,6 +85,53 @@ export function VendorOrderActions({
     router.refresh();
   }
 
+  async function advance() {
+    const next = NEXT_STATUS[status];
+    if (!next) return;
+    setAdvancing(true);
+    const supabase = createClient();
+    const { error } = await supabase.rpc("vendor_update_booking_status", { _booking_id: bookingId, _new_status: next });
+    setAdvancing(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Order moved to ${next}`);
+    router.refresh();
+  }
+
+  async function cancel() {
+    setCancelling(true);
+    const supabase = createClient();
+    const { error } = await supabase.rpc("vendor_update_booking_status", { _booking_id: bookingId, _new_status: "cancelled" });
+    setCancelling(false);
+    if (error) return toast.error(error.message);
+    toast.success("Order cancelled");
+    router.refresh();
+  }
+
+  async function complete() {
+    if (!decorationFile || !teamFile) return toast.error("Both photos are required to mark this order completed");
+    setCompleting(true);
+    try {
+      const [decorationUrl, teamUrl] = await Promise.all([
+        uploadVendorOrderImage(decorationFile, bookingId, "decoration"),
+        uploadVendorOrderImage(teamFile, bookingId, "team"),
+      ]);
+      const supabase = createClient();
+      const { error } = await supabase.rpc("vendor_update_booking_status", {
+        _booking_id: bookingId,
+        _new_status: "completed",
+        _decoration_image_url: decorationUrl,
+        _team_image_url: teamUrl,
+      });
+      if (error) throw error;
+      toast.success("Order marked as Completed");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not complete this order");
+    } finally {
+      setCompleting(false);
+    }
+  }
+
   async function recordPayment() {
     const amount = Number(paymentAmount);
     if (!amount || amount <= 0) return toast.error("Enter an amount greater than 0");
@@ -88,26 +149,6 @@ export function VendorOrderActions({
     setPaymentAmount("");
     setPaymentNote("");
     router.refresh();
-  }
-
-  async function handlePhoto(kind: "setup" | "completion", file: File) {
-    setUploading(true);
-    try {
-      const url = await uploadVendorOrderImage(file, bookingId, kind);
-      const supabase = createClient();
-      const { error } = await supabase.rpc("vendor_update_booking_status", {
-        _booking_id: bookingId,
-        _new_status: kind === "setup" ? "preparing" : "completed",
-        _image_url: url,
-      });
-      if (error) throw error;
-      toast.success(kind === "setup" ? "Setup photo uploaded — order is now Preparing" : "Order marked as Completed");
-      router.refresh();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
   }
 
   if (!acceptedAt) {
@@ -137,6 +178,8 @@ export function VendorOrderActions({
       </section>
     );
   }
+
+  const canCancel = status === "pending" || status === "confirmed" || status === "preparing";
 
   return (
     <>
@@ -213,71 +256,111 @@ export function VendorOrderActions({
       </section>
 
       <section className="mt-4 rounded-3xl border border-border bg-card p-5 shadow-card">
-        <h2 className="mb-3 text-sm font-bold">Progress photos</h2>
-
-        {status === "pending" && (
-          <p className="text-sm text-muted-foreground">
-            Waiting for the booking to be confirmed before you can start.
-          </p>
-        )}
-
-        {status === "confirmed" && (
-          <PhotoUpload
-            label="Upload a setup photo to mark this order as Preparing"
-            uploading={uploading}
-            onFile={(f) => handlePhoto("setup", f)}
-          />
-        )}
-
-        {status === "preparing" && (
-          <div className="space-y-4">
-            {setupImageUrl && <PhotoPreview label="Setup photo" url={setupImageUrl} />}
-            <PhotoUpload
-              label="Upload a completion (group) photo to mark this order as Completed"
-              uploading={uploading}
-              onFile={(f) => handlePhoto("completion", f)}
-            />
-          </div>
-        )}
+        <h2 className="mb-3 text-sm font-bold">Status</h2>
 
         {status === "completed" && (
           <div className="space-y-4">
-            {setupImageUrl && <PhotoPreview label="Setup photo" url={setupImageUrl} />}
-            {completionImageUrl && <PhotoPreview label="Completion photo" url={completionImageUrl} />}
+            {decorationImageUrl && <PhotoPreview label="Decoration photo" url={decorationImageUrl} />}
+            {teamImageUrl && <PhotoPreview label="Team photo" url={teamImageUrl} />}
             <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
               <CheckCircle2 className="h-4 w-4" /> Order completed
             </p>
           </div>
         )}
 
-        {status === "cancelled" && <p className="text-sm text-muted-foreground">This order was cancelled.</p>}
+        {status === "cancelled" && (
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
+            <XCircle className="h-4 w-4" /> This order was cancelled.
+          </p>
+        )}
+
+        {(status === "pending" || status === "confirmed") && (
+          <div className="space-y-2">
+            <button
+              onClick={advance}
+              disabled={advancing}
+              className="w-full rounded-full bg-gradient-brand px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+            >
+              {advancing ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : NEXT_STATUS_LABEL[status]}
+            </button>
+          </div>
+        )}
+
+        {status === "preparing" && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Upload a decoration photo and a photo with your team to mark this order completed.
+            </p>
+            <PhotoPicker label="Decoration photo" file={decorationFile} onChange={setDecorationFile} />
+            <PhotoPicker label="Team photo" file={teamFile} onChange={setTeamFile} />
+            <button
+              onClick={complete}
+              disabled={completing || !decorationFile || !teamFile}
+              className="w-full rounded-full bg-gradient-brand px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+            >
+              {completing ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Mark as Completed"}
+            </button>
+          </div>
+        )}
+
+        {canCancel && (
+          <div className="mt-3 border-t border-border/60 pt-3">
+            {confirmingCancel ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-destructive">
+                  Cancel this order? This can&apos;t be undone from here.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setConfirmingCancel(false)}
+                    className="flex-1 rounded-full border border-border px-4 py-2 text-xs font-semibold"
+                  >
+                    Keep order
+                  </button>
+                  <button
+                    onClick={cancel}
+                    disabled={cancelling}
+                    className="flex-1 rounded-full bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground disabled:opacity-60"
+                  >
+                    {cancelling ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Confirm cancel"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmingCancel(true)}
+                className="w-full rounded-full border border-destructive/40 px-4 py-2 text-xs font-semibold text-destructive"
+              >
+                Cancel order
+              </button>
+            )}
+          </div>
+        )}
       </section>
     </>
   );
 }
 
-function PhotoUpload({
+function PhotoPicker({
   label,
-  uploading,
-  onFile,
+  file,
+  onChange,
 }: {
   label: string;
-  uploading: boolean;
-  onFile: (file: File) => void;
+  file: File | null;
+  onChange: (file: File) => void;
 }) {
   return (
-    <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-border p-6 text-center text-xs font-semibold text-muted-foreground">
-      {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
-      {uploading ? "Uploading…" : label}
+    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-border p-4 text-xs font-semibold text-muted-foreground">
+      <Upload className="h-4 w-4 shrink-0" />
+      <span className="truncate">{file ? file.name : label}</span>
       <input
         type="file"
         accept="image/*"
-        disabled={uploading}
         className="hidden"
         onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onFile(file);
-          e.target.value = "";
+          const f = e.target.files?.[0];
+          if (f) onChange(f);
         }}
       />
     </label>

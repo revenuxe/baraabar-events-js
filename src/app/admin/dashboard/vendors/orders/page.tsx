@@ -226,31 +226,31 @@ export default function VendorOrdersAssignedPage() {
                 )}
               </div>
 
-              {(selected.setup_image_url || selected.completion_image_url) && (
+              {(selected.decoration_image_url || selected.team_image_url) && (
                 <div className="space-y-3 border-t border-border pt-4">
-                  {selected.setup_image_url && (
+                  {selected.decoration_image_url && (
                     <div>
                       <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Setup photo
-                      </p>
-                      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted">
-                        <Image src={selected.setup_image_url} alt="Setup" fill sizes="380px" className="object-cover" />
-                      </div>
-                    </div>
-                  )}
-                  {selected.completion_image_url && (
-                    <div>
-                      <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Completion photo
+                        Decoration photo
                       </p>
                       <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted">
                         <Image
-                          src={selected.completion_image_url}
-                          alt="Completion"
+                          src={selected.decoration_image_url}
+                          alt="Decoration"
                           fill
                           sizes="380px"
                           className="object-cover"
                         />
+                      </div>
+                    </div>
+                  )}
+                  {selected.team_image_url && (
+                    <div>
+                      <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Team photo
+                      </p>
+                      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted">
+                        <Image src={selected.team_image_url} alt="Team" fill sizes="380px" className="object-cover" />
                       </div>
                     </div>
                   )}

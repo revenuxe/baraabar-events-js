@@ -206,15 +206,15 @@ export type Database = {
       bookings: {
         Row: {
           assigned_vendor_id: string | null
-          completion_image_url: string | null
           created_at: string
+          decoration_image_url: string | null
           event_date: string
           event_time: string
           id: string
           notes: string | null
           order_code: string
-          setup_image_url: string | null
           status: Database["public"]["Enums"]["booking_status"]
+          team_image_url: string | null
           total: number
           updated_at: string
           user_id: string
@@ -233,15 +233,15 @@ export type Database = {
         }
         Insert: {
           assigned_vendor_id?: string | null
-          completion_image_url?: string | null
           created_at?: string
+          decoration_image_url?: string | null
           event_date: string
           event_time: string
           id?: string
           notes?: string | null
           order_code?: string
-          setup_image_url?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
+          team_image_url?: string | null
           total: number
           updated_at?: string
           user_id: string
@@ -260,15 +260,15 @@ export type Database = {
         }
         Update: {
           assigned_vendor_id?: string | null
-          completion_image_url?: string | null
           created_at?: string
+          decoration_image_url?: string | null
           event_date?: string
           event_time?: string
           id?: string
           notes?: string | null
           order_code?: string
-          setup_image_url?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
+          team_image_url?: string | null
           total?: number
           updated_at?: string
           user_id?: string
@@ -663,8 +663,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      vendor_accept_assignment: { Args: { _booking_id: string }; Returns: undefined }
-      vendor_decline_assignment: { Args: { _booking_id: string }; Returns: undefined }
+      vendor_accept_assignment: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
+      vendor_decline_assignment: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
       vendor_submit_quote: {
         Args: { _amount: number; _booking_id: string }
         Returns: undefined
@@ -672,8 +678,9 @@ export type Database = {
       vendor_update_booking_status: {
         Args: {
           _booking_id: string
-          _image_url: string
+          _decoration_image_url?: string
           _new_status: Database["public"]["Enums"]["booking_status"]
+          _team_image_url?: string
         }
         Returns: undefined
       }

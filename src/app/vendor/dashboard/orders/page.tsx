@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -9,8 +9,16 @@ import type { Database } from "@/lib/supabase/types";
 
 type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
 
+const FILTERS = [
+  { key: "active", label: "Active" },
+  { key: "needs_response", label: "Needs Response" },
+  { key: "completed", label: "Completed" },
+  { key: "all", label: "All" },
+] as const;
+
 export default function VendorOrdersPage() {
   const [rows, setRows] = useState<BookingRow[] | null>(null);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("active");
 
   useEffect(() => {
     (async () => {
@@ -35,28 +43,59 @@ export default function VendorOrdersPage() {
     })();
   }, []);
 
+  const filtered = useMemo(() => {
+    if (!rows) return [];
+    switch (filter) {
+      case "needs_response":
+        return rows.filter((b) => !b.vendor_accepted_at);
+      case "completed":
+        return rows.filter((b) => b.status === "completed");
+      case "active":
+        return rows.filter((b) => b.vendor_accepted_at && b.status !== "completed" && b.status !== "cancelled");
+      default:
+        return rows;
+    }
+  }, [rows, filter]);
+
   return (
     <section>
       <div className="mb-4">
         <h2 className="font-display text-2xl">Assigned orders</h2>
-        <p className="text-sm text-muted-foreground">{rows ? `${rows.length} order${rows.length === 1 ? "" : "s"}` : " "}</p>
+        <p className="text-sm text-muted-foreground">{rows ? `${rows.length} total` : " "}</p>
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              filter === f.key ? "bg-gradient-brand text-primary-foreground shadow-glow" : "border border-border bg-card"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
       {!rows ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
-      ) : rows.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
-          No orders assigned to you yet.
+          {rows.length === 0 ? "No orders assigned to you yet." : "Nothing here."}
         </div>
       ) : (
         <div className="space-y-2">
-          {rows.map((b) => {
+          {filtered.map((b) => {
             const status = STATUS_META[b.status];
+            const isCompleted = b.status === "completed";
             return (
               <Link
                 key={b.id}
                 href={`/vendor/dashboard/orders/${b.id}`}
-                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-sm shadow-card transition active:scale-[0.99]"
+                className={`flex items-center gap-3 rounded-2xl border border-border p-3.5 text-sm shadow-card transition active:scale-[0.99] ${
+                  isCompleted ? "bg-muted/60 opacity-70 grayscale-[35%]" : "bg-card"
+                }`}
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">#{b.order_code}</p>
