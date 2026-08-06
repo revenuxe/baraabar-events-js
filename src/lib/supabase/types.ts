@@ -205,16 +205,24 @@ export type Database = {
       }
       bookings: {
         Row: {
+          assigned_vendor_id: string | null
+          completion_image_url: string | null
           created_at: string
           event_date: string
           event_time: string
           id: string
           notes: string | null
           order_code: string
+          setup_image_url: string | null
           status: Database["public"]["Enums"]["booking_status"]
           total: number
           updated_at: string
           user_id: string
+          vendor_bill_amount: number | null
+          vendor_paid_amount: number
+          vendor_paid_at: string | null
+          vendor_payment_status: Database["public"]["Enums"]["vendor_payment_status"]
+          vendor_quote_amount: number | null
           venue_city: string
           venue_line1: string
           venue_line2: string | null
@@ -223,16 +231,24 @@ export type Database = {
           venue_pincode: string
         }
         Insert: {
+          assigned_vendor_id?: string | null
+          completion_image_url?: string | null
           created_at?: string
           event_date: string
           event_time: string
           id?: string
           notes?: string | null
           order_code?: string
+          setup_image_url?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total: number
           updated_at?: string
           user_id: string
+          vendor_bill_amount?: number | null
+          vendor_paid_amount?: number
+          vendor_paid_at?: string | null
+          vendor_payment_status?: Database["public"]["Enums"]["vendor_payment_status"]
+          vendor_quote_amount?: number | null
           venue_city: string
           venue_line1: string
           venue_line2?: string | null
@@ -241,16 +257,24 @@ export type Database = {
           venue_pincode: string
         }
         Update: {
+          assigned_vendor_id?: string | null
+          completion_image_url?: string | null
           created_at?: string
           event_date?: string
           event_time?: string
           id?: string
           notes?: string | null
           order_code?: string
+          setup_image_url?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total?: number
           updated_at?: string
           user_id?: string
+          vendor_bill_amount?: number | null
+          vendor_paid_amount?: number
+          vendor_paid_at?: string | null
+          vendor_payment_status?: Database["public"]["Enums"]["vendor_payment_status"]
+          vendor_quote_amount?: number | null
           venue_city?: string
           venue_line1?: string
           venue_line2?: string | null
@@ -258,7 +282,15 @@ export type Database = {
           venue_phone?: string
           venue_pincode?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookings_assigned_vendor_id_fkey"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
@@ -523,6 +555,60 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          business_name: string
+          city: string
+          contact_name: string
+          created_at: string
+          id: string
+          phone: string
+          pincode: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["vendor_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          business_name: string
+          city: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          phone: string
+          pincode: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          business_name?: string
+          city?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          pincode?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -536,15 +622,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      vendor_submit_quote: {
+        Args: { _amount: number; _booking_id: string }
+        Returns: undefined
+      }
+      vendor_update_booking_status: {
+        Args: {
+          _booking_id: string
+          _image_url: string
+          _new_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      app_role: "admin" | "customer"
+      app_role: "admin" | "customer" | "vendor"
       booking_status:
         | "pending"
         | "confirmed"
         | "preparing"
         | "completed"
         | "cancelled"
+      vendor_payment_status: "unpaid" | "paid"
+      vendor_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -675,7 +775,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["admin", "customer"],
+      app_role: ["admin", "customer", "vendor"],
       booking_status: [
         "pending",
         "confirmed",
@@ -683,6 +783,8 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      vendor_payment_status: ["unpaid", "paid"],
+      vendor_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

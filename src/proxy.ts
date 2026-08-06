@@ -11,6 +11,8 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  const isVendorRoute =
+    pathname.startsWith("/vendor") && pathname !== "/vendor/login" && pathname !== "/vendor/status";
 
   if (isAdminRoute) {
     if (!user) {
@@ -27,6 +29,31 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  if (isVendorRoute) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/vendor/login", request.url));
+    }
+
+    const { data: isVendor } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "vendor",
+    });
+
+    if (!isVendor) {
+      return NextResponse.redirect(new URL("/vendor/login", request.url));
+    }
+
+    const { data: vendor } = await supabase
+      .from("vendors")
+      .select("status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (vendor?.status !== "approved") {
+      return NextResponse.redirect(new URL("/vendor/status", request.url));
+    }
+  }
+
   return supabaseResponse;
 }
 
@@ -39,5 +66,5 @@ export const config = {
   // marketing/legal pages, /book — its catalog fetch is a cached,
   // non-cookie client, and the wizard's own auth check is entirely
   // client-side) are deliberately left out.
-  matcher: ["/admin/:path*", "/profile/:path*", "/auth/:path*"],
+  matcher: ["/admin/:path*", "/profile/:path*", "/auth/:path*", "/vendor/:path*"],
 };

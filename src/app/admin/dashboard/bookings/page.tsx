@@ -10,6 +10,7 @@ type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
 type BookingItemRow = Database["public"]["Tables"]["booking_items"]["Row"];
 type StatusEventRow = Database["public"]["Tables"]["booking_status_events"]["Row"];
 type ProfileLite = { full_name: string | null; phone: string | null };
+type VendorLite = { id: string; business_name: string };
 
 // profiles.full_name can be unset (e.g. Google sign-in that skipped the
 // complete-profile step), so fall back to the name typed into this specific
@@ -36,15 +37,18 @@ export default function AdminBookingsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [events, setEvents] = useState<Record<string, StatusEventRow[]>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [vendors, setVendors] = useState<VendorLite[]>([]);
 
   async function load() {
     setLoading(true);
     const supabase = createClient();
-    const [{ data: bookingRows }, { data: itemRows }] = await Promise.all([
+    const [{ data: bookingRows }, { data: itemRows }, { data: vendorRows }] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
       supabase.from("booking_items").select("*"),
+      supabase.from("vendors").select("id, business_name").eq("status", "approved").order("business_name"),
     ]);
     setBookings(bookingRows ?? []);
+    setVendors(vendorRows ?? []);
 
     const grouped: Record<string, BookingItemRow[]> = {};
     for (const it of itemRows ?? []) (grouped[it.booking_id] ??= []).push(it);
@@ -78,6 +82,18 @@ export default function AdminBookingsPage() {
         .order("created_at");
       setEvents((prev) => ({ ...prev, [id]: data ?? [] }));
     }
+  }
+
+  async function assignVendor(id: string, vendorId: string) {
+    setBusyId(id);
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("bookings")
+      .update({ assigned_vendor_id: vendorId || null })
+      .eq("id", id);
+    if (error) alert(error.message);
+    else setBookings((rows) => rows.map((b) => (b.id === id ? { ...b, assigned_vendor_id: vendorId || null } : b)));
+    setBusyId(null);
   }
 
   async function updateStatus(id: string, status: BookingStatus) {
@@ -223,6 +239,25 @@ export default function AdminBookingsPage() {
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Delete
                 </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Assigned vendor
+                </span>
+                <select
+                  value={selected.assigned_vendor_id ?? ""}
+                  onChange={(e) => assignVendor(selected.id, e.target.value)}
+                  disabled={busyId === selected.id}
+                  className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
+                >
+                  <option value="">— Unassigned —</option>
+                  {vendors.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.business_name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex items-center justify-between rounded-2xl border border-dashed border-border p-3">

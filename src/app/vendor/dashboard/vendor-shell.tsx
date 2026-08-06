@@ -3,38 +3,21 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import {
-  ShieldCheck,
-  LogOut,
-  LayoutGrid,
-  Layers,
-  FolderTree,
-  PartyPopper,
-  Gift,
-  CalendarCheck,
-  Users as UsersIcon,
-  Store,
-} from "lucide-react";
+import { Store, LogOut, LayoutGrid, CalendarCheck } from "lucide-react";
 
 const NAV = [
-  { href: "/admin/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
-  { href: "/admin/dashboard/bookings", label: "Bookings", icon: CalendarCheck, exact: false },
-  { href: "/admin/dashboard/categories", label: "Categories", icon: Layers, exact: false },
-  { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree, exact: false },
-  { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper, exact: false },
-  { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift, exact: false },
-  { href: "/admin/dashboard/vendors", label: "Vendors", icon: Store, exact: false },
-  { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
+  { href: "/vendor/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
+  { href: "/vendor/dashboard/orders", label: "Assigned Orders", icon: CalendarCheck, exact: false },
 ];
 
-export function AdminShell({ email, children }: { email: string; children: React.ReactNode }) {
+export function VendorShell({ businessName, children }: { businessName: string; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
   async function signOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/vendor/login");
     router.refresh();
   }
 
@@ -44,17 +27,17 @@ export function AdminShell({ email, children }: { email: string; children: React
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
-              <ShieldCheck className="h-4 w-4" />
+              <Store className="h-4 w-4" />
             </span>
             <span>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Baraabar
               </p>
-              <p className="-mt-0.5 text-sm font-bold">Admin Console</p>
+              <p className="-mt-0.5 text-sm font-bold">Vendor Portal</p>
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:block">{email}</span>
+            <span className="hidden text-xs text-muted-foreground sm:block">{businessName}</span>
             <button
               onClick={signOut}
               className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold"
