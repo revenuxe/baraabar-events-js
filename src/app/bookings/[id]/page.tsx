@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, MapPin, StickyNote } from "lucide-react";
+import { ArrowLeft, Check, Download, MapPin, StickyNote } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_META, STATUS_ORDER, type BookingStatus } from "../status-meta";
@@ -61,6 +61,14 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           <span className={`rounded-full px-3 py-1 text-xs font-bold ${status.badgeClass}`}>{status.label}</span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{status.description}</p>
+
+        <a
+          href={`/bookings/${booking.id}/estimate`}
+          download
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold shadow-card"
+        >
+          <Download className="h-3.5 w-3.5" /> Download estimate (PDF)
+        </a>
 
         {/* Status timeline */}
         <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-card">

@@ -6,6 +6,7 @@ import type { DecorService } from "@/data/types";
 export function ServiceCard({
   service,
   badge = "trending",
+  size = "sm",
 }: {
   service: DecorService;
   /** Which flag-driven badge to show, e.g. so a product marked both
@@ -13,8 +14,17 @@ export function ServiceCard({
    * rendered inside the Featured section. Defaults to trending for every
    * other context (category pages, related products, search). */
   badge?: "trending" | "featured";
+  /** Card/badge scale — "md" for the homepage carousels where cards have
+   * more breathing room, "sm" (default) for denser grids (category pages,
+   * search, related products) where cards run narrower. */
+  size?: "sm" | "md";
 }) {
   const showBadge = badge === "featured" ? service.isFeatured : service.isTrending;
+  const pillClass =
+    size === "md"
+      ? "rounded-full px-2.5 py-1 text-[10px] font-bold leading-tight"
+      : "rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-tight";
+  const iconClass = size === "md" ? "h-3 w-3" : "h-2.5 w-2.5";
   return (
     <Link
       href={`/categories/${service.categorySlug}/${service.slug}`}
@@ -29,23 +39,23 @@ export function ServiceCard({
           sizes="(min-width: 768px) 33vw, 50vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1.5">
+        <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1">
           {service.discountPct > 0 ? (
-            <span className="shrink-0 rounded-full bg-gradient-brand px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow-glow">
+            <span className={`shrink-0 bg-gradient-brand text-primary-foreground shadow-glow ${pillClass}`}>
               {service.discountPct}% off
             </span>
           ) : (
             <span />
           )}
           {showBadge && (
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
+            <span className={`flex shrink-0 items-center gap-0.5 bg-black/70 text-white backdrop-blur ${pillClass}`}>
               {badge === "featured" ? (
                 <>
-                  <Sparkles className="h-3 w-3 fill-current text-accent" /> Featured
+                  <Sparkles className={`${iconClass} fill-current text-accent`} /> Featured
                 </>
               ) : (
                 <>
-                  <Flame className="h-3 w-3 fill-current text-orange-400" /> Trending
+                  <Flame className={`${iconClass} fill-current text-orange-400`} /> Trending
                 </>
               )}
             </span>

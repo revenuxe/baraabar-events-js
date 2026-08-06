@@ -20,6 +20,7 @@ export function BookWizard() {
   const { items, ready: cartReady, subtotal, clear } = useCart();
   const [done, setDone] = useState(false);
   const [orderCode, setOrderCode] = useState("");
+  const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checkingAccount, setCheckingAccount] = useState(false);
   const router = useRouter();
@@ -129,6 +130,7 @@ export function BookWizard() {
     reset();
     setSubmitting(false);
     setOrderCode(booking.order_code);
+    setBookingId(booking.id);
     setDone(true);
   }
 
@@ -187,7 +189,7 @@ export function BookWizard() {
     else router.push("/cart");
   };
 
-  if (done) return <Success orderId={orderCode} />;
+  if (done) return <Success orderId={orderCode} bookingId={bookingId} />;
 
   return (
     <div className="min-h-dvh bg-background pb-32">

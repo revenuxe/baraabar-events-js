@@ -39,7 +39,7 @@ export function FeaturedCollections({
       <div className="no-scrollbar -mx-5 flex snap-x-mandatory gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-4 md:gap-5 md:overflow-visible md:px-0">
         {services.map((s) => (
           <div key={s.id} className="w-48 shrink-0 snap-start-safe md:w-auto">
-            <ServiceCard service={s} badge={cardBadge} />
+            <ServiceCard service={s} badge={cardBadge} size="md" />
           </div>
         ))}
       </div>
