@@ -29,24 +29,28 @@ export function ServiceCard({
           sizes="(min-width: 768px) 33vw, 50vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        {service.discountPct > 0 && (
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-gradient-brand px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow-glow">
-            {service.discountPct}% off
-          </span>
-        )}
-        {showBadge && (
-          <span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
-            {badge === "featured" ? (
-              <>
-                <Sparkles className="h-3 w-3 fill-current text-accent" /> Featured
-              </>
-            ) : (
-              <>
-                <Flame className="h-3 w-3 fill-current text-orange-400" /> Trending
-              </>
-            )}
-          </span>
-        )}
+        <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1.5">
+          {service.discountPct > 0 ? (
+            <span className="shrink-0 rounded-full bg-gradient-brand px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow-glow">
+              {service.discountPct}% off
+            </span>
+          ) : (
+            <span />
+          )}
+          {showBadge && (
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
+              {badge === "featured" ? (
+                <>
+                  <Sparkles className="h-3 w-3 fill-current text-accent" /> Featured
+                </>
+              ) : (
+                <>
+                  <Flame className="h-3 w-3 fill-current text-orange-400" /> Trending
+                </>
+              )}
+            </span>
+          )}
+        </div>
       </div>
       <div className="p-3.5">
         <h3 className="truncate text-sm font-bold">{service.name}</h3>

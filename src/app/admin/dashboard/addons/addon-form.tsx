@@ -17,7 +17,7 @@ export function AddonForm({ addon }: { addon: AddonRow | null }) {
   const isNew = !addon;
 
   const [name, setName] = useState(addon?.name ?? "");
-  const [price, setPrice] = useState(addon?.price ?? 0);
+  const [price, setPrice] = useState<number | "">(addon?.price ?? "");
   const [sortOrder, setSortOrder] = useState(addon?.sort_order ?? 0);
   const [isActive, setIsActive] = useState(addon?.is_active ?? true);
 
@@ -87,11 +87,11 @@ export function AddonForm({ addon }: { addon: AddonRow | null }) {
   async function handleSave() {
     setError(null);
     if (!name.trim()) return setError("Name is required");
-    if (price < 0) return setError("Price can't be negative");
+    if (price === "" || price <= 0) return setError("Price must be greater than 0");
 
     setSaving(true);
     const supabase = createClient();
-    const payload = { name: name.trim(), price, sort_order: sortOrder, is_active: isActive };
+    const payload = { name: name.trim(), price: Number(price), sort_order: sortOrder, is_active: isActive };
 
     const { data: savedAddon, error: saveError } = isNew
       ? await supabase.from("addons").insert(payload).select("id").single()
@@ -140,7 +140,8 @@ export function AddonForm({ addon }: { addon: AddonRow | null }) {
             <input
               type="number"
               value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
+              onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="e.g. 499"
               className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>

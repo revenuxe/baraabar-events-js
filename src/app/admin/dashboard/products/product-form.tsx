@@ -76,7 +76,7 @@ export function ProductForm({
   const [isActive, setIsActive] = useState(product?.is_active ?? true);
   const [sortOrder, setSortOrder] = useState(product?.sort_order ?? 0);
 
-  const [price, setPrice] = useState(product?.price ?? 0);
+  const [price, setPrice] = useState<number | "">(product?.price ?? "");
   const [salePrice, setSalePrice] = useState<number | "">(product?.sale_price ?? "");
 
   const [images, setImages] = useState<string[]>(product?.images ?? []);
@@ -99,7 +99,9 @@ export function ProductForm({
   );
 
   const discountPct =
-    salePrice !== "" && price > 0 ? Math.round(((price - Number(salePrice)) / price) * 100) : 0;
+    salePrice !== "" && price !== "" && price > 0
+      ? Math.round(((price - Number(salePrice)) / price) * 100)
+      : 0;
 
   function handleNameChange(v: string) {
     setName(v);
@@ -134,7 +136,7 @@ export function ProductForm({
       setTab("details");
       return setError("Category is required");
     }
-    if (price <= 0) {
+    if (price === "" || price <= 0) {
       setTab("pricing");
       return setError("Price must be greater than 0");
     }
@@ -152,7 +154,7 @@ export function ProductForm({
       subcategory_id: subcategoryId || null,
       tagline: tagline.trim() || null,
       description: description.trim() || null,
-      price,
+      price: Number(price),
       sale_price: salePrice === "" ? null : Number(salePrice),
       images,
       included: included.map((i) => i.trim()).filter(Boolean),
@@ -322,7 +324,8 @@ export function ProductForm({
                 <input
                   type="number"
                   value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
+                  onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                  placeholder="e.g. 2999"
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
                 />
               </Field>
