@@ -249,14 +249,13 @@ export function VendorOrderActions({
                 {savingQuote ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
               </button>
             </div>
-            {paymentStatus !== "paid" && (
-              <Link
-                href={`/vendor/dashboard/orders/${bookingId}/quote`}
-                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary"
-              >
-                <FileEdit className="h-3.5 w-3.5" /> Create a detailed quote
-              </Link>
-            )}
+            <Link
+              href={`/vendor/dashboard/orders/${bookingId}/quote`}
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary"
+            >
+              <FileEdit className="h-3.5 w-3.5" />
+              {paymentStatus === "paid" ? "View detailed quote" : quoteAmount != null ? "Edit detailed quote" : "Create a detailed quote"}
+            </Link>
           </div>
 
           <div className="flex items-center justify-between border-t border-border/60 pt-3">
