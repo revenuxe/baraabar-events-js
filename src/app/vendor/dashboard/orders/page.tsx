@@ -10,15 +10,15 @@ import type { Database } from "@/lib/supabase/types";
 type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
 
 const FILTERS = [
+  { key: "all", label: "All" },
   { key: "active", label: "Active" },
   { key: "needs_response", label: "Needs Response" },
   { key: "completed", label: "Completed" },
-  { key: "all", label: "All" },
 ] as const;
 
 export default function VendorOrdersPage() {
   const [rows, setRows] = useState<BookingRow[] | null>(null);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("active");
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
 
   useEffect(() => {
     (async () => {
