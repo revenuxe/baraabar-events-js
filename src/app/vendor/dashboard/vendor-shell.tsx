@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Store, LogOut, LayoutGrid, CalendarCheck } from "lucide-react";
+import { Store, LogOut, LayoutGrid, CalendarCheck, Wallet } from "lucide-react";
 
 const NAV = [
   { href: "/vendor/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
   { href: "/vendor/dashboard/orders", label: "Assigned Orders", icon: CalendarCheck, exact: false },
+  { href: "/vendor/dashboard/billing", label: "Billing", icon: Wallet, exact: false },
 ];
 
 export function VendorShell({ businessName, children }: { businessName: string; children: React.ReactNode }) {

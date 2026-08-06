@@ -65,9 +65,15 @@ export default function VendorOrdersPage() {
                     {b.event_time} · {b.venue_city}
                   </p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${status.badgeClass}`}>
-                  {status.label}
-                </span>
+                {!b.vendor_accepted_at ? (
+                  <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold text-primary">
+                    Needs your response
+                  </span>
+                ) : (
+                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${status.badgeClass}`}>
+                    {status.label}
+                  </span>
+                )}
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
               </Link>
             );

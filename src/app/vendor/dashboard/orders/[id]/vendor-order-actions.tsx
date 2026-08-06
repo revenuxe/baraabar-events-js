@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, Upload } from "lucide-react";
+import { Check, CheckCircle2, Loader2, Upload, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadVendorOrderImage } from "@/lib/vendor-upload-client";
 import type { Database } from "@/lib/supabase/types";
@@ -19,6 +19,7 @@ function money(n: number | null): string {
 export function VendorOrderActions({
   bookingId,
   status,
+  acceptedAt,
   setupImageUrl,
   completionImageUrl,
   quoteAmount,
@@ -28,6 +29,7 @@ export function VendorOrderActions({
 }: {
   bookingId: string;
   status: BookingStatus;
+  acceptedAt: string | null;
   setupImageUrl: string | null;
   completionImageUrl: string | null;
   quoteAmount: number | null;
@@ -39,6 +41,23 @@ export function VendorOrderActions({
   const [quote, setQuote] = useState(quoteAmount ? String(quoteAmount) : "");
   const [savingQuote, setSavingQuote] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [responding, setResponding] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentNote, setPaymentNote] = useState("");
+  const [savingPayment, setSavingPayment] = useState(false);
+
+  async function respond(accept: boolean) {
+    setResponding(true);
+    const supabase = createClient();
+    const { error } = await supabase.rpc(accept ? "vendor_accept_assignment" : "vendor_decline_assignment", {
+      _booking_id: bookingId,
+    });
+    setResponding(false);
+    if (error) return toast.error(error.message);
+    toast.success(accept ? "Order accepted" : "Order declined");
+    router.refresh();
+    if (!accept) router.push("/vendor/dashboard/orders");
+  }
 
   async function submitQuote() {
     const amount = Number(quote);
@@ -49,6 +68,25 @@ export function VendorOrderActions({
     setSavingQuote(false);
     if (error) return toast.error(error.message);
     toast.success("Quote submitted");
+    router.refresh();
+  }
+
+  async function recordPayment() {
+    const amount = Number(paymentAmount);
+    if (!amount || amount <= 0) return toast.error("Enter an amount greater than 0");
+    setSavingPayment(true);
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("vendor_payments")
+      .insert({ booking_id: bookingId, amount, note: paymentNote.trim() || null, recorded_by: user?.id ?? null });
+    setSavingPayment(false);
+    if (error) return toast.error(error.message);
+    toast.success("Payment recorded");
+    setPaymentAmount("");
+    setPaymentNote("");
     router.refresh();
   }
 
@@ -70,6 +108,34 @@ export function VendorOrderActions({
     } finally {
       setUploading(false);
     }
+  }
+
+  if (!acceptedAt) {
+    return (
+      <section className="mt-4 rounded-3xl border border-border bg-card p-5 shadow-card">
+        <h2 className="mb-1 text-sm font-bold">Accept this order?</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Confirm you can take this job to unlock quoting, billing, and progress updates. Declining removes you
+          from this order so admin can reassign it.
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => respond(false)}
+            disabled={responding}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-destructive/40 px-4 py-2.5 text-xs font-semibold text-destructive disabled:opacity-60"
+          >
+            <X className="h-3.5 w-3.5" /> Decline
+          </button>
+          <button
+            onClick={() => respond(true)}
+            disabled={responding}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-brand px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+          >
+            {responding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-3.5 w-3.5" />} Accept
+          </button>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -111,9 +177,38 @@ export function VendorOrderActions({
                 paymentStatus === "paid" ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600"
               }`}
             >
-              {paymentStatus === "paid" ? `Paid — ${money(paidAmount)}` : "Unpaid"}
+              {paymentStatus === "paid" ? `Paid — ${money(paidAmount)}` : `${money(paidAmount)} paid so far`}
             </span>
           </div>
+
+          {billAmount != null && paymentStatus !== "paid" && (
+            <div className="space-y-2 border-t border-border/60 pt-3">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Record a payment you collected
+              </label>
+              <input
+                type="number"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="Amount"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+              <input
+                type="text"
+                value={paymentNote}
+                onChange={(e) => setPaymentNote(e.target.value)}
+                placeholder="Note (e.g. Advance, Final settlement)"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                onClick={recordPayment}
+                disabled={savingPayment}
+                className="w-full rounded-full border border-border bg-background px-4 py-2.5 text-xs font-bold disabled:opacity-60"
+              >
+                {savingPayment ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Record payment"}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

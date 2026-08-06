@@ -87,12 +87,17 @@ export default function AdminBookingsPage() {
   async function assignVendor(id: string, vendorId: string) {
     setBusyId(id);
     const supabase = createClient();
+    // A (re)assignment always needs a fresh accept from the vendor, so
+    // clear any prior acceptance rather than leaving it looking pre-accepted.
     const { error } = await supabase
       .from("bookings")
-      .update({ assigned_vendor_id: vendorId || null })
+      .update({ assigned_vendor_id: vendorId || null, vendor_accepted_at: null })
       .eq("id", id);
     if (error) alert(error.message);
-    else setBookings((rows) => rows.map((b) => (b.id === id ? { ...b, assigned_vendor_id: vendorId || null } : b)));
+    else
+      setBookings((rows) =>
+        rows.map((b) => (b.id === id ? { ...b, assigned_vendor_id: vendorId || null, vendor_accepted_at: null } : b)),
+      );
     setBusyId(null);
   }
 

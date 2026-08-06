@@ -6,11 +6,22 @@ import { ArrowLeft, MapPin, StickyNote } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_META } from "@/app/bookings/status-meta";
 import { VendorOrderActions } from "./vendor-order-actions";
-import type { Json } from "@/lib/supabase/types";
+import type { Database, Json } from "@/lib/supabase/types";
 
 export const metadata: Metadata = { title: "Order details | Baraabar Vendor Portal", robots: { index: false, follow: false } };
 
 type AddOnSnapshot = { id: string; name: string; price: number };
+
+// STATUS_META's copy is written for the customer (e.g. "a decorator will be
+// assigned soon") — this vendor IS the decorator, so it needs its own take
+// on what each status means from their side.
+const VENDOR_STATUS_DESCRIPTION: Record<Database["public"]["Enums"]["booking_status"], string> = {
+  pending: "Waiting for admin to confirm this booking before you can start.",
+  confirmed: "Ready for you to start — upload a setup photo when you begin.",
+  preparing: "In progress — upload a completion photo once the job is done.",
+  completed: "This order is complete.",
+  cancelled: "This order was cancelled.",
+};
 
 function parseAddOns(json: Json): AddOnSnapshot[] {
   if (!Array.isArray(json)) return [];
@@ -48,7 +59,7 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
         <h1 className="font-display text-3xl">#{booking.order_code}</h1>
         <span className={`rounded-full px-3 py-1 text-xs font-bold ${status.badgeClass}`}>{status.label}</span>
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">{status.description}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{VENDOR_STATUS_DESCRIPTION[booking.status]}</p>
 
       <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-card">
         <h2 className="mb-3 text-sm font-bold">Decorations</h2>
@@ -110,6 +121,7 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
       <VendorOrderActions
         bookingId={booking.id}
         status={booking.status}
+        acceptedAt={booking.vendor_accepted_at}
         setupImageUrl={booking.setup_image_url}
         completionImageUrl={booking.completion_image_url}
         quoteAmount={booking.vendor_quote_amount}

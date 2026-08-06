@@ -7,6 +7,7 @@ const TABS = [
   { href: "/admin/dashboard/vendors", label: "All Vendors", exact: true },
   { href: "/admin/dashboard/vendors/pending", label: "Pending Applications", exact: false },
   { href: "/admin/dashboard/vendors/orders", label: "Orders Assigned", exact: false },
+  { href: "/admin/dashboard/vendors/billing", label: "Billing", exact: false },
 ];
 
 export default function VendorsLayout({ children }: { children: React.ReactNode }) {

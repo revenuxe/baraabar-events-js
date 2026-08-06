@@ -218,6 +218,7 @@ export type Database = {
           total: number
           updated_at: string
           user_id: string
+          vendor_accepted_at: string | null
           vendor_bill_amount: number | null
           vendor_paid_amount: number
           vendor_paid_at: string | null
@@ -244,6 +245,7 @@ export type Database = {
           total: number
           updated_at?: string
           user_id: string
+          vendor_accepted_at?: string | null
           vendor_bill_amount?: number | null
           vendor_paid_amount?: number
           vendor_paid_at?: string | null
@@ -270,6 +272,7 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id?: string
+          vendor_accepted_at?: string | null
           vendor_bill_amount?: number | null
           vendor_paid_amount?: number
           vendor_paid_at?: string | null
@@ -555,6 +558,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          id: string
+          note: string | null
+          paid_at: string
+          recorded_by: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+          recorded_by?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+          recorded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           address_line1: string
@@ -622,6 +663,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      vendor_accept_assignment: { Args: { _booking_id: string }; Returns: undefined }
+      vendor_decline_assignment: { Args: { _booking_id: string }; Returns: undefined }
       vendor_submit_quote: {
         Args: { _amount: number; _booking_id: string }
         Returns: undefined

@@ -64,24 +64,28 @@ export default function VendorOrdersAssignedPage() {
     setBookings((rows) => rows.map((b) => (b.id === booking.id ? { ...b, vendor_bill_amount: amount } : b)));
   }
 
-  async function markPaid(booking: BookingRow) {
+  // Inserts into the vendor_payments ledger (see billing/page.tsx) rather
+  // than setting bookings.vendor_paid_amount directly — a DB trigger keeps
+  // that summary column in sync, so this stays consistent with the payment
+  // history shown on the Billing tab instead of silently overwriting it.
+  async function recordPayment(booking: BookingRow) {
     const amount = Number(paidInput);
     if (!amount || amount <= 0) return alert("Enter a paid amount greater than 0");
     setBusy(true);
     const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const { error } = await supabase
-      .from("bookings")
-      .update({ vendor_payment_status: "paid", vendor_paid_amount: amount, vendor_paid_at: new Date().toISOString() })
-      .eq("id", booking.id);
+      .from("vendor_payments")
+      .insert({ booking_id: booking.id, amount, recorded_by: user?.id ?? null });
+    if (error) {
+      setBusy(false);
+      return alert(error.message);
+    }
+    const { data: refreshed } = await supabase.from("bookings").select("*").eq("id", booking.id).single();
     setBusy(false);
-    if (error) return alert(error.message);
-    setBookings((rows) =>
-      rows.map((b) =>
-        b.id === booking.id
-          ? { ...b, vendor_payment_status: "paid", vendor_paid_amount: amount, vendor_paid_at: new Date().toISOString() }
-          : b,
-      ),
-    );
+    if (refreshed) setBookings((rows) => rows.map((b) => (b.id === booking.id ? refreshed : b)));
   }
 
   const selected = useMemo(() => bookings.find((b) => b.id === selectedId) ?? null, [bookings, selectedId]);
@@ -208,15 +212,15 @@ export default function VendorOrdersAssignedPage() {
                       type="number"
                       value={paidInput}
                       onChange={(e) => setPaidInput(e.target.value)}
-                      placeholder="Amount paid"
+                      placeholder="Amount (advance or final)"
                       className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
                     />
                     <button
-                      onClick={() => markPaid(selected)}
+                      onClick={() => recordPayment(selected)}
                       disabled={busy}
                       className="shrink-0 rounded-xl bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-60"
                     >
-                      Mark paid
+                      Record payment
                     </button>
                   </div>
                 )}
