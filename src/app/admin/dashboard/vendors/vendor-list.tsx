@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, MapPin, Phone, X } from "lucide-react";
+import { Loader2, MapPin, Phone, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { VENDOR_STATUS_META, type VendorStatus } from "@/lib/vendor-status-meta";
 import type { Database } from "@/lib/supabase/types";
@@ -56,6 +56,21 @@ export function VendorList({ defaultFilter }: { defaultFilter: "all" | VendorSta
     setVendors((rows) => rows.map((v) => (v.id === vendor.id ? { ...v, status, rejection_reason: reason ?? null } : v)));
     setRejecting(false);
     setRejectReason("");
+  }
+
+  // Removes the vendor profile only — their auth account and any orders
+  // that were already assigned to them stay put (bookings.assigned_vendor_id
+  // just falls back to null via its ON DELETE SET NULL), so this reads as
+  // "revoke vendor access" rather than erasing their whole account/history.
+  async function remove(vendor: VendorRow) {
+    if (!confirm(`Delete "${vendor.business_name}"? This can't be undone.`)) return;
+    setBusyId(vendor.id);
+    const supabase = createClient();
+    const { error } = await supabase.from("vendors").delete().eq("id", vendor.id);
+    setBusyId(null);
+    if (error) return alert(error.message);
+    setVendors((rows) => rows.filter((v) => v.id !== vendor.id));
+    setSelectedId((id) => (id === vendor.id ? null : id));
   }
 
   const filtered = useMemo(
@@ -133,13 +148,24 @@ export function VendorList({ defaultFilter }: { defaultFilter: "all" | VendorSta
                 <p className="truncate text-sm font-bold">{selected.business_name}</p>
                 <p className="truncate text-xs text-muted-foreground">{selected.contact_name}</p>
               </div>
-              <button
-                onClick={() => setSelectedId(null)}
-                aria-label="Close"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  onClick={() => remove(selected)}
+                  disabled={busyId === selected.id}
+                  aria-label="Delete vendor"
+                  title="Delete vendor"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-destructive/40 text-destructive disabled:opacity-60"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setSelectedId(null)}
+                  aria-label="Close"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-border"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4 p-4 text-sm">
