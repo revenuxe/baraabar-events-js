@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Wallet, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 
-type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
+type BookingRow = Database["public"]["Tables"]["bookings"]["Row"] & {
+  vendors: { business_name: string } | null;
+};
 type PaymentRow = Database["public"]["Tables"]["vendor_payments"]["Row"];
-type VendorLite = { id: string; business_name: string };
 
 function money(n: number | null): string {
   return `Rs. ${Number(n ?? 0).toLocaleString("en-IN")}`;
@@ -24,75 +26,72 @@ const FILTERS = [
   { key: "paid", label: "Paid" },
 ] as const;
 
+const BILLING_QUERY_KEY = ["admin", "vendor-billing"];
+
+// One embedded-resource select via the assigned_vendor_id FK instead of a
+// second, sequential `vendors.in(...)` round trip once bookings resolve.
+async function fetchBilling(): Promise<BookingRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*, vendors!assigned_vendor_id(business_name)")
+    .not("vendor_bill_amount", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export default function AdminVendorBillingPage() {
-  const [bookings, setBookings] = useState<BookingRow[] | null>(null);
-  const [vendors, setVendors] = useState<Record<string, VendorLite>>({});
+  const queryClient = useQueryClient();
+  const { data: bookings, isLoading } = useQuery({ queryKey: BILLING_QUERY_KEY, queryFn: fetchBilling });
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [payments, setPayments] = useState<PaymentRow[] | null>(null);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function load() {
-    const supabase = createClient();
-    const { data: bookingRows } = await supabase
-      .from("bookings")
-      .select("*")
-      .not("vendor_bill_amount", "is", null)
-      .order("created_at", { ascending: false });
-    setBookings(bookingRows ?? []);
+  // Cached per booking id — reopening a booking you already viewed shows
+  // its payment history instantly instead of a fresh spinner every time.
+  const { data: payments } = useQuery({
+    queryKey: ["admin", "vendor-payments", selectedId],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("vendor_payments")
+        .select("*")
+        .eq("booking_id", selectedId!)
+        .order("paid_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!selectedId,
+  });
 
-    const vendorIds = [...new Set((bookingRows ?? []).map((b) => b.assigned_vendor_id).filter((id): id is string => !!id))];
-    if (vendorIds.length) {
-      const { data: vendorRows } = await supabase.from("vendors").select("id, business_name").in("id", vendorIds);
-      const map: Record<string, VendorLite> = {};
-      for (const v of vendorRows ?? []) map[v.id] = v;
-      setVendors(map);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function openBooking(id: string) {
+  function openBooking(id: string) {
     setSelectedId(id);
-    setPayments(null);
     setAmount("");
     setNote("");
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("vendor_payments")
-      .select("*")
-      .eq("booking_id", id)
-      .order("paid_at", { ascending: false });
-    setPayments(data ?? []);
   }
 
+  // recorded_by fills in via vendor_payments' column default (auth.uid()).
   async function recordPayment(booking: BookingRow) {
     const value = Number(amount);
     if (!value || value <= 0) return alert("Enter an amount greater than 0");
     setSaving(true);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const { data: inserted, error } = await supabase
+    const { error } = await supabase
       .from("vendor_payments")
-      .insert({ booking_id: booking.id, amount: value, note: note.trim() || null, recorded_by: user?.id ?? null })
-      .select("*")
-      .single();
+      .insert({ booking_id: booking.id, amount: value, note: note.trim() || null });
     setSaving(false);
-    if (error || !inserted) return alert(error?.message ?? "Could not record payment");
+    if (error) return alert(error.message);
 
-    setPayments((rows) => [inserted, ...(rows ?? [])]);
     setAmount("");
     setNote("");
-    // The DB trigger updates the booking's paid/pending summary — refresh
-    // this row from the server rather than recomputing it by hand here.
-    const { data: refreshed } = await supabase.from("bookings").select("*").eq("id", booking.id).single();
-    if (refreshed) setBookings((rows) => (rows ?? []).map((b) => (b.id === booking.id ? refreshed : b)));
+    // The DB trigger updates the booking's paid/pending summary, so both
+    // the list totals and this booking's payment history need a refresh.
+    queryClient.invalidateQueries({ queryKey: BILLING_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: ["admin", "vendor-payments", booking.id] });
   }
 
   const filtered = useMemo(() => {
@@ -114,7 +113,7 @@ export default function AdminVendorBillingPage() {
 
   return (
     <section>
-      {!bookings ? (
+      {isLoading ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
       ) : (
         <>
@@ -153,7 +152,6 @@ export default function AdminVendorBillingPage() {
             <div className="space-y-2">
               {filtered.map((b) => {
                 const pending = pendingAmount(b);
-                const vendor = b.assigned_vendor_id ? vendors[b.assigned_vendor_id] : undefined;
                 return (
                   <button
                     key={b.id}
@@ -162,7 +160,7 @@ export default function AdminVendorBillingPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold">
-                        #{b.order_code} · {vendor?.business_name ?? "Unknown vendor"}
+                        #{b.order_code} · {b.vendors?.business_name ?? "Unknown vendor"}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
                         Billed {money(b.vendor_bill_amount)} · Paid {money(b.vendor_paid_amount)}
@@ -195,9 +193,7 @@ export default function AdminVendorBillingPage() {
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 p-4 backdrop-blur-lg">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">#{selected.order_code}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {selected.assigned_vendor_id ? vendors[selected.assigned_vendor_id]?.business_name : ""}
-                </p>
+                <p className="truncate text-xs text-muted-foreground">{selected.vendors?.business_name}</p>
               </div>
               <button
                 onClick={() => setSelectedId(null)}
@@ -263,7 +259,7 @@ export default function AdminVendorBillingPage() {
                   <p className="text-xs text-muted-foreground">No payments recorded yet.</p>
                 ) : (
                   <div className="space-y-2">
-                    {payments.map((p) => (
+                    {payments.map((p: PaymentRow) => (
                       <div key={p.id} className="flex items-center justify-between rounded-xl border border-border p-2.5">
                         <div>
                           <p className="font-semibold">{money(p.amount)}</p>

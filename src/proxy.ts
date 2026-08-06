@@ -27,6 +27,15 @@ export async function proxy(request: NextRequest) {
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
+
+    // Forward the already-validated user's email via a request header so
+    // admin/dashboard/layout.tsx doesn't need a second getUser() round
+    // trip just to display it — this request already paid for one.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-admin-email", user.email ?? "");
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+    return response;
   }
 
   if (isVendorRoute) {

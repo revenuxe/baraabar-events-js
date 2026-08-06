@@ -1,27 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
-export default function UsersPage() {
-  const [rows, setRows] = useState<ProfileRow[]>([]);
-  const [loading, setLoading] = useState(true);
+async function fetchUsers(): Promise<ProfileRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500);
+  if (error) throw error;
+  return data ?? [];
+}
 
-  useEffect(() => {
-    (async () => {
-      const supabase = createClient();
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-      setRows(data ?? []);
-      setLoading(false);
-    })();
-  }, []);
+export default function UsersPage() {
+  const { data: rows = [], isLoading } = useQuery({ queryKey: ["admin", "users"], queryFn: fetchUsers });
 
   return (
     <section>
@@ -29,7 +23,7 @@ export default function UsersPage() {
         <h2 className="font-display text-2xl">Users</h2>
         <p className="text-sm text-muted-foreground">{rows.length} customer profiles</p>
       </div>
-      {loading ? (
+      {isLoading ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
       ) : rows.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">

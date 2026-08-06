@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, MapPin, StickyNote, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STATUS_META, STATUS_ORDER, type BookingStatus } from "@/app/bookings/status-meta";
 import type { Database } from "@/lib/supabase/types";
 
-type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
 type BookingItemRow = Database["public"]["Tables"]["booking_items"]["Row"];
-type StatusEventRow = Database["public"]["Tables"]["booking_status_events"]["Row"];
+type BookingRow = Database["public"]["Tables"]["bookings"]["Row"] & { booking_items: BookingItemRow[] };
 type ProfileLite = { full_name: string | null; phone: string | null };
 type VendorLite = { id: string; business_name: string };
 
@@ -28,61 +28,75 @@ const FILTERS: { key: "all" | BookingStatus; label: string }[] = [
   { key: "cancelled", label: "Cancelled" },
 ];
 
+const BOOKINGS_QUERY_KEY = ["admin", "bookings"];
+const APPROVED_VENDORS_QUERY_KEY = ["admin", "approved-vendors"];
+
+// Embeds booking_items via the FK instead of a separate, unfiltered
+// "fetch the entire booking_items table" query — this was the single
+// worst offender for admin load time (grows unboundedly with every item
+// ever added to every booking, regardless of how many are shown).
+async function fetchBookings(): Promise<BookingRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*, booking_items(*)")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function fetchApprovedVendors(): Promise<VendorLite[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("vendors")
+    .select("id, business_name")
+    .eq("status", "approved")
+    .order("business_name");
+  if (error) throw error;
+  return data ?? [];
+}
+
 export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState<BookingRow[]>([]);
-  const [itemsByBooking, setItemsByBooking] = useState<Record<string, BookingItemRow[]>>({});
-  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: bookings = [], isLoading } = useQuery({ queryKey: BOOKINGS_QUERY_KEY, queryFn: fetchBookings });
+  const { data: vendors = [] } = useQuery({ queryKey: APPROVED_VENDORS_QUERY_KEY, queryFn: fetchApprovedVendors });
   const [filter, setFilter] = useState<"all" | BookingStatus>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [events, setEvents] = useState<Record<string, StatusEventRow[]>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [vendors, setVendors] = useState<VendorLite[]>([]);
 
-  async function load() {
-    setLoading(true);
-    const supabase = createClient();
-    const [{ data: bookingRows }, { data: itemRows }, { data: vendorRows }] = await Promise.all([
-      supabase.from("bookings").select("*").order("created_at", { ascending: false }),
-      supabase.from("booking_items").select("*"),
-      supabase.from("vendors").select("id, business_name").eq("status", "approved").order("business_name"),
-    ]);
-    setBookings(bookingRows ?? []);
-    setVendors(vendorRows ?? []);
-
-    const grouped: Record<string, BookingItemRow[]> = {};
-    for (const it of itemRows ?? []) (grouped[it.booking_id] ??= []).push(it);
-    setItemsByBooking(grouped);
-
-    const userIds = [...new Set((bookingRows ?? []).map((b) => b.user_id))];
-    if (userIds.length) {
-      const { data: profileRows } = await supabase
-        .from("profiles")
-        .select("id, full_name, phone")
-        .in("id", userIds);
-      const map: Record<string, ProfileLite> = {};
-      for (const p of profileRows ?? []) map[p.id] = { full_name: p.full_name, phone: p.phone };
-      setProfiles(map);
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function openBooking(id: string) {
-    setSelectedId(id);
-    if (!events[id]) {
+  // profiles.id has no direct FK to bookings (both just reference
+  // auth.users independently), so PostgREST can't embed this one — it has
+  // to stay a second, batched-by-.in() query, but now cached per user-id
+  // set rather than re-fetched on every mount.
+  const userIds = useMemo(() => [...new Set(bookings.map((b) => b.user_id))], [bookings]);
+  const { data: profiles = {} } = useQuery({
+    queryKey: ["admin", "booking-customers", userIds.join(",")],
+    queryFn: async () => {
       const supabase = createClient();
-      const { data } = await supabase
+      const { data, error } = await supabase.from("profiles").select("id, full_name, phone").in("id", userIds);
+      if (error) throw error;
+      const map: Record<string, ProfileLite> = {};
+      for (const p of data ?? []) map[p.id] = { full_name: p.full_name, phone: p.phone };
+      return map;
+    },
+    enabled: userIds.length > 0,
+  });
+
+  const { data: events } = useQuery({
+    queryKey: ["admin", "booking-status-events", selectedId],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from("booking_status_events")
         .select("*")
-        .eq("booking_id", id)
+        .eq("booking_id", selectedId!)
         .order("created_at");
-      setEvents((prev) => ({ ...prev, [id]: data ?? [] }));
-    }
-  }
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!selectedId,
+  });
 
   async function assignVendor(id: string, vendorId: string) {
     setBusyId(id);
@@ -93,28 +107,19 @@ export default function AdminBookingsPage() {
       .from("bookings")
       .update({ assigned_vendor_id: vendorId || null, vendor_accepted_at: null })
       .eq("id", id);
-    if (error) alert(error.message);
-    else
-      setBookings((rows) =>
-        rows.map((b) => (b.id === id ? { ...b, assigned_vendor_id: vendorId || null, vendor_accepted_at: null } : b)),
-      );
     setBusyId(null);
+    if (error) return alert(error.message);
+    queryClient.invalidateQueries({ queryKey: BOOKINGS_QUERY_KEY });
   }
 
   async function updateStatus(id: string, status: BookingStatus) {
     setBusyId(id);
     const supabase = createClient();
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
-    if (error) alert(error.message);
-    else {
-      setBookings((rows) => rows.map((b) => (b.id === id ? { ...b, status } : b)));
-      setEvents((prev) => {
-        const rest = { ...prev };
-        delete rest[id];
-        return rest;
-      });
-    }
     setBusyId(null);
+    if (error) return alert(error.message);
+    queryClient.invalidateQueries({ queryKey: BOOKINGS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: ["admin", "booking-status-events", id] });
   }
 
   async function remove(booking: BookingRow) {
@@ -124,7 +129,7 @@ export default function AdminBookingsPage() {
     const { error } = await supabase.from("bookings").delete().eq("id", booking.id);
     setBusyId(null);
     if (error) return alert(error.message);
-    setBookings((rows) => rows.filter((b) => b.id !== booking.id));
+    queryClient.invalidateQueries({ queryKey: BOOKINGS_QUERY_KEY });
     setSelectedId((id) => (id === booking.id ? null : id));
   }
 
@@ -159,7 +164,7 @@ export default function AdminBookingsPage() {
         ))}
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
@@ -169,12 +174,12 @@ export default function AdminBookingsPage() {
         <div className="space-y-2">
           {filtered.map((b) => {
             const profile = profiles[b.user_id];
-            const items = itemsByBooking[b.id] ?? [];
+            const items = b.booking_items;
             const status = STATUS_META[b.status];
             return (
               <button
                 key={b.id}
-                onClick={() => openBooking(b.id)}
+                onClick={() => setSelectedId(b.id)}
                 className="flex w-full flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left text-sm transition active:scale-[0.99]"
               >
                 <div className="min-w-0 flex-1">
@@ -282,7 +287,7 @@ export default function AdminBookingsPage() {
               <div>
                 <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">Items</p>
                 <div className="space-y-1.5">
-                  {(itemsByBooking[selected.id] ?? []).map((it) => (
+                  {selected.booking_items.map((it) => (
                     <div key={it.id} className="flex items-center justify-between">
                       <span>
                         {it.service_name} {it.quantity > 1 && `× ${it.quantity}`}
@@ -323,11 +328,11 @@ export default function AdminBookingsPage() {
 
               <div>
                 <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">History</p>
-                {!events[selected.id] ? (
+                {!events ? (
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 ) : (
                   <div className="space-y-1">
-                    {events[selected.id].map((e) => (
+                    {events.map((e) => (
                       <p key={e.id} className="text-xs text-muted-foreground">
                         <span className="font-semibold text-foreground">{STATUS_META[e.status].label}</span> —{" "}
                         {new Date(e.created_at).toLocaleString(undefined, {

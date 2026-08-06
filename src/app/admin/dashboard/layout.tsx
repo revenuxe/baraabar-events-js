@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 import { AdminShell } from "./admin-shell";
 
 export const metadata: Metadata = {
@@ -9,12 +9,10 @@ export const metadata: Metadata = {
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   // proxy.ts (middleware) already enforces signed-in + has_role("admin")
-  // for every /admin/** route except /admin/login before this ever runs —
-  // no client-side re-check needed here, unlike the old app.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // for every /admin/** route except /admin/login before this ever runs,
+  // and forwards the validated user's email via a request header — no
+  // second getUser() round trip needed here just to display it.
+  const email = (await headers()).get("x-admin-email") ?? "";
 
-  return <AdminShell email={user?.email ?? ""}>{children}</AdminShell>;
+  return <AdminShell email={email}>{children}</AdminShell>;
 }

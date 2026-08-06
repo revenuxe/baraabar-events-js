@@ -1,51 +1,44 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { Loader2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STATUS_META } from "@/app/bookings/status-meta";
 import type { Database } from "@/lib/supabase/types";
 
-type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
-type VendorLite = { id: string; business_name: string };
+type BookingRow = Database["public"]["Tables"]["bookings"]["Row"] & {
+  vendors: { business_name: string } | null;
+};
 
 function money(n: number | null): string {
   return `Rs. ${Number(n ?? 0).toLocaleString("en-IN")}`;
 }
 
+const ORDERS_QUERY_KEY = ["admin", "vendor-orders"];
+
+// One embedded-resource select via the assigned_vendor_id FK instead of a
+// second, sequential `vendors.in(...)` round trip once bookings resolve.
+async function fetchOrders(): Promise<BookingRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*, vendors!assigned_vendor_id(business_name)")
+    .not("assigned_vendor_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export default function VendorOrdersAssignedPage() {
-  const [bookings, setBookings] = useState<BookingRow[]>([]);
-  const [vendors, setVendors] = useState<Record<string, VendorLite>>({});
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: bookings = [], isLoading } = useQuery({ queryKey: ORDERS_QUERY_KEY, queryFn: fetchOrders });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [billInput, setBillInput] = useState("");
   const [paidInput, setPaidInput] = useState("");
   const [busy, setBusy] = useState(false);
-
-  async function load() {
-    setLoading(true);
-    const supabase = createClient();
-    const { data: bookingRows } = await supabase
-      .from("bookings")
-      .select("*")
-      .not("assigned_vendor_id", "is", null)
-      .order("created_at", { ascending: false });
-    setBookings(bookingRows ?? []);
-
-    const vendorIds = [...new Set((bookingRows ?? []).map((b) => b.assigned_vendor_id).filter((id): id is string => !!id))];
-    if (vendorIds.length) {
-      const { data: vendorRows } = await supabase.from("vendors").select("id, business_name").in("id", vendorIds);
-      const map: Record<string, VendorLite> = {};
-      for (const v of vendorRows ?? []) map[v.id] = v;
-      setVendors(map);
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
 
   function openBooking(b: BookingRow) {
     setSelectedId(b.id);
@@ -61,31 +54,23 @@ export default function VendorOrdersAssignedPage() {
     const { error } = await supabase.from("bookings").update({ vendor_bill_amount: amount }).eq("id", booking.id);
     setBusy(false);
     if (error) return alert(error.message);
-    setBookings((rows) => rows.map((b) => (b.id === booking.id ? { ...b, vendor_bill_amount: amount } : b)));
+    queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
   }
 
   // Inserts into the vendor_payments ledger (see billing/page.tsx) rather
   // than setting bookings.vendor_paid_amount directly — a DB trigger keeps
   // that summary column in sync, so this stays consistent with the payment
   // history shown on the Billing tab instead of silently overwriting it.
+  // recorded_by fills in via vendor_payments' column default (auth.uid()).
   async function recordPayment(booking: BookingRow) {
     const amount = Number(paidInput);
     if (!amount || amount <= 0) return alert("Enter a paid amount greater than 0");
     setBusy(true);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("vendor_payments")
-      .insert({ booking_id: booking.id, amount, recorded_by: user?.id ?? null });
-    if (error) {
-      setBusy(false);
-      return alert(error.message);
-    }
-    const { data: refreshed } = await supabase.from("bookings").select("*").eq("id", booking.id).single();
+    const { error } = await supabase.from("vendor_payments").insert({ booking_id: booking.id, amount });
     setBusy(false);
-    if (refreshed) setBookings((rows) => rows.map((b) => (b.id === booking.id ? refreshed : b)));
+    if (error) return alert(error.message);
+    queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
   }
 
   const selected = useMemo(() => bookings.find((b) => b.id === selectedId) ?? null, [bookings, selectedId]);
@@ -96,7 +81,7 @@ export default function VendorOrdersAssignedPage() {
         {bookings.length} order{bookings.length === 1 ? "" : "s"} assigned to a vendor
       </p>
 
-      {loading ? (
+      {isLoading ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
       ) : bookings.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
@@ -106,7 +91,6 @@ export default function VendorOrdersAssignedPage() {
         <div className="space-y-2">
           {bookings.map((b) => {
             const status = STATUS_META[b.status];
-            const vendor = b.assigned_vendor_id ? vendors[b.assigned_vendor_id] : undefined;
             return (
               <button
                 key={b.id}
@@ -115,7 +99,7 @@ export default function VendorOrdersAssignedPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">
-                    #{b.order_code} · {vendor?.business_name ?? "Unknown vendor"}
+                    #{b.order_code} · {b.vendors?.business_name ?? "Unknown vendor"}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
                     Quote {money(b.vendor_quote_amount)} · Bill {money(b.vendor_bill_amount)}
@@ -149,9 +133,7 @@ export default function VendorOrdersAssignedPage() {
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 p-4 backdrop-blur-lg">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">#{selected.order_code}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {selected.assigned_vendor_id ? vendors[selected.assigned_vendor_id]?.business_name : ""}
-                </p>
+                <p className="truncate text-xs text-muted-foreground">{selected.vendors?.business_name}</p>
               </div>
               <button
                 onClick={() => setSelectedId(null)}

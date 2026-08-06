@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, MapPin, Phone, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { VENDOR_STATUS_META, type VendorStatus } from "@/lib/vendor-status-meta";
@@ -15,45 +16,45 @@ const FILTERS: { key: "all" | VendorStatus; label: string }[] = [
   { key: "rejected", label: "Rejected" },
 ];
 
+const VENDORS_QUERY_KEY = ["admin", "vendors"];
+
+async function fetchVendors(): Promise<VendorRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("vendors")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export function VendorList({ defaultFilter }: { defaultFilter: "all" | VendorStatus }) {
-  const [vendors, setVendors] = useState<VendorRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: vendors = [], isLoading } = useQuery({ queryKey: VENDORS_QUERY_KEY, queryFn: fetchVendors });
   const [filter, setFilter] = useState<"all" | VendorStatus>(defaultFilter);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
 
-  async function load() {
-    setLoading(true);
-    const supabase = createClient();
-    const { data } = await supabase.from("vendors").select("*").order("created_at", { ascending: false });
-    setVendors(data ?? []);
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
+  // reviewed_by fills in via the vendors.reviewed_by column default
+  // (auth.uid()) — no need for a client-side getUser() round trip just to
+  // stamp who acted.
   async function review(vendor: VendorRow, status: "approved" | "rejected", reason?: string) {
     setBusyId(vendor.id);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     const { error } = await supabase
       .from("vendors")
       .update({
         status,
         rejection_reason: status === "rejected" ? (reason ?? null) : null,
         reviewed_at: new Date().toISOString(),
-        reviewed_by: user?.id ?? null,
       })
       .eq("id", vendor.id);
     setBusyId(null);
     if (error) return alert(error.message);
-    setVendors((rows) => rows.map((v) => (v.id === vendor.id ? { ...v, status, rejection_reason: reason ?? null } : v)));
+    queryClient.invalidateQueries({ queryKey: VENDORS_QUERY_KEY });
     setRejecting(false);
     setRejectReason("");
   }
@@ -69,7 +70,7 @@ export function VendorList({ defaultFilter }: { defaultFilter: "all" | VendorSta
     const { error } = await supabase.from("vendors").delete().eq("id", vendor.id);
     setBusyId(null);
     if (error) return alert(error.message);
-    setVendors((rows) => rows.filter((v) => v.id !== vendor.id));
+    queryClient.invalidateQueries({ queryKey: VENDORS_QUERY_KEY });
     setSelectedId((id) => (id === vendor.id ? null : id));
   }
 
@@ -99,7 +100,7 @@ export function VendorList({ defaultFilter }: { defaultFilter: "all" | VendorSta
         ))}
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
