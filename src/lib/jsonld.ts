@@ -68,12 +68,17 @@ export function itemListJsonLd(services: DecorService[]) {
 export function productJsonLd(service: DecorService, categoryName: string) {
   return {
     "@context": "https://schema.org",
-    "@type": "Product",
+    // These catalogue entries are on-site event-decoration services, not retail
+    // products that can be shipped or physically returned. Using Service keeps
+    // the markup aligned with the booking experience and prevents Google from
+    // applying Merchant listings shipping/return-policy requirements.
+    "@type": "Service",
     name: service.name,
     description: service.metaDescription || service.tagline || service.description,
     image: service.images,
+    serviceType: "Event decoration service",
     category: categoryName,
-    brand: { "@type": "Brand", name: SITE_NAME },
+    provider: { "@id": `${SITE_URL}/#organization` },
     offers: {
       "@type": "Offer",
       url: `${SITE_URL}/categories/${service.categorySlug}/${service.slug}`,
