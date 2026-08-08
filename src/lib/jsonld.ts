@@ -66,25 +66,42 @@ export function itemListJsonLd(services: DecorService[]) {
 }
 
 export function productJsonLd(service: DecorService, categoryName: string) {
+  const url = `${SITE_URL}/categories/${service.categorySlug}/${service.slug}`;
+
   return {
     "@context": "https://schema.org",
-    // These catalogue entries are on-site event-decoration services, not retail
-    // products that can be shipped or physically returned. Using Service keeps
-    // the markup aligned with the booking experience and prevents Google from
-    // applying Merchant listings shipping/return-policy requirements.
-    "@type": "Service",
+    // Google Product rich results require a Product root. These are booked
+    // event-decoration packages, so they belong to Google's product-snippet
+    // use case (a customer requests a booking rather than checking out here).
+    "@type": "Product",
+    "@id": `${url}#product`,
     name: service.name,
     description: service.metaDescription || service.tagline || service.description,
     image: service.images,
-    serviceType: "Event decoration service",
+    sku: service.id,
     category: categoryName,
-    provider: { "@id": `${SITE_URL}/#organization` },
+    brand: {
+      "@type": "Brand",
+      name: SITE_NAME,
+    },
+    // A typed page node is important: an @id on its own is an invalid object
+    // type for Google's structured-data parser and produces the parent_node
+    // indexing error in Search Console.
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
     offers: {
       "@type": "Offer",
-      url: `${SITE_URL}/categories/${service.categorySlug}/${service.slug}`,
+      url,
       priceCurrency: "INR",
       price: service.priceDiscounted,
       availability: "https://schema.org/InStock",
+      seller: {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: SITE_NAME,
+      },
       areaServed: "Bengaluru",
     },
     ...(service.reviewCount > 0
