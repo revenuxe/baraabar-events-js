@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "corporate event decoration India",
   ],
   authors: [{ name: SITE_NAME }],
-  icons: { icon: "/favicon-48x48.png", apple: "/favicon-48x48.png" },
+  icons: { icon: "/decor-eventz-logo.ico", shortcut: "/decor-eventz-logo.ico" },
   alternates: { canonical: "/" },
   openGraph: {
     title: SITE_TITLE,
