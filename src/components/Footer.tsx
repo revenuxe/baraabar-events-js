@@ -1,4 +1,4 @@
-import logo from "@/assets/baraabar event logo.webp";
+import logo from "@/assets/decor-eventz-logo-transparent.png";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
@@ -17,7 +17,7 @@ export function Footer() {
       <div className="rounded-[2rem] bg-gradient-brand p-6 text-primary-foreground shadow-elevated md:flex md:items-center md:justify-between md:gap-10 md:rounded-[3rem] md:p-12">
         <h2 className="font-display text-3xl leading-tight md:text-5xl">
           Ready to plan something<br />
-          <span className="italic">truly special</span>?
+          <span className="italic">unforgettable</span>?
         </h2>
         <Link
           href="/categories"
@@ -30,8 +30,8 @@ export function Footer() {
       <div className="mt-8 flex items-center justify-between">
         <Image
           src={logo}
-          alt="Baraabar — Balloon & Event Decoration"
-          className="h-8 w-auto object-contain"
+          alt="Decor Eventz — Dream, Design, Deliver"
+          className="h-16 w-auto object-contain md:h-20"
         />
         <div className="flex gap-2">
           {[
@@ -93,7 +93,7 @@ export function Footer() {
       </div>
 
       <p className="mt-6 text-center text-[11px] text-muted-foreground">
-        Made with ❤️ in India · © {new Date().getFullYear()} Baraabar
+        Dream · Design · Deliver · © {new Date().getFullYear()} Decor Eventz
       </p>
     </footer>
   );

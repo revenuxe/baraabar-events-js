@@ -14,7 +14,7 @@ const STEPS: Step[] = [
 export function Journey() {
   return (
     <section className="mx-auto w-full max-w-md px-5 pt-4 pb-10 md:max-w-6xl md:px-8 md:pt-6 md:pb-16">
-      <p className="text-xs font-bold uppercase tracking-widest text-accent">The Baraabar way</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-accent">The Decor Eventz way</p>
       <h2 className="mt-1 font-display text-3xl md:text-5xl">Your event, orchestrated</h2>
 
       <ol className="relative mt-6 space-y-4 pl-2">

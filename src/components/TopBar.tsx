@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import logo from "@/assets/baraabar event logo.webp";
+import logo from "@/assets/decor-eventz-logo-transparent.png";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,14 +17,14 @@ export function TopBar() {
   const { itemCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 pt-[max(0.5rem,env(safe-area-inset-top))] bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-md items-center justify-between gap-2 px-4 py-2.5 md:max-w-6xl md:px-8 md:py-3">
+    <header className="sticky top-0 z-40 bg-transparent px-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:px-6">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between gap-2 rounded-[1.65rem] border border-white/40 bg-white/10 px-4 py-2.5 shadow-glass backdrop-blur-2xl md:max-w-6xl md:rounded-full md:px-6 md:py-3">
         <Link href="/" className="relative flex shrink-0 items-center">
           <Image
             src={logo}
-            alt="Baraabar"
+            alt="Decor Eventz — Dream, Design, Deliver"
             priority
-            className="h-11 w-auto object-contain md:h-12"
+            className="h-14 w-auto object-contain md:h-16"
           />
         </Link>
 
@@ -78,7 +78,7 @@ export function TopBar() {
           </button>
           <Link
             href="/categories"
-            className="hidden rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background md:inline-flex"
+            className="hidden rounded-full bg-gradient-brand px-5 py-2.5 text-sm font-bold text-primary-foreground md:inline-flex"
           >
             Get Started
           </Link>
