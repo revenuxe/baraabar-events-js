@@ -10,13 +10,13 @@ const heroImg = unsplash("balloonArch", 1200, 1400);
 
 export function Hero() {
   return (
-    <section className="relative -mt-[104px] overflow-hidden md:-mt-[112px]">
+    <section className="relative -mt-[104px] overflow-x-clip md:-mt-[112px]">
       <div aria-hidden className="absolute inset-0 bg-aurora animate-gradient-drift" />
-      <div className="relative mx-auto w-full max-w-md px-5 pt-[120px] pb-10 md:max-w-6xl md:px-8 md:pt-[160px] md:pb-20">
+      <div className="relative mx-auto w-full max-w-md px-6 pt-[120px] pb-10 md:max-w-6xl md:px-8 md:pt-[160px] md:pb-20">
         <div className="grid items-start gap-8 md:grid-cols-2 md:gap-14">
           {/* copy + CTAs */}
           <div className="flex flex-col">
-            <h1 className="animate-rise-in font-display text-[52px] leading-[1.15] tracking-tight md:text-[84px]">
+            <h1 className="animate-rise-in overflow-visible font-display text-[clamp(2.7rem,11vw,3.25rem)] leading-[1.12] tracking-tight md:text-[84px]">
               Celebrations <span className="text-gradient-brand italic">Made</span>
               <br />
               <span className="text-gradient-brand italic">Easy</span> in{" "}
