@@ -23,6 +23,7 @@ const NAV = [
   { href: "/admin/dashboard/subcategories", label: "Subcategories", icon: FolderTree, exact: false },
   { href: "/admin/dashboard/products", label: "Products", icon: PartyPopper, exact: false },
   { href: "/admin/dashboard/addons", label: "Add-ons", icon: Gift, exact: false },
+  { href: "/admin/dashboard/decorations", label: "Decorations", icon: PartyPopper, exact: false },
   { href: "/admin/dashboard/vendors", label: "Vendors", icon: Store, exact: false },
   { href: "/admin/dashboard/users", label: "Users", icon: UsersIcon, exact: false },
 ];
@@ -48,7 +49,7 @@ export function AdminShell({ email, children }: { email: string; children: React
             </span>
             <span>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Baraabar
+                Decor Eventz
               </p>
               <p className="-mt-0.5 text-sm font-bold">Admin Console</p>
             </span>

@@ -34,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   ]);
   if (!booking) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const logoBuffer = await readFile(join(process.cwd(), "src/assets/baraabar-logo-pdf.png"));
+  const logoBuffer = await readFile(join(process.cwd(), "src/assets/decor-eventz-logo-transparent.png"));
   const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 
   const estimateItems: BookingEstimateItem[] = (items ?? []).map((it) => ({
@@ -69,7 +69,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return new NextResponse(Uint8Array.from(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="Baraabar-Estimate-${booking.order_code}.pdf"`,
+      "Content-Disposition": `attachment; filename="Decor-Eventz-Estimate-${booking.order_code}.pdf"`,
       "Cache-Control": "private, no-store",
     },
   });

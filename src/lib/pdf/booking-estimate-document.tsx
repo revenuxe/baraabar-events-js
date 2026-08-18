@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica",
   },
   headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  logo: { width: 128, height: 31.5 },
+  logo: { width: 58, height: 58 },
   headerRight: { alignItems: "flex-end" },
   eyebrow: { fontSize: 8, fontFamily: "Helvetica-Bold", letterSpacing: 1.5, color: PINK },
   genDate: { fontSize: 8, color: MUTED, marginTop: 2 },
@@ -188,7 +188,7 @@ export function BookingEstimateDocument({
 
   return (
     <Document
-      title={`Baraabar estimate — #${data.orderCode}`}
+      title={`Decor Eventz estimate — #${data.orderCode}`}
       author={SITE_NAME}
       subject="Booking estimate"
     >

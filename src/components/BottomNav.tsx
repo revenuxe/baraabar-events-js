@@ -7,7 +7,7 @@ import { Home, LayoutGrid, CalendarCheck, User } from "lucide-react";
 const ITEMS = [
   { to: "/", label: "Home", Icon: Home, exact: true },
   { to: "/categories", label: "Categories", Icon: LayoutGrid, exact: false },
-  { to: "/bookings", label: "Booking", Icon: CalendarCheck, exact: false },
+  { to: "/bookings", label: "My Bookings", Icon: CalendarCheck, exact: false },
   { to: "/profile", label: "Profile", Icon: User, exact: false },
 ] as const;
 
@@ -20,7 +20,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
     >
       <div className="mx-auto max-w-md px-4">
-        <div className="glass flex items-center justify-between gap-1 rounded-full px-2 py-2 shadow-elevated">
+        <div className="flex items-center justify-between gap-1 rounded-full border border-[#e1e8f0] bg-white px-2 py-2 shadow-elevated">
           {ITEMS.map(({ to, label, Icon, exact }) => {
             const active = exact ? pathname === to : pathname.startsWith(to);
             return (
@@ -33,7 +33,7 @@ export function BottomNav() {
               >
                 <span
                   className={`relative grid h-10 w-10 place-items-center rounded-full transition-all ${
-                    active ? "bg-gradient-brand text-primary-foreground shadow-glow" : ""
+                    active ? "bg-primary text-primary-foreground shadow-glow" : ""
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />

@@ -69,7 +69,7 @@ export function SearchOverlay({
         <DialogPrimitive.Content
           className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-2xl p-4 pt-[max(1rem,env(safe-area-inset-top))] outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-4"
         >
-          <DialogPrimitive.Title className="sr-only">Search Baraabar</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="sr-only">Search Decor Eventz</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
             Search our decoration categories, services and pages
           </DialogPrimitive.Description>

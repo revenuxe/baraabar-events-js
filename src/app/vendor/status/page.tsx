@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./sign-out-button";
 
 export const metadata: Metadata = {
-  title: "Application status | Baraabar Vendor Portal",
+  title: "Application status | Decor Eventz Vendor Portal",
   robots: { index: false, follow: false },
 };
 

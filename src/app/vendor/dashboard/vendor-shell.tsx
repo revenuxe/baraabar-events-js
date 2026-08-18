@@ -32,7 +32,7 @@ export function VendorShell({ businessName, children }: { businessName: string; 
             </span>
             <span>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Baraabar
+                Decor Eventz
               </p>
               <p className="-mt-0.5 text-sm font-bold">Vendor Portal</p>
             </span>

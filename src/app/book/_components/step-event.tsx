@@ -108,7 +108,8 @@ export function StepEvent({
       </section>
 
       <section>
-        <p className="mb-3 text-sm font-bold">Setup time window</p>
+        <p className="text-sm font-bold">Preferred setup window</p>
+        <p className="mb-3 mt-1 text-xs text-muted-foreground">Your decorator will arrive during this window to complete the setup before your event.</p>
         <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
           {windows.map((w) => {
             const value = `${w.label} (${w.range})`;

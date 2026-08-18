@@ -5,60 +5,23 @@ import type { DecorCategory } from "@/data/types";
 
 export function CategoryStrip({ categories }: { categories: DecorCategory[] }) {
   return (
-    <section className="mx-auto w-full max-w-md px-5 pb-10 md:max-w-6xl md:px-8 md:pb-16">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <section className="mx-auto w-full max-w-md px-5 pb-14 md:max-w-7xl md:px-8 md:pb-20">
+      <div className="relative mb-7 md:mb-8">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-accent">
-            Our services
-          </p>
-          <h2 className="mt-1 font-display text-3xl leading-tight md:text-5xl">
-            Browse by <span className="italic text-gradient-brand">category</span>
-          </h2>
-          <p className="mt-2 max-w-md text-sm text-muted-foreground md:text-base">
-            Every setup is designed and installed by trained decorators — start with your
-            occasion.
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-primary md:text-[30px]">Categories</h2>
+          <div className="mt-2 h-1 w-11 rounded-full bg-[#e61b68]" />
         </div>
-        <Link
-          href="/categories"
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary md:text-sm"
-        >
-          View all <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
-        </Link>
+        <Link href="/categories" className="absolute bottom-0 right-0 inline-flex items-center gap-1 text-sm font-semibold text-[#e61b68]">View all <ArrowUpRight className="h-4 w-4" /></Link>
       </div>
-
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-        {categories.slice(0, 6).map((c) => (
-          <Link
-            key={c.slug}
-            href={`/categories/${c.slug}`}
-            className="group relative block aspect-[3/4] overflow-hidden rounded-3xl shadow-card transition-all active:scale-[0.98] md:aspect-[4/5] md:hover:-translate-y-1 md:hover:shadow-elevated"
-          >
-            <Image
-              src={c.heroImage}
-              alt={`${c.name} — ${c.tagline}`}
-              loading="lazy"
-              fill
-              sizes="(min-width: 768px) 33vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div
-              aria-hidden
-              className={`absolute inset-0 bg-gradient-to-t ${c.accent} mix-blend-multiply opacity-70 transition-opacity group-hover:opacity-60`}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent"
-            />
-
-            <div className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-primary shadow-glow transition-transform group-hover:rotate-45 md:right-4 md:top-4 md:h-10 md:w-10">
-              <ArrowUpRight className="h-4 w-4" />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-7 md:grid-cols-6 md:gap-x-4 md:gap-y-8">
+        {categories.slice(0, 6).map((category) => (
+          <Link key={category.slug} href={`/categories/${category.slug}`} className="group block text-center transition-transform active:scale-[0.98] md:hover:-translate-y-1">
+            <div className="relative aspect-[1.06] overflow-hidden rounded-[1.4rem] border border-[#f2e0cf] bg-[#fff4e9] p-2 shadow-[0_12px_24px_-22px_rgba(8,42,92,.45)] md:rounded-[1.6rem]">
+              <div className="relative h-full w-full overflow-hidden rounded-[1.05rem] md:rounded-[1.25rem]">
+                <Image src={category.heroImage} alt={`${category.name} — ${category.tagline}`} fill loading="lazy" sizes="(min-width: 768px) 25vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+              </div>
             </div>
-
-            <div className="absolute inset-x-3 bottom-3 text-primary-foreground md:inset-x-5 md:bottom-5">
-              <h3 className="font-display text-2xl leading-none md:text-3xl">{c.name}</h3>
-              <p className="mt-1 text-[12px] opacity-90 md:text-sm">{c.tagline}</p>
-            </div>
+            <h3 className="mt-3 text-[15px] font-medium text-primary md:text-base">{category.name}</h3>
           </Link>
         ))}
       </div>

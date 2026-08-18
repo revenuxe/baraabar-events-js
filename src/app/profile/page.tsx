@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ChevronRight, MapPin, Bell, HelpCircle, Gift, LogIn, CalendarCheck } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutRow } from "./sign-out-row";
 import { EditProfileButton } from "./edit-profile-button";
@@ -38,12 +37,6 @@ export default async function ProfilePage() {
           >
             Sign in / Create account
           </Link>
-          <div className="my-4 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            OR
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <GoogleSignInButton redirectTo="/profile" />
         </main>
         <BottomNav />
       </div>

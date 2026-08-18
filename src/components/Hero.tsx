@@ -1,158 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Clock, Truck } from "lucide-react";
-import { SearchBar } from "@/components/SearchBar";
-import { WhatsAppIcon } from "@/components/WhatsAppIcon";
-import { CONTACT } from "@/lib/site";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { unsplash } from "@/data/images";
+import { SearchBar } from "@/components/SearchBar";
 
-const heroImg = unsplash("balloonArch", 1200, 1400);
+const slides = [
+  { image: unsplash("balloonArch", 1400, 900), kicker: "Last minute party?", title: "We've got you covered.", copy: "Trained decorators, premium props and a clean setup at your venue.", action: "Book a setup" },
+  { image: unsplash("marigold", 1400, 900), kicker: "Festive décor", title: "Make every celebration shine.", copy: "Thoughtful festive decoration for intimate gatherings and grand occasions.", action: "Explore festive" },
+  { image: unsplash("heartFloral", 1400, 900), kicker: "Special moments", title: "Celebrate love, beautifully.", copy: "Romantic décor that turns your favourite moments into lasting memories.", action: "Explore romance" },
+];
 
 export function Hero() {
+  const [active, setActive] = useState(0);
+  useEffect(() => { const id = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 6000); return () => window.clearInterval(id); }, []);
+  const slide = slides[active];
+  const previous = () => setActive((value) => (value + slides.length - 1) % slides.length);
+  const next = () => setActive((value) => (value + 1) % slides.length);
+
   return (
-    <section className="relative -mt-[104px] overflow-x-clip md:-mt-[112px]">
-      <div aria-hidden className="absolute inset-0 bg-aurora animate-gradient-drift" />
-      <div className="relative mx-auto w-full max-w-md px-6 pt-[120px] pb-10 md:max-w-6xl md:px-8 md:pt-[160px] md:pb-20">
-        <div className="grid items-start gap-8 md:grid-cols-2 md:gap-14">
-          {/* copy + CTAs */}
-          <div className="flex flex-col">
-            <h1 className="animate-rise-in overflow-visible font-display text-[clamp(2.7rem,11vw,3.25rem)] leading-[1.12] tracking-tight md:text-[84px]">
-              Celebrations <span className="text-gradient-brand italic">Made</span>
-              <br />
-              <span className="text-gradient-brand italic">Easy</span> in{" "}
-              <span className="text-gradient-brand italic">Bangalore</span>
-            </h1>
-            <p
-              className="animate-rise-in mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground md:text-lg"
-              style={{ animationDelay: "0.1s" }}
-            >
-              Balloon arches, theme decor and full event styling — designed by pros and set up
-              at your venue, right on time.
-            </p>
-
-            <div className="mt-6">
-              <SearchBar />
-            </div>
-
-            {/* Image (mobile shows here, desktop hidden — desktop uses right column) */}
-            <div className="relative mt-6 md:hidden">
-              <div
-                aria-hidden
-                className="absolute -inset-4 rounded-[3rem] bg-gradient-brand opacity-25 blur-3xl"
-              />
-              <Link
-                href="/categories/birthday"
-                className="relative block animate-float-slow overflow-hidden rounded-[2rem] shadow-elevated transition-transform active:scale-[0.98]"
-              >
-                <Image
-                  src={heroImg}
-                  alt="A balloon arch decoration set up for a birthday party"
-                  priority
-                  sizes="100vw"
-                  fill={false}
-                  width={1200}
-                  height={1400}
-                  className="h-[400px] w-full object-cover"
-                />
-                <div className="glass-dark absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-primary-foreground">
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-                  </span>
-                  <span className="text-[11px] font-bold">Trusted Event Decorators</span>
-                </div>
-                <div className="glass-dark absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-widest opacity-80">Popular</p>
-                    <p className="font-semibold">Balloon Arch Decoration</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
-                    <p className="font-semibold">₹3,499</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            {/* Secondary CTA */}
-            <div className="mt-4 flex flex-col gap-3 md:mt-5 md:flex-row md:items-center">
-              <Link
-                href="/categories"
-                className="flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 text-base font-semibold text-primary-foreground shadow-glow transition-transform active:scale-[0.98] md:w-fit md:px-8"
-              >
-                Explore Decorations
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href={CONTACT.whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-4 text-base font-semibold text-foreground shadow-card transition-transform active:scale-[0.98] md:w-fit md:px-8"
-              >
-                <WhatsAppIcon className="h-4 w-4" />
-                WhatsApp Us
-              </a>
-            </div>
-
-            <ul className="mt-6 grid grid-cols-3 gap-2 text-center text-[11px] font-medium text-muted-foreground md:max-w-md md:text-xs">
-              <li className="glass rounded-2xl p-3">
-                <Clock className="mx-auto mb-1 h-4 w-4 text-primary" />
-                Same-week slots
-              </li>
-              <li className="glass rounded-2xl p-3">
-                <ShieldCheck className="mx-auto mb-1 h-4 w-4 text-primary" />
-                Trained decorators
-              </li>
-              <li className="glass rounded-2xl p-3">
-                <Truck className="mx-auto mb-1 h-4 w-4 text-primary" />
-                Setup & teardown
-              </li>
-            </ul>
-          </div>
-
-          {/* Right column: desktop image */}
-          <div className="relative hidden md:block">
-            <div
-              aria-hidden
-              className="absolute -inset-6 rounded-[3rem] bg-gradient-brand opacity-30 blur-3xl"
-            />
-            <Link
-              href="/categories/birthday"
-              className="relative block animate-float-slow overflow-hidden rounded-[3rem] shadow-elevated transition-transform hover:-translate-y-1 hover:shadow-elevated"
-            >
-              <Image
-                src={heroImg}
-                alt="A balloon arch decoration set up for a birthday party"
-                priority
-                sizes="50vw"
-                width={1200}
-                height={1400}
-                className="h-[680px] w-full object-cover"
-              />
-              <div className="glass-dark absolute left-4 top-4 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-primary-foreground">
-                <span className="relative flex h-2 w-2 shrink-0">
-                  <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-green-400" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-                </span>
-                <span className="text-xs font-bold">Trusted Event Decorators</span>
-              </div>
-              <div className="glass-dark absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl px-4 py-3 text-primary-foreground">
-                <div>
-                  <p className="text-[11px] uppercase tracking-widest opacity-80">Popular</p>
-                  <p className="font-semibold">Balloon Arch Decoration</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-widest opacity-80">from</p>
-                  <p className="font-semibold">₹3,499</p>
-                </div>
-              </div>
-              <span aria-hidden className="absolute right-4 top-4 flex h-3 w-3">
-                <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-accent" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
-              </span>
-            </Link>
+    <section className="bg-white px-4 pb-12 pt-[132px] md:px-8 md:pb-20 md:pt-[154px]">
+      <div className="relative mx-auto h-[510px] max-w-7xl overflow-hidden rounded-[2rem] bg-[#fff0f5] md:h-[470px] md:rounded-[1.4rem]">
+        <div className="absolute inset-y-0 right-0 w-[62%]"><Image key={slide.image} src={slide.image} alt="Decor Eventz event decoration" priority fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover object-center" /><div className="absolute inset-0 bg-[linear-gradient(90deg,#fff0f5_0%,rgba(255,240,245,.28)_55%,transparent_100%)]" /></div>
+        <div className="absolute inset-x-5 top-5 z-10 md:hidden"><SearchBar square placeholder="Search decorations..." /></div>
+        <div className="relative flex h-full max-w-md items-center px-6 py-12 md:max-w-[58%] md:px-16">
+          <div>
+            <p className="text-[clamp(2rem,4vw,3.8rem)] font-bold leading-none tracking-tight text-[#e61b68]">{slide.kicker}</p>
+            <h1 className="mt-2 text-[clamp(2.35rem,5vw,4.6rem)] font-extrabold leading-[.98] tracking-tight text-primary">{slide.title}</h1>
+            <div className="my-5 h-1 w-20 rounded-full bg-[#e61b68]" />
+            <p className="max-w-md text-base leading-relaxed text-primary/75 md:text-xl">{slide.copy}</p>
+            <Link href="/categories" className="mt-7 inline-flex items-center gap-3 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-[#103d7a]">{slide.action}<ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
+        <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">{slides.map((item, index) => <button key={item.title} onClick={() => setActive(index)} aria-label={`Go to campaign ${index + 1}`} className={`h-2.5 rounded-full ${active === index ? "w-7 bg-[#e61b68]" : "w-2.5 bg-primary/25"}`} />)}</div>
+        <div className="absolute bottom-5 right-5 hidden gap-2 md:flex"><button onClick={previous} className="grid h-9 w-9 place-items-center rounded-full bg-white text-primary shadow"><ArrowLeft className="h-4 w-4" /></button><button onClick={next} className="grid h-9 w-9 place-items-center rounded-full bg-white text-primary shadow"><ArrowRight className="h-4 w-4" /></button></div>
       </div>
     </section>
   );

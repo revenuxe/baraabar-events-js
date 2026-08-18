@@ -51,7 +51,7 @@ function formatDate(iso: string): string {
 const styles = StyleSheet.create({
   page: { paddingTop: 40, paddingBottom: 56, paddingHorizontal: 44, fontSize: 9.5, color: INK, fontFamily: "Helvetica" },
   headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  logo: { width: 128, height: 31.5 },
+  logo: { width: 58, height: 58 },
   headerRight: { alignItems: "flex-end" },
   eyebrow: { fontSize: 8, fontFamily: "Helvetica-Bold", letterSpacing: 1.5, color: PINK },
   genDate: { fontSize: 8, color: MUTED, marginTop: 2 },

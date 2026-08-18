@@ -8,7 +8,6 @@ export function PickupCta() {
         href="/categories"
         className="relative flex items-center gap-4 overflow-hidden rounded-3xl bg-gradient-brand p-4 shadow-elevated md:p-6"
       >
-        <div aria-hidden className="absolute inset-0 opacity-30 bg-mesh" />
         <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-primary-foreground md:h-14 md:w-14">
           <Sparkles className="h-6 w-6" />
         </div>

@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { publicSupabaseClient } from "@/lib/supabase/public";
 import { testimonials } from "./testimonials";
 import { cities } from "./cities";
-import type { DecorCategory, DecorService, DecorSubcategory, ServiceAddOn } from "./types";
+import type { BalloonOption, DecorCategory, DecorService, DecorSubcategory, ProductFaq, ServiceAddOn } from "./types";
 
 type Catalog = {
   categories: DecorCategory[];
@@ -77,6 +77,13 @@ const getCatalog = unstable_cache(
         rating: p.rating,
         reviewCount: p.review_count,
         included: p.included,
+        notIncluded: p.not_included,
+        balloonOptions: (p.balloon_options as unknown as BalloonOption[]).filter(
+          (option) => option?.name && Array.isArray(option.colors),
+        ),
+        faqs: (p.faqs as unknown as ProductFaq[]).filter((faq) => faq?.question && faq?.answer),
+        deliveryInfo: p.delivery_info ?? undefined,
+        careInfo: p.care_info ?? undefined,
         tags: p.tags,
         addOns,
         sortOrder: p.sort_order,

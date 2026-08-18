@@ -33,6 +33,9 @@ export type ServiceAddOn = {
   description?: string;
 };
 
+export type BalloonOption = { name: string; colors: string[] };
+export type ProductFaq = { question: string; answer: string };
+
 export type DecorService = {
   id: string;
   slug: string;
@@ -49,6 +52,11 @@ export type DecorService = {
   rating: number;
   reviewCount: number;
   included: string[];
+  notIncluded: string[];
+  balloonOptions: BalloonOption[];
+  faqs: ProductFaq[];
+  deliveryInfo?: string;
+  careInfo?: string;
   tags: string[];
   addOns: ServiceAddOn[];
   sortOrder: number;

@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { VendorAuthForm } from "./vendor-auth-form";
 
 export const metadata: Metadata = {
-  title: "Vendor sign-in | Baraabar",
-  description: "Sign in or apply as a Baraabar decor vendor.",
+  title: "Vendor sign-in | Decor Eventz",
+  description: "Sign in or apply as a Decor Eventz vendor.",
   robots: { index: false, follow: false },
 };
 

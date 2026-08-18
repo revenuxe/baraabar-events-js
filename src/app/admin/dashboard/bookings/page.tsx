@@ -291,6 +291,9 @@ export default function AdminBookingsPage() {
                     <div key={it.id} className="flex items-center justify-between">
                       <span>
                         {it.service_name} {it.quantity > 1 && `× ${it.quantity}`}
+                        {typeof it.customizations === "object" && it.customizations !== null && "balloon_choice" in it.customizations && typeof it.customizations.balloon_choice === "string" && (
+                          <p className="mt-1 text-xs font-semibold text-primary">Balloon colours: {it.customizations.balloon_choice}</p>
+                        )}
                       </span>
                       <span className="font-semibold">₹{Number(it.unit_price).toLocaleString("en-IN")}</span>
                     </div>

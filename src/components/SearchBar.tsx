@@ -58,6 +58,7 @@ export function SearchBar({
   className,
   placeholder,
   mode = "dropdown",
+  square = false,
   onQueryChange,
 }: {
   className?: string;
@@ -67,6 +68,7 @@ export function SearchBar({
    * popover entirely and reports the query via onQueryChange instead, for
    * pages that filter their own already-loaded cards in place. */
   mode?: "dropdown" | "filter";
+  square?: boolean;
   onQueryChange?: (query: string) => void;
 }) {
   const [value, setValue] = useState("");
@@ -120,7 +122,7 @@ export function SearchBar({
 
   return (
     <div ref={containerRef} className={`relative w-full ${className ?? ""}`}>
-      <div className="flex w-full items-center gap-2 rounded-full border border-border bg-card pl-5 pr-1.5 py-1.5 shadow-card transition focus-within:ring-2 focus-within:ring-primary">
+      <div className={`flex w-full items-center gap-2 border border-border bg-card pl-5 pr-1.5 py-1.5 shadow-card transition focus-within:ring-2 focus-within:ring-primary ${square ? "rounded-sm" : "rounded-full"}`}>
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         <input
           value={value}

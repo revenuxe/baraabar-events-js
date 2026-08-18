@@ -118,6 +118,7 @@ export function BookWizard() {
         original_price: it.originalPrice ?? null,
         quantity: it.quantity,
         addons: it.addOns,
+        customizations: it.balloonChoice ? { balloon_choice: it.balloonChoice } : {},
       })),
     );
     if (itemsError) {
@@ -234,7 +235,7 @@ export function BookWizard() {
           className="mt-8 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border p-3 text-xs font-semibold text-muted-foreground"
         >
           <WhatsAppIcon className="h-4 w-4" />
-          Not sure? Chat with a Baraabar decorator
+          Not sure? Chat with a Decor Eventz decorator
         </a>
       </main>
 

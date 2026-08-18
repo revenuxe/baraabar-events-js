@@ -15,6 +15,7 @@ export type CartItem = {
   originalPrice?: number;
   quantity: number;
   addOns: ServiceAddOn[];
+  balloonChoice?: string;
 };
 
 const KEY = "baraabar_cart_v1";

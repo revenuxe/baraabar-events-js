@@ -3,62 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import type { DecorSubcategory } from "@/data/types";
 
-export function SubcategoriesGrid({
-  categorySlug,
-  subcategories,
-}: {
-  categorySlug: string;
-  subcategories: DecorSubcategory[];
-}) {
+export function SubcategoriesGrid({ categorySlug, subcategories }: { categorySlug: string; subcategories: DecorSubcategory[] }) {
   const [query, setQuery] = useState("");
-  const q = query.trim().toLowerCase();
-  const visible = q ? subcategories.filter((s) => s.name.toLowerCase().includes(q)) : subcategories;
-
-  return (
-    <>
-      <SearchBar className="mb-8 max-w-xl" mode="filter" onQueryChange={setQuery} />
-
-      {visible.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-          {visible.map((s) => (
-            <Link
-              key={s.slug}
-              href={`/categories/${categorySlug}/sub/${s.slug}`}
-              className="group relative block aspect-[3/4] overflow-hidden rounded-3xl shadow-card transition-all active:scale-[0.98] md:hover:-translate-y-1 md:hover:shadow-elevated"
-            >
-              {s.image ? (
-                <Image
-                  src={s.image}
-                  alt={s.name}
-                  loading="lazy"
-                  fill
-                  sizes="(min-width: 768px) 25vw, 50vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              ) : (
-                <div className="h-full w-full bg-gradient-brand" />
-              )}
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent"
-              />
-              <div className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-primary shadow-glow transition-transform group-hover:rotate-45">
-                <ArrowUpRight className="h-4 w-4" />
-              </div>
-              <div className="absolute inset-x-3 bottom-3 text-primary-foreground">
-                <h3 className="font-display text-xl leading-none md:text-2xl">{s.name}</h3>
-                {s.tagline && <p className="mt-1 text-[11px] opacity-90 md:text-sm">{s.tagline}</p>}
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-sm text-muted-foreground">No types match &ldquo;{query}&rdquo;.</p>
-      )}
-    </>
-  );
+  const visible = query.trim() ? subcategories.filter((subcategory) => subcategory.name.toLowerCase().includes(query.trim().toLowerCase())) : subcategories;
+  return <><SearchBar className="mb-8 max-w-xl" mode="filter" onQueryChange={setQuery} />{visible.length ? <div className="grid grid-cols-2 gap-x-4 gap-y-7 md:grid-cols-4 md:gap-x-6 md:gap-y-10">{visible.map((subcategory) => <Link key={subcategory.slug} href={`/categories/${categorySlug}/sub/${subcategory.slug}`} className="group block text-center transition-transform active:scale-[.98] md:hover:-translate-y-1"><div className="relative aspect-[1.06] overflow-hidden rounded-[1.4rem] border border-[#f2e0cf] bg-[#fff4e9] p-2 shadow-card"><div className="relative h-full w-full overflow-hidden rounded-[1.05rem]">{subcategory.image ? <Image src={subcategory.image} alt={subcategory.name} fill loading="lazy" sizes="(min-width: 768px) 25vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="h-full w-full bg-[#edf7f8]" />}</div></div><h3 className="mt-3 text-[15px] font-semibold text-primary md:text-lg">{subcategory.name}</h3></Link>)}</div> : <p className="text-center text-sm text-muted-foreground">No types match &ldquo;{query}&rdquo;.</p>}</>;
 }

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export type MegaMenuCategory = { slug: string; name: string };
 export type MegaMenuSubcategory = { slug: string; name: string; categorySlug: string };
-export type MegaMenuProduct = { slug: string; categorySlug: string; name: string; image: string };
+export type MegaMenuProduct = { slug: string; categorySlug: string; subcategorySlug: string; name: string; image: string };
 
 type MegaMenuData = {
   categories: MegaMenuCategory[];
@@ -33,7 +33,7 @@ async function fetchMegaMenuData(): Promise<MegaMenuData> {
     // admin-curated picks over whatever happens to sort first.
     supabase
       .from("products")
-      .select("slug,name,images,categories(slug)")
+      .select("slug,name,images,categories(slug),subcategories(slug)")
       .eq("is_active", true)
       .order("is_featured", { ascending: false })
       .order("sort_order")
@@ -50,6 +50,7 @@ async function fetchMegaMenuData(): Promise<MegaMenuData> {
     products: (prods ?? []).map((p) => ({
       slug: p.slug,
       categorySlug: p.categories?.slug ?? "",
+      subcategorySlug: p.subcategories?.slug ?? "",
       name: p.name,
       image: p.images[0] ?? "",
     })),

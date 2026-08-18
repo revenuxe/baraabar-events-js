@@ -1,9 +1,7 @@
 import logo from "@/assets/decor-eventz-logo-transparent.png";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon } from "@/components/SocialIcons";
-import { CONTACT, CONTACT_ADDRESS_FULL, CONTACT_MAPS_URL } from "@/lib/site";
 
 const LEGAL_LINKS = [
   { href: "/contact", label: "Contact Us" },
@@ -35,8 +33,8 @@ export function Footer() {
         />
         <div className="flex gap-2">
           {[
-            { Icon: InstagramIcon, href: "https://www.instagram.com/baraabarmade/", label: "Instagram" },
-            { Icon: LinkedinIcon, href: "https://www.linkedin.com/company/baraabar", label: "LinkedIn" },
+            { Icon: InstagramIcon, href: "#", label: "Instagram" },
+            { Icon: LinkedinIcon, href: "#", label: "LinkedIn" },
             { Icon: YoutubeIcon, href: "#", label: "YouTube" },
             { Icon: TwitterIcon, href: "#", label: "Twitter" },
           ].map(({ Icon, href, label }) => (
@@ -54,36 +52,8 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col gap-6 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-start md:justify-between md:gap-4">
-        <address className="not-italic">
-          <ul className="space-y-2.5">
-            <li className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <a
-                href={CONTACT_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="leading-relaxed hover:text-foreground"
-              >
-                {CONTACT_ADDRESS_FULL}
-              </a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-primary" />
-              <a href={CONTACT.phoneHref} className="hover:text-foreground">
-                {CONTACT.phone}
-              </a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Mail className="h-4 w-4 shrink-0 text-primary" />
-              <a href={`mailto:${CONTACT.email}`} className="hover:text-foreground">
-                {CONTACT.email}
-              </a>
-            </li>
-          </ul>
-        </address>
-
-        <nav className="flex flex-wrap gap-x-5 gap-y-2.5 md:flex-col md:items-end md:text-right">
+      <div className="mt-8 flex justify-center border-t border-border pt-6 text-xs text-muted-foreground md:justify-end">
+        <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2.5 md:justify-end">
           {LEGAL_LINKS.map((l) => (
             <Link key={l.href} href={l.href} className="hover:text-foreground">
               {l.label}

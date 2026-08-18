@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { AdminShell } from "./admin-shell";
 
 export const metadata: Metadata = {
-  title: "Admin dashboard | Baraabar",
+  title: "Admin dashboard | Decor Eventz",
   robots: { index: false, follow: false },
 };
 

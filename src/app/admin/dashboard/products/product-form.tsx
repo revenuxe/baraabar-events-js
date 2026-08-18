@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Check, Gift, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Gift, HelpCircle, Loader2, Palette, Plus, Save, Trash2 } from "lucide-react";
 import { GalleryUploadField } from "@/components/admin/GalleryUploadField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { TagInput } from "@/components/admin/TagInput";
@@ -14,6 +14,8 @@ type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 type CategoryOption = { id: string; name: string };
 type SubcategoryOption = { id: string; name: string; category_id: string };
 type AddonOption = { id: string; name: string; price: number };
+type BalloonOption = { name: string; colors: string[] };
+type ProductFaq = { question: string; answer: string };
 
 const TABS = [
   { key: "details", label: "Details" },
@@ -82,6 +84,15 @@ export function ProductForm({
   const [images, setImages] = useState<string[]>(product?.images ?? []);
 
   const [included, setIncluded] = useState<string[]>(product?.included ?? [""]);
+  const [notIncluded, setNotIncluded] = useState<string[]>(product?.not_included ?? []);
+  const [balloonOptions, setBalloonOptions] = useState<BalloonOption[]>(
+    (product?.balloon_options as unknown as BalloonOption[] | undefined) ?? [],
+  );
+  const [faqs, setFaqs] = useState<ProductFaq[]>(
+    (product?.faqs as unknown as ProductFaq[] | undefined) ?? [],
+  );
+  const [deliveryInfo, setDeliveryInfo] = useState(product?.delivery_info ?? "");
+  const [careInfo, setCareInfo] = useState(product?.care_info ?? "");
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>(initialSelectedAddonIds ?? []);
   const [rating, setRating] = useState(product?.rating ?? 4.8);
   const [reviewCount, setReviewCount] = useState(product?.review_count ?? 0);
@@ -116,6 +127,13 @@ export function ProductForm({
   }
   function addIncluded() {
     setIncluded((items) => [...items, ""]);
+  }
+  function updateNotIncluded(i: number, v: string) { setNotIncluded((items) => items.map((it, idx) => idx === i ? v : it)); }
+  function updateBalloon(i: number, key: keyof BalloonOption, value: string) {
+    setBalloonOptions((items) => items.map((item, idx) => idx === i ? { ...item, [key]: key === "colors" ? value.split(",").map((c) => c.trim()).filter(Boolean) : value } : item));
+  }
+  function updateFaq(i: number, key: keyof ProductFaq, value: string) {
+    setFaqs((items) => items.map((item, idx) => idx === i ? { ...item, [key]: value } : item));
   }
 
   function toggleAddon(id: string) {
@@ -158,6 +176,11 @@ export function ProductForm({
       sale_price: salePrice === "" ? null : Number(salePrice),
       images,
       included: included.map((i) => i.trim()).filter(Boolean),
+      not_included: notIncluded.map((i) => i.trim()).filter(Boolean),
+      balloon_options: balloonOptions.filter((option) => option.name.trim() && option.colors.length),
+      faqs: faqs.filter((faq) => faq.question.trim() && faq.answer.trim()),
+      delivery_info: deliveryInfo.trim() || null,
+      care_info: careInfo.trim() || null,
       tags,
       is_trending: isTrending,
       is_featured: isFeatured,
@@ -390,6 +413,29 @@ export function ProductForm({
                 </div>
               </div>
 
+              <ContentSection icon={Palette} title="Balloon colour choices" description="Shown beneath the gallery. Add a palette name and its colours, separated by commas.">
+                {balloonOptions.map((option, i) => (
+                  <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_auto]">
+                    <input value={option.name} onChange={(e) => updateBalloon(i, "name", e.target.value)} placeholder="e.g. Pink · White · Rosegold" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                    <input value={option.colors.join(", ")} onChange={(e) => updateBalloon(i, "colors", e.target.value)} placeholder="pink, white, #d8a1a8" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />
+                    <button type="button" onClick={() => setBalloonOptions((items) => items.filter((_, idx) => idx !== i))} className="grid h-10 w-10 place-items-center rounded-xl border border-border text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                ))}
+                <ContentAddButton label="Add colour palette" onClick={() => setBalloonOptions((items) => [...items, { name: "", colors: [] }])} />
+              </ContentSection>
+
+              <ContentSection icon={Check} title="Not included" description="Use this for items customers often assume are part of the package.">
+                {notIncluded.map((item, i) => <div key={i} className="flex gap-2"><input value={item} onChange={(e) => updateNotIncluded(i, e.target.value)} className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" /><button type="button" onClick={() => setNotIncluded((items) => items.filter((_, idx) => idx !== i))} className="grid h-9 w-9 place-items-center rounded-xl border border-border text-destructive"><Trash2 className="h-3.5 w-3.5" /></button></div>)}
+                <ContentAddButton label="Add exclusion" onClick={() => setNotIncluded((items) => [...items, ""])} />
+              </ContentSection>
+
+              <ContentSection icon={HelpCircle} title="FAQs" description="Answers appear in the FAQ tab on this product page.">
+                {faqs.map((faq, i) => <div key={i} className="grid gap-2 rounded-xl border border-border p-3"><input value={faq.question} onChange={(e) => updateFaq(i, "question", e.target.value)} placeholder="Question" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" /><div className="flex gap-2"><textarea value={faq.answer} onChange={(e) => updateFaq(i, "answer", e.target.value)} placeholder="Answer" rows={2} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" /><button type="button" onClick={() => setFaqs((items) => items.filter((_, idx) => idx !== i))} className="grid h-10 w-10 place-items-center rounded-xl border border-border text-destructive"><Trash2 className="h-3.5 w-3.5" /></button></div></div>)}
+                <ContentAddButton label="Add FAQ" onClick={() => setFaqs((items) => [...items, { question: "", answer: "" }])} />
+              </ContentSection>
+
+              <div className="grid gap-5 md:grid-cols-2"><Field label="Delivery information"><textarea value={deliveryInfo} onChange={(e) => setDeliveryInfo(e.target.value)} rows={4} placeholder="Setup timing, location coverage, or booking notice." className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" /></Field><Field label="Care information"><textarea value={careInfo} onChange={(e) => setCareInfo(e.target.value)} rows={4} placeholder="How to keep the decor looking its best." className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" /></Field></div>
+
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Add-ons</h3>
@@ -543,6 +589,14 @@ function Field({
       {children}
     </label>
   );
+}
+
+function ContentSection({ icon: Icon, title, description, children }: { icon: typeof Palette; title: string; description: string; children: React.ReactNode }) {
+  return <div className="space-y-2 rounded-2xl border border-border bg-muted/20 p-4"><div><h3 className="flex items-center gap-2 text-sm font-bold"><Icon className="h-4 w-4 text-primary" />{title}</h3><p className="mt-1 text-xs text-muted-foreground">{description}</p></div><div className="space-y-2">{children}</div></div>;
+}
+
+function ContentAddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold"><Plus className="h-3.5 w-3.5" />{label}</button>;
 }
 
 function Toggle({

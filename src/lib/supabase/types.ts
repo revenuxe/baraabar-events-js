@@ -119,6 +119,7 @@ export type Database = {
           addons: Json
           booking_id: string
           category_slug: string
+          customizations: Json
           created_at: string
           id: string
           image: string | null
@@ -133,6 +134,7 @@ export type Database = {
           addons?: Json
           booking_id: string
           category_slug: string
+          customizations?: Json
           created_at?: string
           id?: string
           image?: string | null
@@ -147,6 +149,7 @@ export type Database = {
           addons?: Json
           booking_id?: string
           category_slug?: string
+          customizations?: Json
           created_at?: string
           id?: string
           image?: string | null
@@ -376,17 +379,22 @@ export type Database = {
       products: {
         Row: {
           category_id: string
+          balloon_options: Json
           created_at: string
           description: string | null
+          delivery_info: string | null
           id: string
           images: string[]
           included: string[]
+          care_info: string | null
+          faqs: Json
           is_active: boolean
           is_featured: boolean
           is_trending: boolean
           meta_description: string | null
           meta_title: string | null
           name: string
+          not_included: string[]
           og_image_url: string | null
           price: number
           rating: number
@@ -401,17 +409,22 @@ export type Database = {
         }
         Insert: {
           category_id: string
+          balloon_options?: Json
           created_at?: string
           description?: string | null
+          delivery_info?: string | null
           id?: string
           images?: string[]
           included?: string[]
+          care_info?: string | null
+          faqs?: Json
           is_active?: boolean
           is_featured?: boolean
           is_trending?: boolean
           meta_description?: string | null
           meta_title?: string | null
           name: string
+          not_included?: string[]
           og_image_url?: string | null
           price: number
           rating?: number
@@ -426,17 +439,22 @@ export type Database = {
         }
         Update: {
           category_id?: string
+          balloon_options?: Json
           created_at?: string
           description?: string | null
+          delivery_info?: string | null
           id?: string
           images?: string[]
           included?: string[]
+          care_info?: string | null
+          faqs?: Json
           is_active?: boolean
           is_featured?: boolean
           is_trending?: boolean
           meta_description?: string | null
           meta_title?: string | null
           name?: string
+          not_included?: string[]
           og_image_url?: string | null
           price?: number
           rating?: number

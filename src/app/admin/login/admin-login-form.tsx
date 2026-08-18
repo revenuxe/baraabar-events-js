@@ -8,7 +8,7 @@ import { Lock, Mail, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@baraabar.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -54,7 +54,7 @@ export function AdminLoginForm() {
           </div>
           <h1 className="mt-4 font-display text-3xl leading-tight">Admin sign-in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Restricted access. Sign in with your Baraabar admin account.
+            Restricted access. Sign in with your Decor Eventz admin account.
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-3">
@@ -65,7 +65,7 @@ export function AdminLoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@baraabar.com"
+                placeholder="Admin email"
                 className="w-full bg-transparent py-3 text-sm outline-none"
               />
             </label>
@@ -99,7 +99,7 @@ export function AdminLoginForm() {
         </div>
 
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Baraabar · Admin Console
+          Decor Eventz · Admin Console
         </p>
       </div>
     </div>

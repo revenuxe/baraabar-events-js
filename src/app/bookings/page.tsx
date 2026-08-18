@@ -4,7 +4,6 @@ import Image from "next/image";
 import { CalendarCheck, ChevronRight, LogIn, PartyPopper } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_META } from "./status-meta";
 
@@ -39,12 +38,6 @@ export default async function BookingsPage() {
           >
             Sign in / Create account
           </Link>
-          <div className="my-4 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            OR
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <GoogleSignInButton redirectTo="/bookings" />
         </main>
         <BottomNav />
       </div>

@@ -19,7 +19,7 @@ export async function renderVendorBillingPdf(
   vendor: VendorRow,
   mode: "quote" | "invoice",
 ): Promise<Buffer> {
-  const logoBuffer = await readFile(join(process.cwd(), "src/assets/baraabar-logo-pdf.png"));
+  const logoBuffer = await readFile(join(process.cwd(), "src/assets/decor-eventz-logo-transparent.png"));
   const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 
   const items = parseQuoteItems(booking.vendor_quote_items);

@@ -13,6 +13,8 @@ export function StepReview({
   items: CartItem[];
   subtotal: number;
 }) {
+  const decorationTotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const addOnsTotal = items.reduce((sum, item) => sum + item.addOns.reduce((sum, addOn) => sum + addOn.price, 0) * item.quantity, 0);
   return (
     <div className="space-y-6">
       <header>
@@ -66,15 +68,21 @@ export function StepReview({
         {draft.notes.trim() && <Row label="Notes" value={draft.notes} />}
       </div>
 
-      <div className="rounded-3xl border border-dashed border-border p-5">
-        <p className="text-sm font-bold">Total</p>
-        <p className="mt-1 text-2xl font-black text-gradient-brand">
+      <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
+        <p className="text-sm font-bold">Price summary</p>
+        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+          <div className="flex justify-between"><span>Decoration price</span><span>₹{decorationTotal.toLocaleString("en-IN")}</span></div>
+          <div className="flex justify-between"><span>Add-ons</span><span>₹{addOnsTotal.toLocaleString("en-IN")}</span></div>
+          <div className="flex justify-between text-xs"><span>Taxes & fees</span><span>Included</span></div>
+        </div>
+        <div className="mt-3 border-t border-border pt-3"><p className="text-sm font-bold">Final total</p>
+        <p className="mt-1 text-2xl font-black text-primary">
           ₹{subtotal.toLocaleString("en-IN")}
         </p>
         <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           <PartyPopper className="h-3.5 w-3.5" />
           No payment needed now — we&apos;ll confirm final pricing after a quick venue check.
-        </p>
+        </p></div>
       </div>
     </div>
   );

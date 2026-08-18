@@ -3,56 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import type { DecorCategory } from "@/data/types";
 
 export function CategoriesGrid({ categories }: { categories: DecorCategory[] }) {
   const [query, setQuery] = useState("");
-  const q = query.trim().toLowerCase();
-  const visible = q ? categories.filter((c) => c.name.toLowerCase().includes(q)) : categories;
-
-  return (
-    <>
-      <SearchBar className="mb-8 max-w-xl" mode="filter" onQueryChange={setQuery} />
-
-      {visible.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-          {visible.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/categories/${c.slug}`}
-              className="group relative block aspect-[3/4] overflow-hidden rounded-3xl shadow-card transition-all active:scale-[0.98] md:hover:-translate-y-1 md:hover:shadow-elevated"
-            >
-              <Image
-                src={c.heroImage}
-                alt={`${c.name} — ${c.tagline}`}
-                loading="lazy"
-                fill
-                sizes="(min-width: 768px) 25vw, 50vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div
-                aria-hidden
-                className={`absolute inset-0 bg-gradient-to-t ${c.accent} mix-blend-multiply opacity-70`}
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent"
-              />
-              <div className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-primary shadow-glow transition-transform group-hover:rotate-45">
-                <ArrowUpRight className="h-4 w-4" />
-              </div>
-              <div className="absolute inset-x-3 bottom-3 text-primary-foreground">
-                <h3 className="font-display text-xl leading-none md:text-2xl">{c.name}</h3>
-                <p className="mt-1 text-[11px] opacity-90 md:text-sm">{c.tagline}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-sm text-muted-foreground">No categories match &ldquo;{query}&rdquo;.</p>
-      )}
-    </>
-  );
+  const visible = query.trim() ? categories.filter((category) => category.name.toLowerCase().includes(query.trim().toLowerCase())) : categories;
+  return <><SearchBar className="mb-8 max-w-xl" mode="filter" onQueryChange={setQuery} />{visible.length ? <div className="grid grid-cols-2 gap-x-4 gap-y-7 md:grid-cols-4 md:gap-x-6 md:gap-y-10">{visible.map((category) => <Link key={category.slug} href={`/categories/${category.slug}`} className="group block text-center transition-transform active:scale-[.98] md:hover:-translate-y-1"><div className="relative aspect-[1.06] overflow-hidden rounded-[1.4rem] border border-[#f2e0cf] bg-[#fff4e9] p-2 shadow-card"><div className="relative h-full w-full overflow-hidden rounded-[1.05rem]"><Image src={category.heroImage} alt={category.name} fill loading="lazy" sizes="(min-width: 768px) 25vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" /></div></div><h3 className="mt-3 text-[15px] font-semibold text-primary md:text-lg">{category.name}</h3></Link>)}</div> : <p className="text-center text-sm text-muted-foreground">No categories match &ldquo;{query}&rdquo;.</p>}</>;
 }

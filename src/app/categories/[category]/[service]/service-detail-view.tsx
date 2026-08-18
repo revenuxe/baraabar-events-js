@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Check, ShoppingBag, Star } from "lucide-react";
+import { Check, CircleHelp, PackageCheck, Pencil, ShoppingBag, Star, Truck, HeartHandshake, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Footer } from "@/components/Footer";
 import { ServiceCard } from "@/components/ServiceCard";
@@ -35,6 +35,9 @@ export function ServiceDetailView({
   const [relatedQuery, setRelatedQuery] = useState("");
   const [galleryApi, setGalleryApi] = useState<CarouselApi>();
   const [activeImage, setActiveImage] = useState(0);
+  const [detailTab, setDetailTab] = useState<"included" | "faqs" | "delivery" | "care">("included");
+  const [balloonChoice, setBalloonChoice] = useState("");
+  const [customBalloonChoice, setCustomBalloonChoice] = useState("");
 
   useEffect(() => {
     if (!galleryApi) return;
@@ -60,7 +63,7 @@ export function ServiceDetailView({
 
   function buildCartItem() {
     return {
-      id: `${service.categorySlug}/${service.slug}`,
+      id: `${service.categorySlug}/${service.slug}/${balloonChoice || "default"}`,
       productId: service.id,
       categorySlug: service.categorySlug,
       categoryName: category.name,
@@ -70,6 +73,7 @@ export function ServiceDetailView({
       unitPrice: service.priceDiscounted,
       originalPrice: service.priceOriginal,
       addOns: selectedAddOns,
+      balloonChoice: balloonChoice === "Custom" ? customBalloonChoice.trim() || "Custom" : balloonChoice || undefined,
     };
   }
 
@@ -220,18 +224,9 @@ export function ServiceDetailView({
               </div>
             )}
 
-            {/* What's included */}
-            <section className="mt-6">
-              <h2 className="text-sm font-bold">What&apos;s included</h2>
-              <ul className="mt-3 space-y-2">
-                {service.included.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {service.balloonOptions.length > 0 && <section className="mt-6 rounded-3xl border border-border bg-card p-4 shadow-card"><div className="flex items-center justify-between gap-3"><h2 className="text-sm font-bold">Choose balloon colours</h2><span className="text-xs text-muted-foreground">Tap to select</span></div><div className="mt-3 flex flex-wrap gap-2">{service.balloonOptions.map((option) => { const selected = balloonChoice === option.name; return <button key={option.name} onClick={() => setBalloonChoice(option.name)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition ${selected ? "border-primary bg-primary/10 text-primary ring-1 ring-primary" : "border-border bg-background hover:border-primary/40"}`}><span className="flex -space-x-1">{option.colors.slice(0, 4).map((color, i) => <span key={`${color}-${i}`} className="h-3.5 w-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: color }} />)}</span>{option.name}{selected && <Check className="h-3.5 w-3.5" />}</button>; })}<button onClick={() => setBalloonChoice("Custom")} className={`inline-flex items-center gap-1.5 rounded-full border border-dashed px-3 py-2 text-sm font-semibold ${balloonChoice === "Custom" ? "border-primary bg-primary/10 text-primary" : "border-border"}`}><Pencil className="h-3.5 w-3.5" />Custom</button></div>{balloonChoice === "Custom" && <input autoFocus value={customBalloonChoice} onChange={(e) => setCustomBalloonChoice(e.target.value)} placeholder="Describe your colour palette" className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />}</section>}
+
+            <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-card"><div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-border p-3">{([{ key: "included", label: "What's included", icon: PackageCheck }, { key: "faqs", label: "FAQs", icon: CircleHelp }, { key: "delivery", label: "Delivery", icon: Truck }, { key: "care", label: "Care info", icon: HeartHandshake }] as const).filter((tab) => tab.key === "included" || (tab.key === "faqs" && service.faqs.length) || (tab.key === "delivery" && service.deliveryInfo) || (tab.key === "care" && service.careInfo)).map((tab) => { const Icon = tab.icon; return <button key={tab.key} onClick={() => setDetailTab(tab.key)} className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition ${detailTab === tab.key ? "bg-gradient-brand text-primary-foreground shadow-glow" : "border border-border bg-background"}`}><Icon className="h-3.5 w-3.5" />{tab.label}</button>; })}</div><div className="p-4">{detailTab === "included" && <div className="grid gap-5 sm:grid-cols-2"><div><p className="mb-3 text-xs font-bold uppercase tracking-wide text-emerald-700">Included · {service.included.length} items</p><ul className="space-y-2.5">{service.included.map((item) => <li key={item} className="flex items-start gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />{item}</li>)}</ul></div>{service.notIncluded.length > 0 && <div><p className="mb-3 text-xs font-bold uppercase tracking-wide text-rose-600">Not included</p><ul className="space-y-2.5">{service.notIncluded.map((item) => <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground"><X className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />{item}</li>)}</ul></div>}</div>}{detailTab === "faqs" && <div className="space-y-3">{service.faqs.map((faq) => <details key={faq.question} className="rounded-xl border border-border bg-background p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{faq.answer}</p></details>)}</div>}{detailTab === "delivery" && <p className="text-sm leading-relaxed text-muted-foreground">{service.deliveryInfo}</p>}{detailTab === "care" && <p className="text-sm leading-relaxed text-muted-foreground">{service.careInfo}</p>}</div></section>
 
             {/* Add-ons */}
             {service.addOns.length > 0 && (

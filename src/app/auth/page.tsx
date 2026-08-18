@@ -5,7 +5,7 @@ import { AuthForm } from "./auth-form";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in or create your Baraabar account to book decorations and track your bookings.",
+  description: "Sign in or create your Decor Eventz account to book decorations and track your bookings.",
   robots: { index: false, follow: true },
 };
 

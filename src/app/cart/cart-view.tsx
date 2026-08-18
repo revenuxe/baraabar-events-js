@@ -10,6 +10,8 @@ import { useCart } from "@/lib/cart-store";
 export function CartView() {
   const router = useRouter();
   const { items, ready, updateQuantity, removeItem, subtotal } = useCart();
+  const decorationTotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const addOnsTotal = items.reduce((sum, item) => sum + item.addOns.reduce((addOnSum, addOn) => addOnSum + addOn.price, 0) * item.quantity, 0);
 
   if (!ready) return null;
 
@@ -43,7 +45,7 @@ export function CartView() {
                     key={it.id}
                     className="flex gap-3 rounded-3xl border border-border bg-card p-3 shadow-card"
                   >
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl">
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
                       <Image src={it.image} alt={it.serviceName} fill className="object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -51,16 +53,13 @@ export function CartView() {
                         {it.categoryName}
                       </p>
                       <h3 className="truncate text-sm font-bold">{it.serviceName}</h3>
-                      {it.addOns.length > 0 && (
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                          + {it.addOns.map((a) => a.name).join(", ")}
-                        </p>
-                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">Decoration · ₹{it.unitPrice.toLocaleString("en-IN")}</p>
+                      {it.addOns.length > 0 && <div className="mt-1 space-y-0.5">{it.addOns.map((addOn) => <p key={addOn.id} className="text-xs text-muted-foreground">+ {addOn.name} · ₹{addOn.price.toLocaleString("en-IN")}</p>)}</div>}
                       <div className="mt-2 flex items-center justify-between">
                         <div className="inline-flex items-center gap-3 rounded-full bg-muted px-1.5 py-1">
                           <button
                             onClick={() => updateQuantity(it.id, it.quantity - 1)}
-                            className="grid h-6 w-6 place-items-center rounded-full bg-card text-foreground"
+                            className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground shadow-sm"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="h-3 w-3" />
@@ -68,7 +67,7 @@ export function CartView() {
                           <span className="min-w-4 text-center text-xs font-bold">{it.quantity}</span>
                           <button
                             onClick={() => updateQuantity(it.id, it.quantity + 1)}
-                            className="grid h-6 w-6 place-items-center rounded-full bg-card text-foreground"
+                            className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground shadow-sm"
                             aria-label="Increase quantity"
                           >
                             <Plus className="h-3 w-3" />
@@ -82,7 +81,7 @@ export function CartView() {
                     <button
                       onClick={() => removeItem(it.id)}
                       aria-label={`Remove ${it.serviceName}`}
-                      className="grid h-8 w-8 shrink-0 place-items-center self-start rounded-full text-muted-foreground hover:bg-muted"
+                      className="grid h-10 w-10 shrink-0 place-items-center self-start rounded-full border border-border bg-card text-muted-foreground hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -93,12 +92,17 @@ export function CartView() {
 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
               <div className="mx-auto max-w-md px-5 md:max-w-2xl md:px-0">
-                <div className="flex items-center justify-between rounded-2xl border border-dashed border-border p-4 md:mb-4">
-                  <span className="text-sm font-bold">Subtotal</span>
-                  <span className="text-xl font-black text-gradient-brand">
+                <div className="rounded-2xl border border-border bg-card p-4 shadow-card md:mb-4">
+                  <div className="space-y-2 border-b border-border pb-3 text-sm text-muted-foreground">
+                    <div className="flex justify-between"><span>Decoration price</span><span>₹{decorationTotal.toLocaleString("en-IN")}</span></div>
+                    <div className="flex justify-between"><span>Add-ons</span><span>₹{addOnsTotal.toLocaleString("en-IN")}</span></div>
+                    <div className="flex justify-between text-xs"><span>Taxes & fees</span><span>Included</span></div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between"><span className="text-sm font-bold">Final total</span>
+                  <span className="text-xl font-black text-primary">
                     ₹{subtotal.toLocaleString("en-IN")}
                   </span>
-                </div>
+                </div></div>
                 <button
                   onClick={() => router.push("/book")}
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow transition-all active:scale-[0.98]"
