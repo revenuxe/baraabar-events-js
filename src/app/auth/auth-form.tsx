@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import logo from "@/assets/baraabar event logo.webp";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
@@ -93,15 +92,7 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
             : "Join Baraabar for doorstep pickup, saved measurements, and order tracking."}
         </p>
 
-        <GoogleSignInButton redirectTo={redirectTo} className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-card px-6 py-4 text-sm font-bold text-foreground shadow-card disabled:opacity-60" />
-
-        <div className="my-6 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          OR
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <form onSubmit={onSubmit} className="space-y-3">
+        <form onSubmit={onSubmit} className="mt-8 space-y-3">
           {mode === "signup" && (
             <Field icon={<User className="h-4 w-4" />}>
               <input
