@@ -25,7 +25,7 @@ export function FeaturedCollections({
   const move = (direction: "left" | "right") => cardsRef.current?.scrollBy({ left: direction === "right" ? 360 : -360, behavior: "smooth" });
   if (services.length === 0) return null;
   return (
-    <section className="mx-auto w-full max-w-md px-5 pb-10 md:max-w-6xl md:px-8 md:pb-16">
+    <section className="mx-auto w-full max-w-md px-6 pb-10 md:max-w-6xl md:px-8 md:pb-16">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-accent">{eyebrow}</p>
@@ -42,9 +42,9 @@ export function FeaturedCollections({
         </div>
       </div>
 
-      <div ref={cardsRef} className="no-scrollbar -mx-5 flex snap-x-mandatory gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:gap-5 md:px-0">
+      <div ref={cardsRef} className="no-scrollbar -mx-6 flex snap-x-mandatory gap-3 overflow-x-auto scroll-px-6 px-6 pb-2 md:mx-0 md:gap-5 md:scroll-px-0 md:px-0">
         {services.map((s) => (
-          <div key={s.id} className="w-48 shrink-0 snap-start-safe md:w-[calc((100%-3.75rem)/4)]">
+          <div key={s.id} className="w-60 shrink-0 snap-start-safe md:w-[calc((100%-3.75rem)/4)]">
             <ServiceCard service={s} badge={cardBadge} size="md" />
           </div>
         ))}

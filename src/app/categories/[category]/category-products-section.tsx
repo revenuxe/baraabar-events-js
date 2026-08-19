@@ -29,9 +29,9 @@ export function CategoryProductsSection({
   return (
     <>
       {subcategories.length > 0 && (
-        <section className="mx-auto w-full max-w-md px-5 pt-8 md:max-w-6xl md:px-8 md:pt-10">
+        <section className="mx-auto w-full max-w-md px-6 pt-8 md:max-w-6xl md:px-8 md:pt-10">
           <p className="mb-3 text-xs font-bold uppercase tracking-widest text-accent">Shop by type</p>
-          <div className="no-scrollbar -mx-5 flex gap-4 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+          <div className="no-scrollbar -mx-6 flex gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 md:mx-0 md:scroll-px-0 md:px-0">
             <ShowAllCard active={activeSub === null} onClick={() => setActiveSub(null)} />
             {subcategories.map((s) => (
               <SubcategoryCard
@@ -46,11 +46,11 @@ export function CategoryProductsSection({
         </section>
       )}
 
-      <div className="mx-auto w-full max-w-md px-5 pt-6 md:max-w-6xl md:px-8">
+      <div className="mx-auto w-full max-w-md px-6 pt-6 md:max-w-6xl md:px-8">
         <SearchBar className="max-w-xl" mode="filter" onQueryChange={setQuery} />
       </div>
 
-      <section className="mx-auto w-full max-w-md px-5 py-8 md:max-w-6xl md:px-8 md:py-12">
+      <section className="mx-auto w-full max-w-md px-6 py-8 md:max-w-6xl md:px-8 md:py-12">
         {visibleServices.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {visibleServices.map((s) => (

@@ -21,7 +21,7 @@ export function Hero() {
   const next = () => setActive((value) => (value + 1) % slides.length);
 
   return (
-    <section className="bg-white px-4 pb-12 pt-[128px] md:px-8 md:pb-20 md:pt-[154px]">
+    <section className="bg-white px-4 pb-12 pt-3 md:px-8 md:pb-20 md:pt-[154px]">
       <div className="relative mx-auto h-[510px] max-w-7xl overflow-hidden rounded-[2rem] bg-[#fff0f5] md:h-[470px] md:rounded-[1.4rem]">
         <div className="absolute inset-y-0 right-0 w-[62%]"><Image key={slide.image} src={slide.image} alt="Decor Eventz event decoration" priority fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover object-center" /><div className="absolute inset-0 bg-[linear-gradient(90deg,#fff0f5_0%,rgba(255,240,245,.28)_55%,transparent_100%)]" /></div>
         <div className="absolute inset-x-5 top-5 z-10 md:hidden"><SearchBar square placeholder="Search decorations..." /></div>
