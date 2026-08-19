@@ -1,4 +1,4 @@
-import logo from "@/assets/decor-eventz-logo-transparent.png";
+import logo from "@/assets/decor-eventz-logo.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon } from "@/components/SocialIcons";
@@ -29,7 +29,7 @@ export function Footer() {
         <Image
           src={logo}
           alt="Decor Eventz — Dream, Design, Deliver"
-          className="h-16 w-auto object-contain md:h-20"
+          className="h-auto w-40 object-contain md:w-56"
         />
         <div className="flex gap-2">
           {[

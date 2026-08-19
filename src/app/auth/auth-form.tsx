@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import logo from "@/assets/decor-eventz-logo-transparent.png";
+import logo from "@/assets/decor-eventz-logo.webp";
 
 export function AuthForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
@@ -76,7 +76,7 @@ export function AuthForm({ redirectTo }: { redirectTo: string }) {
           <Image
             src={logo}
             alt="Decor Eventz — Dream, Design, Deliver"
-            className="h-9 w-auto object-contain"
+            className="h-9 w-32 object-contain"
           />
         </Link>
         <span className="w-10" />

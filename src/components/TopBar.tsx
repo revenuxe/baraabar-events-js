@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Headphones, MapPin, Search, ShoppingBag, UserRound, X } from "lucide-react";
-import logo from "@/assets/decor-eventz-logo-transparent.png";
+import logo from "@/assets/decor-eventz-logo.webp";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { useCart } from "@/lib/cart-store";
 import { useMegaMenuData } from "@/lib/use-mega-menu-data";
@@ -33,7 +33,7 @@ export function TopBar() {
   return (
     <header className={`${home ? "sticky md:fixed" : "sticky"} inset-x-0 top-0 z-40 border-b border-[#e8edf3] bg-white shadow-sm`}>
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-4 px-4 md:px-8">
-        <Link href="/" className="flex shrink-0 items-center"><Image src={logo} alt="Decor Eventz" priority className="h-12 w-auto object-contain md:h-14" /></Link>
+        <Link href="/" className="flex shrink-0 items-center"><Image src={logo} alt="Decor Eventz" priority className="h-12 w-44 object-contain md:h-14 md:w-64" /></Link>
         <button className="hidden items-center gap-1.5 rounded-xl border border-[#dfe6ee] px-3 py-2 text-left text-xs text-muted-foreground md:flex">
           <MapPin className="h-4 w-4 shrink-0 text-accent" /><span className="whitespace-nowrap">Deliver to <b className="text-sm text-foreground">Bangalore</b></span><ChevronDown className="ml-1 h-3.5 w-3.5" />
         </button>

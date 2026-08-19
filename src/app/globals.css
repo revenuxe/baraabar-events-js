@@ -53,41 +53,41 @@
   --radius: 1rem;
 
   /* Brand core */
-  --brand-purple: #082a5c;
-  --brand-pink: #d90b62;
-  --brand-ink: #082a5c;
+  --brand-purple: #65065e;
+  --brand-pink: #b70d65;
+  --brand-ink: #4d044a;
 
   /* Surfaces */
   --background: #ffffff;
-  --foreground: #082a5c;
+  --foreground: #4d044a;
   --surface: #ffffff;
   --surface-elevated: oklch(1 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: #082a5c;
+  --card-foreground: #4d044a;
   --popover: oklch(1 0 0);
-  --popover-foreground: #082a5c;
+  --popover-foreground: #4d044a;
 
-  --primary: #082a5c;
+  --primary: #a30c5b;
   --primary-foreground: oklch(0.99 0.008 75);
   --secondary: #ffffff;
-  --secondary-foreground: #082a5c;
+  --secondary-foreground: #4d044a;
   --muted: #ffffff;
   --muted-foreground: #64748b;
-  --accent: #0096a6;
+  --accent: #b70d65;
   --accent-foreground: oklch(0.99 0.008 75);
   --destructive: oklch(0.6 0.24 27);
   --destructive-foreground: oklch(0.99 0.005 320);
-  --border: #d8e0ea;
-  --input: #d8e0ea;
-  --ring: #082a5c;
+  --border: #eadce6;
+  --input: #eadce6;
+  --ring: #a30c5b;
 
   /* Signature gradients */
-  --gradient-brand: linear-gradient(135deg, #082a5c 0%, #007f91 100%);
+  --gradient-brand: linear-gradient(135deg, #65065e 0%, #b70d65 100%);
   --gradient-brand-soft: linear-gradient(
     135deg,
-    rgb(8 42 92 / 0.10) 0%,
-    rgb(0 150 166 / 0.10) 100%
+    rgb(101 6 94 / 0.10) 0%,
+    rgb(183 13 101 / 0.10) 100%
   );
   --gradient-aurora: radial-gradient(
       1200px 600px at 10% -10%,
@@ -106,9 +106,9 @@
   /* Shadows */
   --shadow-glass:
     0 1px 0 0 oklch(1 0 0 / 0.6) inset, 0 8px 24px -8px oklch(0.22 0.07 245 / 0.12);
-  --shadow-elevated: 0 20px 44px -20px rgb(8 42 92 / 0.25);
-  --shadow-glow: 0 12px 28px -12px rgb(0 150 166 / 0.30);
-  --shadow-card: 0 2px 8px -2px rgb(8 42 92 / 0.08), 0 18px 34px -16px rgb(8 42 92 / 0.18);
+  --shadow-elevated: 0 20px 44px -20px rgb(101 6 94 / 0.25);
+  --shadow-glow: 0 12px 28px -12px rgb(183 13 101 / 0.30);
+  --shadow-card: 0 2px 8px -2px rgb(101 6 94 / 0.08), 0 18px 34px -16px rgb(101 6 94 / 0.18);
 
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
