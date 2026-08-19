@@ -116,7 +116,7 @@ export function StepVenue({
               >
                 <span
                   className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${
-                    selected ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                    selected ? "border-brand-pink bg-brand-pink text-primary-foreground" : "border-border"
                   }`}
                 >
                   {selected && <Check className="h-3 w-3" />}

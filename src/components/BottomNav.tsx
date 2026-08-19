@@ -33,7 +33,7 @@ export function BottomNav() {
               >
                 <span
                   className={`relative grid h-10 w-10 place-items-center rounded-full transition-all ${
-                    active ? "bg-primary text-primary-foreground shadow-glow" : ""
+                    active ? "bg-brand-pink text-primary-foreground shadow-glow" : ""
                   }`}
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />

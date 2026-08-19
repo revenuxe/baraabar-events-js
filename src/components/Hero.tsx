@@ -31,7 +31,7 @@ export function Hero() {
             <h1 className="mt-2 text-[clamp(2.35rem,5vw,4.6rem)] font-extrabold leading-[.98] tracking-tight text-primary">{slide.title}</h1>
             <div className="my-5 h-1 w-20 rounded-full bg-brand-pink" />
             <p className="max-w-md text-base leading-relaxed text-primary/75 md:text-xl">{slide.copy}</p>
-            <Link href="/categories" className="mt-7 inline-flex items-center gap-3 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-[#103d7a]">{slide.action}<ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/categories" className="mt-7 inline-flex items-center gap-3 rounded-xl bg-brand-pink px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-brand-pink/90">{slide.action}<ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
         <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">{slides.map((item, index) => <button key={item.title} onClick={() => setActive(index)} aria-label={`Go to campaign ${index + 1}`} className={`h-2.5 rounded-full ${active === index ? "w-7 bg-brand-pink" : "w-2.5 bg-primary/25"}`} />)}</div>

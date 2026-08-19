@@ -467,7 +467,7 @@ export function ProductForm({
                           <span className="flex items-center gap-2.5">
                             <span
                               className={`grid h-4 w-4 shrink-0 place-items-center rounded border ${
-                                selected ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                                selected ? "border-brand-pink bg-brand-pink text-primary-foreground" : "border-border"
                               }`}
                             >
                               {selected && <Check className="h-3 w-3" />}

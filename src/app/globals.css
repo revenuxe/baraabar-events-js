@@ -68,7 +68,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: #4d044a;
 
-  --primary: #a30c5b;
+  --primary: #65065e;
   --primary-foreground: oklch(0.99 0.008 75);
   --secondary: #ffffff;
   --secondary-foreground: #4d044a;
@@ -80,7 +80,7 @@
   --destructive-foreground: oklch(0.99 0.005 320);
   --border: #eadce6;
   --input: #eadce6;
-  --ring: #a30c5b;
+  --ring: #b70d65;
 
   /* Signature gradients */
   --gradient-brand: linear-gradient(135deg, #65065e 0%, #b70d65 100%);
